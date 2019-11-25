@@ -1,0 +1,131 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.AlertsListViewModel
+@{
+    ViewBag.Title = "Message";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "AlertList")
+
+<script src="~/Scripts/ViewCommonScripts/MessagesCommonScript.js"></script>
+
+
+@Html.Hidden("IndexMessageUrl", Url.Action("Index", "Messages"))
+@Html.Hidden("AddMessageUrl", Url.Action("AddAlert", "Messages"))
+@Html.Hidden("EditMessageUrl", Url.Action("EditAlert", "Messages", new { messageId = "__messageId__", MessageType = "__messageType__" }))
+
+<div style="width: 100%; justify-content:center;padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard"  style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Messages</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                    ADD MESSAGE
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="MessageActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect MessageAction"
+                    for="MessageActions">
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Delete</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="alert">Messages Text</th>
+                        <th id="alerttype">Targets</th>
+                        <th id="org">Organisation</th>
+                        <th id="kiosklinked">Kiosk Linked</th>
+                    </tr>
+                    <tr class="search-row hidden">
+                        <td></td>
+                        <td>Alert Text</td>
+                        <td>Targets</td>
+                        <td>Organisation</td>
+                        <td>Kiosks Linked</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.AlertsList)
+                    {
+                        <tr>
+                            <td>
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="@item.Id">
+                                    <input type="checkbox" id="@item.Id" class="mdl-checkbox__input" name="messageActionCheckbox" />
+                                </label>
+                            </td>
+                            <td data-AlertType="@item.MessageType"
+                                data-orgId="@item.OrganisationId"
+                                data-Id="@item.Id" style="width:50%">
+                                @item.AlertText
+                            </td>
+                            <td>@item.Target</td>
+                            <td>@item.OrganisationName</td>
+                            <td>@item.KioskName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <content class="mdl-tooltip mdl-tooltip--large" for="alert">Messages Text</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="alerttype">Alerts Type</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="org">Organisation Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="kiosklinked">Kiosk Linked</content>
+        </div>
+        <footer class="mdl-mini-footer">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+            var successMessage = '@TempData["SuccessMessage"]'
+            var errorMessage='@TempData["ErrorMessage"]'
+            if (successMessage != '') {
+                createSnackbar(successMessage);
+            }
+            if (errorMessage != '') {
+                createSnackbar(errorMessage);
+            }
+
+            var DeleteMessage =  @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null) {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            var eventCategory = 'Messages';
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+    </script>
+}

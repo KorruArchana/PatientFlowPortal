@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=10; IE=11; IE=EDGE" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    @*Material Design*@
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <link rel="stylesheet" href="~/Content/UserContent/mainstyles.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/UserContent/IEStyles.css" />
+    <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Roboto'>
+    <link rel="stylesheet" href="~/Content/UserContent/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="~/Scripts/jquery.dataTables.min.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/UserScripts/DataTable.js"></script>
+
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
+    <link href="~/Content/semantic.css" rel="stylesheet" />
+    <script src="~/Scripts/UserScripts/semantic.js"></script>
+
+    <script src="~/Scripts/UserScripts/ModalPopup.js"></script>
+    <script>
+        $(document).ready(function () {
+            var changesApplied = false;
+            var form = $('#' +@Html.Raw(Json.Encode(@ViewBag.FormId))+'');
+            var title =@Html.Raw(Json.Encode(@ViewBag.Title));
+            $('#backbtn').on('click', function () {
+                if (changesApplied && title !== "QuestionnaireReportListView" && title !== "UsageReportListView") {
+                    showDiscardChangesPopup();
+                }
+                else {
+                    showLoading();
+                    if (title == "AddQuestionnaire") {
+                        window.location.href = '@Url.Action("Index", "Questionnaire")';
+                    }
+                    else if (title == "EditOrganisation") {
+                        window.location.href = '@Url.Action("Index", "Organisation")';
+                    }
+                    else if (title == "AddOrganisation") {
+                        setTimeout(function () {
+                            window.location.href = '@Url.Action("Index", "Organisation")';
+                        }, 8000);
+                    }
+                    else {
+                        history.back();
+                    }
+                }
+            });
+
+            $(form).ready(function () {
+                var originalFormData;
+                showLoading();
+                setTimeout(function () {
+                    originalFormData = form.serialize();
+                    if (originalFormData !== form.serialize()) {
+                        changesApplied = true;
+                    }
+                    else {
+                        changesApplied = false;
+                    }
+                    hideLoading();
+                    $('#backbtn').removeClass('disableddiv');
+                }, 1000);
+
+                $(form).change(function () {
+                    if (originalFormData !== form.serialize()) {
+                        changesApplied = true;
+                    }
+                    else {
+                        changesApplied = false;
+                    }
+                });
+            });
+
+            if (title == "MemberMessage") {
+                $('#AddEditLayoutFooter').hide();
+            }
+            $('#cancelbtn').click(function () {
+                if (changesApplied && title !== "QuestionnaireReportListView" && title !== "UsageReportListView") {
+                    showDiscardChangesPopup();
+                }
+                else {
+                    showLoading();
+                    if (title == "AddQuestionnaire") {
+                        window.location.href = '@Url.Action("Index", "Questionnaire")';
+                    }
+                    else if (title == "EditOrganisation" || title == "AddOrganisation") {
+                        window.location.href = '@Url.Action("Index", "Organisation")';
+                    }
+                    else {
+                        history.back();
+                    }
+                }
+
+            });
+
+            function showDiscardChangesPopup() {
+                var cancelText = "Are you sure you want to cancel and discard any changes made to this "
+                var titleText;
+                switch (title) {
+                    case "AddEditMember":
+                        titleText = cancelText + "Member?";
+                        break;
+                    case "AddEditKiosk":
+                        titleText = cancelText + "Kiosk?"
+                        break;
+                    case "AddEditDepartment":
+                        titleText = cancelText + "department?"
+                        break;
+                    case "AddEditUsers":
+                        titleText = cancelText + "user?"
+                        break;
+                    case "AddOrganisation":
+                    case "EditOrganisation":
+                        titleText = cancelText + "organisation?"
+                        break;
+                    default:
+                        titleText = cancelText + "page?"
+                        break;
+                }
+
+                showDialog({
+                    liElement: "Delete",
+                    title: "Discard changes?",
+                    text: titleText,
+                    negative: {
+                        title: 'Cancel'
+                    },
+                    positive: {
+                        title: 'Discard Changes',
+                        onClick: function (e) {
+                            showLoading();
+                            if (title == "AddQuestionnaire") {
+                                window.location.href = '@Url.Action("Index", "Questionnaire")';
+                            }
+                            else if (title == "EditOrganisation" || title == "AddOrganisation") {
+                                window.location.href = '@Url.Action("Index", "Organisation")';
+                            }
+                            else {
+                                history.back();
+                            }
+                            hideLoading();
+                        }
+                    }
+                })
+            }
+        });
+    </script>
+
+</head>
+
+<body>
+
+    @using (Ajax.BeginForm((string)ViewBag.SaveAction, (string)ViewBag.Controller, new AjaxOptions
+    {
+        UpdateTargetId = "ContentContainer",
+        InsertionMode = InsertionMode.Replace,
+        OnSuccess = "SuccessHandling"
+    }, new { @id = (string)ViewBag.FormId }))
+    {
+
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs" style="overflow-y:hidden">
+            <header class="mdl-layout__header">
+                <div class="mdl-layout__header-row">
+                    <span class="mdl-layout-title h6 highEmphasisBlack onPrimary">@ViewBag.Module</span>
+                    @if (ViewBag.Title == "AddEditMember")
+                    {
+                        <div class="mdl-card__menu" style="visibility:hidden" id="memberActions">
+                            <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="memberMessageActions">
+                                <i class="material-icons">more_vert</i>
+                            </button>
+                            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                for="memberMessageActions"></ul>
+                        </div>
+                    }
+                    @if (ViewBag.Title == "AddEditDepartment")
+                    {
+                        <div class="mdl-card__menu" style="display:none" id="departmentMenuActions">
+                            <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="departmentActions">
+                                <i class="material-icons">more_vert</i>
+                            </button>
+                            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                for="departmentActions"></ul>
+                        </div>
+                    }
+                    @if (ViewBag.Title == "EditOrganisation")
+                    {
+                        <div class="mdl-card__menu" style="display:none" id="OrganisationMenuActions">
+                            <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="OrganisationActions" type="button">
+                                <i class="material-icons">more_vert</i>
+                            </button>
+                            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                for="OrganisationActions"></ul>
+                        </div>
+                    }
+                    @if (ViewBag.Title == "AddEditUsers")
+                    {
+                        <div class="mdl-card__menu" style="display:none" id="UserMenuActions">
+                            <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="UserActions" type="button">
+                                <i class="material-icons">more_vert</i>
+                            </button>
+                            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                                for="UserActions"></ul>
+                        </div>
+                    }
+                </div>
+            </header>
+            <div class="mdl-layout__drawer-button disableddiv" id="backbtn"><i class="material-icons">arrow_back</i></div>
+
+            @RenderBody()
+
+            <footer class="mdl-mini-footer mdl-shadow--6dp" id="AddEditLayoutFooter">
+                <div class="mdl-mini-footer__right-section">
+                    <button type="button" id="cancelbtn" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect"
+                            style="margin-right: 5px;">
+                        Cancel
+                    </button>
+
+                    <button type="submit" id="addupdatebtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                        @ViewBag.Savebutton
+                    </button>
+                </div>
+            </footer>
+        </div>
+    }
+</body>
+
+</html>

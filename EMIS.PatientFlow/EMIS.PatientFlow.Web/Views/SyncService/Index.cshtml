@@ -1,0 +1,164 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.SyncServiceListViewModel
+
+
+@Html.Partial("_GoogleAnalytics","SyncService")
+
+@using (Ajax.BeginForm("Index", "SyncService", new AjaxOptions { UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace }))
+{
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Services
+            </span>
+
+        </div>
+        <div class="rightBlockTopButtonContainer">
+
+            <a href="#" style="text-decoration:none" onclick="return LoadAddContent('AddSyncService')">
+                <input type="text" class="AddOrEditText AddTextColor" value="Register Service" readonly="readonly"/>
+                <img src="~/Images/plus.png" />
+            </a>
+
+        </div>
+    </div>
+
+    <div id="grdServices" class="rightBlockContent">
+        <div>
+            <input type="text" placeholder="Organisation Name..." class="rightTxtBox" data-bind='value: organisation' />
+            <button name="btnSearch" type="submit" class="icon searchBox" data-bind="click:initialize"><i class="fa fa-search"></i> Search</button>
+        </div>
+        <table class="TFtable">
+            <thead>
+                <tr>
+                    <th>Product Key</th>
+                    <th>Organisation Name</th>
+                    <th>Linked Kiosk</th>
+                    <th>Is Connected</th>
+                    <th>Is Active</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: items">
+                <tr>
+                    <td><a href="#" data-bind="text: ProductKey, click: $parent.update"> </a></td>
+                    <td data-bind="text: OrganisationName"></td>
+                    <td data-bind="text: KioskName"></td>
+                    <td data-bind="text: $data.IsConnected ? 'Yes' : 'No'"></td>
+                    <td ><a href="#" class="actLinkBtn" title="" data-bind="text: $data.IsActive ? 'Yes' : 'No', click: $parent.Activation"> </a></td>
+                    <td><a href="#" class="deleteLinkBtn" title="Delete service" data-bind="click: $parent.deleteService"> </a></td>
+                </tr>
+            </tbody>
+            <tbody data-bind="ifnot: items().length">
+                <tr>
+                    <td colspan="5" style="text-align:center">No records found.</td>
+                </tr>
+            </tbody>
+            <tfoot data-bind="if: items().length">
+                <tr style="background-color:white;">
+                    <td colspan="5"><div id="paginationHolder"></div></td>
+                </tr>
+            </tfoot>
+        </table>
+
+    </div>
+    <div style="color: red; margin-left: 40px">
+        @Html.ValidationMessage("CustomError")
+    </div>
+
+}
+@{
+    int pageSize = EMIS.PatientFlow.Web.Helper.Config.PageSize;
+
+}
+<script type="text/javascript">
+   
+    var pagedViewModel = function (pageSize) {
+        var self = this;
+        self.items = ko.observableArray();
+        self.organisation = ko.observable('');
+        self.currentPage = ko.observable(1);
+
+        self.totalCount = ko.observable(1);
+        self.pageSize = pageSize;
+        self.pageCount = ko.computed(function () {
+            if ((self.totalCount() % self.pageSize) == 0)
+                return parseInt((self.totalCount() / self.pageSize));
+            else
+                return parseInt((self.totalCount() / self.pageSize)) + 1;
+        });
+        self.update = function(item) {
+            return LoadEditContent('EditService', item.Id);
+        };
+        self.deleteService = function(item) {
+            return LoadDeleteContent('DeleteSyncService', item.Id, 0);
+        };
+        self.Activation = function(item) {
+            $.ajax({
+                url: '@Url.Action("UpdateSyncServiceStatus", "SyncService")',
+                data: { serviceId: item.Id, isActive: !item.IsActive },
+                type: "GET",
+                success: function(data) {
+                    self.getData(self.currentPage());
+                },
+                error: function(data) {
+
+                }
+            });
+        };
+        self.initialize = function () {
+            self.currentPage(1);
+            self.totalCount(0);
+            self.items.removeAll();
+            self.getData(self.currentPage());
+        }
+        self.getData = function (pageNumber) {
+            $.ajax({
+                url:  '@Url.Action("GetSyncService", "SyncService")',//'/SyncService/GetSyncService',
+                data: { pageNumber: pageNumber, pageSize: self.pageSize, organisationName: self.organisation() },
+                type: "GET",
+                cache: false,
+                success: function (data) {
+                    self.items.removeAll();
+                    self.currentPage(pageNumber);
+                    self.totalCount(data.TotalCount);
+
+                    if (data.Services.length > 0) {
+                        for (i = 0; i < data.Services.length; i++) {
+                            self.items.push(data.Services[i]);
+                        }
+                    }
+
+                    self.createPagination();
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+
+        self.createPagination = function () {
+
+            $("#paginationHolder").pagination({
+                pages: self.pageCount(),
+                itemsOnPage: self.pageSize,
+                currentPage: self.currentPage(),
+                cssStyle: 'light-theme',
+                onPageClick: self.loadPage // fires when a page is clicked
+            });
+
+        };
+        self.loadPage = function (pageNo, event) {
+            console.log(pageNo);
+            self.getData(pageNo);
+        };
+
+        self.initialize();
+    };
+
+    $(document).ready(function () {
+        var vm = new pagedViewModel(@pageSize);
+        var element = document.getElementById('grdServices');
+        ko.cleanNode(element);
+        ko.applyBindings(vm, element);
+    });
+</script>

@@ -1,0 +1,166 @@
+﻿.mdl-button--large-screen-only {
+    border-radius: inherit;
+    bottom: calc(100% - 153px);
+    right: calc(50% - 357.5px);
+    background-color: white !important
+}
+
+.mdl-button--small-screen-only {
+    border-radius: inherit;
+    right: 80%;
+    bottom: 60px;
+    background-color: white !important
+}
+
+.questionnaireName::placeholder {
+    font-family: 'Roboto','Arial', sans-serif !important;
+    font-weight: bold;
+    font-size: 19.71px;
+    letter-spacing: 0.5px;
+}
+
+.ui.dropdown:not(.button) > .default.text, .ui.default.dropdown:not(.button) > .text {
+    padding-top: 0px !important;
+}
+
+#QuestionCardFooter .ui.bottom.left.pointing.dropdown > .menu:after {
+    left: 16.5em  !important;
+    right: auto;
+}
+
+/*Edit styles*/
+.option {
+    color: #000000de !important;
+    font-size: 14.26px !important;
+}
+
+.optionCode {
+    color: #000000de !important;
+    font-size: 14px;
+}
+
+#txt_options::placeholder {
+    color: #00000099;
+    font-size: 14.26px;
+}
+
+.optionCode::placeholder {
+    color: #00000061;
+    font-size: 14px;
+}
+
+.questionTypeDropdown {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    top: 3px;
+    font-size:16px;
+}
+
+.targetDemographicsDropdown {
+    position: relative;
+    top: -3px;
+    color: #442b2d8a;
+    width: 23px;
+    height: 17px;
+}
+
+.uncheckedRadioBtn {
+    height: 24px;
+    width: 24px;
+    color: #00000061;
+    margin-right: 8px;
+    vertical-align: bottom;
+}
+
+.ui.search.dropdown > .text {
+    font-size: 14.26px;
+}
+
+.ui.dropdown > .text {
+    font-size: 14.26px;
+}
+
+#EditQuestion {
+    margin-left: -68px;
+    margin-right: -20px;
+}
+
+#everyDays {
+    font-size: 14.26px;
+}
+
+.CodeAndLogicQuestionStyle {
+    text-align: right;
+    width: 40%
+}
+
+.DeleteBtn {
+    text-align: center;
+    width: 5%
+}
+
+.break {
+    float: right;
+    line-height: 22px;
+}
+
+#TargetDemographic .ui.selection.dropdown {
+    padding: 0px !important;
+    min-height: 0px !important;
+    margin-left: 0px !important;
+    margin-bottom: 2px;
+    min-width: 0px !important;
+}
+
+#TargetDemographic .ui.selection.dropdown .menu > .item {
+    padding: 10px 16px !important;
+}
+
+h6, p {
+    font-weight: normal !important;
+    /*line-height: 0px !important;*/
+    margin: 0px !important;
+}
+
+.CheckIcon {
+    height: 16px;
+    width: 16px;
+    margin: 0px 16px;
+}
+
+.QuestionMenuItem {
+    height: 32px !important;
+    padding: 8px 2px 8px 16px !important;
+}
+
+#QuestionCardFooter .ui.dropdown .menu > .item {
+    padding: 5px 0px 7px 0px !important;
+}
+
+#QuestionCardFooter .ui.dropdown .menu {
+    padding: 8px 0px !important;
+}
+textarea:focus {
+    outline: 0;
+}
+textarea {
+    resize: none
+}
+
+#questionnaireName {
+   height:56px;
+}
+
+.AddQuestions {
+    height: 40px;
+    width: 40px;
+    min-width: 0px !important;
+    border-radius: 4px;
+}
+
+.NestedQuestionHeight {
+    height: -webkit-fill-available;
+    min-height:105px;
+}

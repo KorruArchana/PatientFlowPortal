@@ -1,0 +1,78 @@
+﻿@model EMIS.PatientFlow.Entities.KioskSyncKeys
+
+@{
+    ViewBag.Title = "KioskSyncKeys";
+    Layout = null;
+}
+
+<script src="~/Scripts/bootstrap.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.kioskGuidCopy').on('click', function () {
+            var kioskGuid = $.trim( $(this).closest("tr").find('.kioskGuid').text());
+            //var kiosk = $('<input id="KioksGuidinput">').val(kioskGuid).appendTo('body').select();
+            var success = document.execCommand("copy");
+            $('#KioksGuidinput').css({ 'visibility': 'hidden' });
+            success ? alertify.success("Kiosk Registration key copied") : ("Kiosk Registration key is not copied");
+            
+        })
+        $('.SyncGuidCopy').on('click', function () {
+            var syncGuid = $.trim( $(this).closest("tr").find('.SyncProductKey').text());
+            //var sync = $('<input id="syncinput">').val(syncGuid).appendTo('body').select();
+            var success = document.execCommand("copy");
+            $('#syncinput').css({ 'visibility': 'hidden' });
+            success ? alertify.success("Sync service key copied") : ("Sync service key is not copied");
+        })
+    })
+
+    function load() {
+        $('#KioskKeyModal').modal('hide');
+    }
+</script>
+
+<div class="modal-dialog modal-md">
+    <div class="modal-content" style="overflow-x:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="page-header-text-popup">
+                <span>Kiosk Keys</span>
+            </p>
+        </div>
+        <div class="modal-body" style="overflow-y:auto">
+            <table class="table table-responsive"  id="portal-table">
+                <tr>
+                    <th style="text-align:left">@Html.DisplayNameFor(m => m.OrganisationName)</th>
+                    <td style="text-align:left">@Html.DisplayFor(m => m.OrganisationName)</td>
+                </tr>
+                <tr>
+                    <th style="text-align:left">@Html.DisplayNameFor(m => m.KioskName)</th>
+                    <td style="text-align:left">@Html.DisplayFor(m => m.KioskName)</td>
+                </tr>
+                <tr>
+                    <th style="text-align:left">Registration key</th>
+                    <td class="kioskGuid" style="text-align: left">@Html.DisplayFor(m => m.KioskGuid)</td>
+                    <td>
+                        <a id="copyKioskSyncKeys">
+                            <i class="fa fa-copy fa-2x kioskGuidCopy" title="Copy Kiosk Key to Clipboard" aria-hidden="true"></i>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align:left">Sync Service key</th>
+                    <td class="SyncProductKey" style="text-align: left">@Html.DisplayFor(m => m.SyncGuid)</td>
+                    <td>
+                        <a id="copyKioskSyncKeys">
+                            <i class="fa fa-copy fa-2x SyncGuidCopy" title="Copy Sync Key to Clipboard" aria-hidden="true"></i>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="modal-footer control-float-right field-spacing-popup" >
+            <button class="btn btn-primary btn-lg cancel-button" type="button" onclick="load()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>

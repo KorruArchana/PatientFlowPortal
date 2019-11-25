@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <title>Numeric</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Material-Design---Artboards" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-Copy" transform="translate(-32.000000, -89.000000)">
+            <g id="Menu" transform="translate(16.000000, 13.000000)">
+                <g id="List-item" transform="translate(0.000000, 64.000000)">
+                    <g id="Multiple-Choice" transform="translate(16.000000, 12.000000)">
+                        <g id="Numeric">
+                            <g id="✱-/-Color-/-Surface-/-Base" fill="#FFFFFF">
+                                <rect id="Rectangle-13" x="0" y="0" width="24" height="24"></rect>
+                            </g>
+                            <g id="Shape" transform="translate(2.000000, 2.000000)">
+                                <rect id="Rectangle" stroke="#9A8C8D" stroke-width="2" x="1" y="1" width="18" height="18" rx="2"></rect>
+                                <path d="M11.5,2 L11.5,17" id="Line-2" stroke="#9A8C8D" stroke-width="2" stroke-linecap="square"></path>
+                                <path d="M13,10.5 L18,10.5" id="Line" stroke="#9A8C8D" stroke-width="2" stroke-linecap="square"></path>
+                                <g id="✱-/-Color-/-Surface-/-Base" transform="translate(13.000000, 2.000000)" fill="#FFFFFF">
+                                    <rect id="Rectangle-13" x="0" y="0" width="5" height="7"></rect>
+                                </g>
+                                <g id="✱-/-Color-/-Surface-/-Base" transform="translate(13.000000, 2.000000)" fill="#FFFFFF">
+                                    <rect id="Rectangle-13" x="0" y="0" width="5" height="7"></rect>
+                                </g>
+                                <g id="✱-/-Color-/-Surface-/-Base" transform="translate(2.000000, 2.000000)" fill="#FFFFFF">
+                                    <rect id="Rectangle-13" x="0" y="0" width="9" height="16"></rect>
+                                </g>
+                                <polygon id="Triangle" stroke="#9A8C8D" points="15 5 16 6 14 6"></polygon>
+                                <g id="✱-/-Color-/-Surface-/-Base" transform="translate(15.500000, 15.000000) scale(1, -1) translate(-15.500000, -15.000000) translate(13.000000, 12.000000)" fill="#FFFFFF">
+                                    <rect id="Rectangle-13" x="0" y="0" width="5" height="6"></rect>
+                                </g>
+                                <polygon id="Triangle" stroke="#9A8C8D" transform="translate(15.000000, 14.500000) scale(1, -1) translate(-15.000000, -14.500000) " points="15 14 16 15 14 15"></polygon>
+                                <text id="1" font-family="Arial-BoldMT, Arial" font-size="12" font-weight="bold" letter-spacing="0.08412991" fill="#9A8C8D">
+                                    <tspan x="4" y="14">1</tspan>
+                                </text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

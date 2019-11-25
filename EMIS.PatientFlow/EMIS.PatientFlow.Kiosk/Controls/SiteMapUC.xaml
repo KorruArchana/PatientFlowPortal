@@ -1,0 +1,91 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SiteMapUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding SiteMap, Source={StaticResource Locator}}">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+  
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0" Style="{DynamicResource HeadingButtonStyle}">
+            <TextBlock>
+                <Run Text="{Binding HospitalNameText}" FontWeight="Bold"/>
+            </TextBlock>
+        </Button>
+
+        <TabControl Grid.Row="1" BorderThickness="0" 
+                    Margin="0,30,0,40" ItemsSource="{Binding KioskSiteMapList}"
+                    AlternationCount="{Binding Path=Items.Count,RelativeSource={RelativeSource Self}}">
+
+            <TabControl.Resources>
+                <Style TargetType="{x:Type Grid}">
+                    <Setter Property="Background" Value="{DynamicResource SiteMap.Header.Background}"/>
+                </Style>
+                <Style TargetType="{x:Type TabControl}">
+                    <Setter Property="TabControl.Background" Value="White"/>
+                </Style>
+                <Style TargetType="TabItem">
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="FontSize" Value="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargFont, Source={StaticResource Locator}}"/>
+                    <Setter Property="MinHeight" Value="60"/>
+                    <Setter Property="MinWidth" Value="200"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border Name="Border" CornerRadius="0" Margin="-1,-1,-1,0" 
+                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <Label Name="Label"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                               Foreground="{DynamicResource SiteMap.Foreground.GrayColor}" FontWeight="SemiBold"
+                                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                        <ContentPresenter x:Name="ContentSite"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Content="{Binding SiteMapName}">
+                                        </ContentPresenter>
+                                    </Label>
+                                </Border>
+
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="{DynamicResource Button.Background}" />
+                                        <Setter TargetName="Label" Property="Foreground" Value="{StaticResource Button.Text.White}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+
+                </Style>
+                
+                <Style TargetType="{x:Type TabPanel}">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                </Style>
+               
+            </TabControl.Resources>
+                 
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <Image  Source="{Binding Image}" Margin="0,50,0,0"
+                   VerticalAlignment="Center" HorizontalAlignment="Center" Stretch="Uniform"/>
+                </DataTemplate>    
+            </TabControl.ContentTemplate>
+       
+        </TabControl>
+
+    </Grid>
+</UserControl>

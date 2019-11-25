@@ -1,0 +1,327 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.UserListViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "Account")
+<script src="~/Scripts/UserScripts/UserDefinedFunctions.js"></script>
+<script src="~/Scripts/ViewCommonScripts/AccountCommonScript.js"></script>
+
+
+@Html.Hidden("IndexAccountUrl", Url.Action("Index", "Account"))
+@Html.Hidden("AddAccountUrl", Url.Action("Register", "Account"))
+@Html.Hidden("EditAccountUrl", Url.Action("UpdateUser", "Account", new { userName = "__userName__" }))
+@Html.Hidden("ResetPswdUrl", Url.Action("ResetPassword", "Account", new { userName = "__userName__" }))
+@Html.Hidden("CurrentUserName")
+@*<link rel="stylesheet" href="~/Content/UserContent/mainstyles.css" />*@
+
+<script>
+    var dataTable;
+
+    $(document).ready(function () {
+        showLoading();
+        $('#CurrentUserName').val(@Html.Raw(Json.Encode(@HttpContext.Current.User.Identity.Name)));
+        var columnindex = 0;
+        var i = 0;
+        DataTableIntialization($(window).width());
+
+        //$(window).resize(function () {
+        //    if ($.fn.dataTable.isDataTable('#user-portal-table')) {
+        //        $('.dataTables_paginate,.dataTables_length,.dataTables_info').remove();
+        //        $('#user-portal-table').DataTable().destroy();
+        //        DataTableIntialization($(window).width());
+        //    }
+        //})
+
+        function DataTableIntialization(width) {
+            dataTable = $('#user-portal-table').DataTable({
+                "dom": "rt<'bottom' lip><'clear'>",
+                bPaginate: true,
+                serverSide: true,
+                bFilter: true,
+                processing: true,
+                info: true,
+                pagingType: "simple",
+                bSortCellsTop: true,
+                searching: true,
+                language: {
+                    processing: '<div class="dataTables_wrapper" > Loading... </div>',
+                    paginate: {
+                        next: ' <i class="material-icons" id="prev">chevron_right</i>',
+                        previous: '<i class="material-icons" id="next">chevron_left</i>'
+                    },
+                    sLengthMenu: width < 380 ? "Rows : _MENU_" : "Rows per Page : _MENU_"
+                },
+                "order": [[1, "asc"]],
+                orderCellsTop: true,
+                columnDefs: [{
+                    "targets": [0,1,2],
+                    "className": "mdl-data-table__cell--non-numeric",
+                },
+                {
+                    "targets": [3],
+                    "className": "mdl-data-table__cell--non-numeric datawraptext"
+                },
+                {
+                    "targets": [0, 'no-sort'],
+                    "orderable": false,
+                    bSortable: false
+                }],
+                createdRow: function (row, data, dataIndex) {
+                    $(row).find('td:eq(0)').attr('data-name', data.UserName);
+                },
+                columns: [
+                    {
+                        data: null,
+                        width: "10%",
+                        className: "center",
+                        render: function (data, type, row) {
+                            var td = '<td>\
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="' + row.UserName + '">\
+                                    <input type="checkbox" class="mdl-checkbox__input" name="UserActionCheckbox"  id="'+ row.UserName +'"/>\
+                                </label>\
+                            </td>'
+                            return td;
+                        },
+                    },
+                    //{ data: "Name" },
+                    { data: "UserName" },
+                    { data: "Email" },
+                    { data: "OrganisationName","width": "25px" } //org Name
+                ],
+                ajax: function (data, callback, settings) {
+                    filterValues = {};
+                    filterValues.draw = data.draw;
+                    filterValues.start = data.start;
+                    filterValues.length = data.length;
+                    filterValues.search = data.search;
+                    filterValues.order = data.order;
+                    filterValues.columns = data.columns;
+                    $.ajax({
+                        url: '../EgtonAccount/GetUsersData',
+                        method: 'GET',
+                        data: filterValues
+                    }).done(callback);
+                },
+                "fnDrawCallback": function () {
+                    componentHandler.upgradeAllRegistered();
+                    $('.mdl-tooltip').toggle(function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    }, function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    });
+                }
+            });
+        }
+
+        $('.user-search-row td').each(function (index, value) {
+            var row = "";
+            var td = $(this);
+            var usedText = [];
+            var itemlist = [];
+             var title = $(this).text();
+             if (title == "Organisation") {
+                 row += "<select class='ui multiple search dropdown table selectionDropdown column_search'\
+                    multiple='multiple' data-column='" + index + "'\
+                     id='"+ title.trim().replace(' ', '_') + "' >";
+                row += '<option value="">Search</option>';
+                 var str = '#' + title.trim().replace(' ', '_');
+                var userData = [];
+
+                 userData[3] = @Html.Raw(Json.Encode(Model.OrganisationNameList));
+                 if (userData[3] != null) {
+                     userData[index].sort();
+                 }
+                 $.each(userData[index], function (idx, v) {
+
+                    columnindex = i;
+                    i = i + 1;
+                    var newString = [];
+                    if (v.indexOf(",") > -1) {
+                        newString = v.split(/[ ,.]+/);
+                        columnindex = i + 1;
+                        $.each(newString, function (index, tabletext) {
+                            var tabletext1 = camalize(tabletext);
+                            if (usedText.indexOf(tabletext1) === -1) {
+                                itemlist.push(tabletext1);
+                            }
+                            columnindex++;
+                            usedText.push(tabletext1);
+                        });
+                        i = columnindex;
+                    }
+                    else {
+                        itemlist.push(v);
+                    }
+                    td.html(row);
+                    $(str).drop();
+
+                    $('.ui.dropdown.table').drop({ fullTextSearch: true });
+                });
+                itemlist = itemlist.sort(naturalCompare);
+                $.each(itemlist, function (index, tabletext) {
+                    row += '<option value="' + index + '">' + tabletext + '</option>';
+                });
+
+                td.html(row);
+                $(str).drop();
+
+                $('.ui.dropdown.table').drop({ fullTextSearch: true });
+
+                row += '</select>';
+
+             }
+             else if (title != 'Actions' && title != 'Divert' && title != 'Publish' && title != '') {
+                 $(this).html('<input type="text" data-column="' + index + '" placeholder="Search" class="column_search" style="height: 56px;"/>');
+             }
+            else { $(this).html(""); }
+        });
+
+        $('input[type="Text"]').on('keyup', function () {
+            var i = $(this).attr('data-column');
+            var v = $(this).val();
+            dataTable.column(i).search(v).draw();
+        });
+
+        $('.ui.dropdown.table').on("change", function () {
+            var textValue = [];
+            var textSingleValue = $(this).find('option:selected').text();
+            $(this).find('option:selected').each(function () {
+                textValue.push($(this).text());
+            });
+            var data = $.map(textValue, function (index, value) {
+                return index ? '^.*' + $.fn.dataTable.util.escapeRegex(index) + '.*$' : null;
+            });
+            if (data.length === 0) {
+                data = [""];
+            }
+            var val = data.join('|');
+            if (textValue.length > 1) {
+                dataTable.columns($(this).parent().index()).every(function () {
+                    var column = this;
+                    column
+                        .search(val ? val : '', true, false)
+                        .draw();
+                });
+            }
+            else {
+                dataTable
+                    .column($(this).parent().index())
+                    .search(textSingleValue)
+                    .draw();
+            }
+        });
+
+        $('.mdl-mini-footer .mdl-card__actions').append($(".dataTables_paginate,.dataTables_length,.dataTables_info"));
+        hideLoading();
+});
+
+</script>
+
+<div style="width: 100%; justify-content: center;padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard" style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Users</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                    New User
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="UserActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect UserAction"
+                    for="UserActions">
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Remove user</a></span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Reset password</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="user-portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        @*<th id="user">Name</th>*@
+                        <th id="user">User name</th>
+                        <th id="email">Email</th>
+                        <th id="roles">Organisation</th>
+                    </tr>
+                    <tr class="user-search-row hidden">
+                        <td></td>
+                        @*<td>Name</td>*@
+                        <td>User name</td>
+                        <td>Email</td>
+                        <td>Organisation</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            @*<content class="mdl-tooltip mdl-tooltip--large" for="user">Name</content>*@
+            <content class="mdl-tooltip mdl-tooltip--large" for="user">User name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="email">Email Address</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="roles">Organisation Name</content>
+        </div>
+        <footer class="mdl-mini-footer">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+           var eventCategory = 'Users';
+           var successMessage = '@TempData["SuccessMessage"]'
+           var errorMessage = '@TempData["ErrorMessage"]'
+           var resetPwdSuccess = '@TempData["ResetPwdSuccess"]'
+           if (successMessage != '') {
+                createSnackbar(successMessage);
+           }
+           if (errorMessage != '') {
+                createSnackbar(errorMessage);
+           }
+           if (resetPwdSuccess != '') {
+               createSnackbar(resetPwdSuccess);
+           }
+
+           var DeleteMessage =  @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+           var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+           if (DeleteMessage != '' && DeleteMessage != null) {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+           }
+           if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+
+        })
+    </script>
+}
+

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Module FriendlyName="Unit Testing">
+	<SqlBatch Path="UniversalTests\PolicyTests" Type="Tests" FriendlyName="Policy Test Class">
+		<SqlFile Filename="Create_PolicyTestTestClass.sql"/>
+	</SqlBatch>
+	<SqlBatch Path="UniversalTests\PolicyTests\Views" Type="Tests" FriendlyName="Policy Test Views">
+		<SqlFile Filename="PolicyTest.ProductObject.sql"/>
+		<SqlFile Filename="PolicyTest.ObjectExtendedProperty.sql"/>
+	</SqlBatch>
+	<SqlBatch Path="UniversalTests\PolicyTests\Functions" Type="Tests" FriendlyName="Policy Test Functions">
+		<SqlFile Filename="PolicyTest.Split.sql"/>
+	</SqlBatch>
+	<SqlBatch Path="UniversalTests\PolicyTests\" Type="Tests" FriendlyName="Policy Test">
+		<SqlFile Filename="PolicyTest.TestConstraintsNamedCorrectly.sql"/>
+		<SqlFile Filename="PolicyTest.TestIsolationLevelSetCorrectly.sql"/>
+		<SqlFile Filename="PolicyTest.TestDeprecatedBlobTypesNotUsed.sql"/>
+		<SqlFile Filename="PolicyTest.TestIdentityUsedCorrectly.sql"/>
+		<SqlFile Filename="PolicyTest.TestIndexesAreNotCoveredByOtherIndexes.sql"/>
+		<SqlFile Filename="PolicyTest.TestIndexesCreatedInCorrectFileGroup.sql"/>
+		<SqlFile Filename="PolicyTest.TestIndexesThatShouldBeUniqueAreUnique.sql"/>
+		<SqlFile Filename="PolicyTest.ReferenceValidator.sql"/>
+		<SqlFile Filename="PolicyTest.TestReferenceValidator.sql"/>
+		<SqlFile Filename="PolicyTest.TestProceduresReferenceExistingObjects.sql"/>
+		<SqlFile Filename="PolicyTest.TestForUnusedParameters.sql"/>
+		<SqlFile Filename="PolicyTest.TestParametersCasedCorrectly.sql"/>
+		<SqlFile Filename="PolicyTest.TestIndexesNamedCorrectly.sql"/>
+		<SqlFile Filename="PolicyTest.TestTableHasExtendedPropertyDescription.sql"/>
+		<SqlFile Filename="PolicyTest.TestTablesHaveAPrimaryKey.sql"/>
+		<SqlFile Filename="PolicyTest.TestTablesNotCreatedOnAHeap.sql"/>
+		<SqlFile Filename="PolicyTest.TestSCTIDColumnsHaveForeignKeyToKnownCodes.sql"/>
+		<SqlFile Filename="PolicyTest.TestForInvalidDataTypeUse.sql"/>
+		<SqlFile Filename="PolicyTest.TestVarcharAndDecimalHaveLengthSpecified.sql"/>
+		<SqlFile Filename="PolicyTest.TestForeignKeysExistWhereIndicated.sql"/>
+		<SqlFile Filename="PolicyTest.TestEnumTablesShouldHaveUniqueDescriptionColumn.sql"/>
+		<SqlFile Filename="PolicyTest.TestConstraintsAreTrusted.sql"/>
+		<SqlFile Filename="PolicyTest.TestColumnNaming.sql"/>
+		<SqlFile Filename="PolicyTest.TestFullTextIndexesNotUsed.sql"/>
+		<SqlFile Filename="PolicyTest.TestIdentityColumnWithPotentialAlternativePK.sql"/>
+		<SqlFile Filename="PolicyTest.TestColumnNamingConvention.sql"/>
+		<SqlFile Filename="PolicyTest.TestHungarianNaming.sql"/>
+		<SqlFile Filename="PolicyTest.TestSuspectDataTypeChoices.sql"/>
+		<SqlFile Filename="PolicyTest.TestNoOrphanTablesExist.sql"/>
+		<SqlFile Filename="PolicyTest.TestCheckConstraintsThatShouldBeForeignKeys.sql"/>
+  </SqlBatch>
+	<SqlBatch Path="UniversalTests\tSQLtValidationTests" Type="Tests" FriendlyName="tSQLt Test Validation Test">
+		<SqlFile Filename="Create_tSQLtValidationTestTestClass.sql"/>
+		<SqlFile Filename="tSQLtValidationTest.TestAllTestProcedureWillExecute.sql"/>
+		<SqlFile Filename="tSQLtValidationTest.TestNoTestsExecutedNeedlesslyDuringPatchRun.sql"/>
+	</SqlBatch>
+	<SqlBatch Path=".\" Type="Tests" FriendlyName="Run All Unit Tests">
+		<SqlFile Filename="RunAllInitialUnitTests.sql"/>
+		<SqlCop/>
+		<SqlFile Filename="RunAllRemainingUnitTests.sql"/>
+	</SqlBatch>
+	<SqlBatch Path=".\" Type="Scripts" FriendlyName="Cleanup">
+		<SqlFile Filename="tSQLt.XmlTestFileCleanup.sql"/>
+	</SqlBatch>
+</Module>

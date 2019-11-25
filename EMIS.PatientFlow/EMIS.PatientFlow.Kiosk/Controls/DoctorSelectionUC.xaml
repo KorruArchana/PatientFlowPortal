@@ -1,0 +1,354 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.DoctorSelectionUc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras"
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding DoctorSelection, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DoctorSelectionUCStyle.xaml"/>
+                <ResourceDictionary Source="../Converters/AppointmentButtonStyleConverter.xaml" />
+                <ResourceDictionary Source="../Converters/ActualWidthConverter.xaml" />
+                <ResourceDictionary Source="../Converters/Converters.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1.5*"/>
+            <RowDefinition Height="8.5*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2.5*"/>
+            <ColumnDefinition Width="7.5*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                BorderBrush="#087A6F" BorderThickness="0,0,0,6">
+
+            <Grid x:Name="WeekRowGrid" VerticalAlignment="Bottom">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="0.25*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="1" Style="{StaticResource PreviousNextButtonStyle}" Padding="10"
+                    Content="&lt;" FontSize="50" IsEnabled="{Binding IsPreviousButtonEnabled}"
+                    Command="{Binding DoctorSelection.PreviousWeekCommand, Source={StaticResource Locator}}"
+                    CommandParameter="{Binding SlotWeekCalender.Monday}"/>
+
+                <Button Grid.Column="9" Style="{StaticResource PreviousNextButtonStyle}" Padding="10"
+                    Content="&gt;" FontSize="50"
+                    Command="{Binding DoctorSelection.NextWeekCommand, Source={StaticResource Locator}}"
+                    CommandParameter="{Binding SlotWeekCalender.Sunday}"/>
+
+                <Button Grid.Column="2" IsEnabled="{Binding SlotWeekCalender.Monday.IsSlotPresent}"
+                        Command="{Binding DoctorSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                        CommandParameter="{Binding SlotWeekCalender.Monday.Date}">
+
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                            <Binding Path="SlotWeekCalender.Monday.IsSelected"/>
+                            <Binding Source="{StaticResource SelectedButtonStyle}" />
+                            <Binding Source="{StaticResource WeekCalenderButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="Mon" FontWeight="Normal"/>
+                        <LineBreak/>
+                        <Run Text="{Binding SlotWeekCalender.Monday.Day}"/>
+                        <Run Text="{Binding SlotWeekCalender.Monday.Month}"/>
+                    </TextBlock>
+                </Button>
+
+                <Button Grid.Column="3" IsEnabled="{Binding SlotWeekCalender.Tuesday.IsSlotPresent}"
+                        Command="{Binding DoctorSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                        CommandParameter="{Binding SlotWeekCalender.Tuesday.Date}">
+                    
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                            <Binding Path="SlotWeekCalender.Tuesday.IsSelected"/>
+                            <Binding Source="{StaticResource SelectedButtonStyle}" />
+                            <Binding Source="{StaticResource WeekCalenderButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+                    
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="Tue" FontWeight="Normal"/>
+                        <LineBreak/>
+                        <Run Text="{Binding SlotWeekCalender.Tuesday.Day}"/>
+                        <Run Text="{Binding SlotWeekCalender.Tuesday.Month}"/>
+                    </TextBlock>
+                </Button>
+
+                <Button Grid.Column="4" IsEnabled="{Binding SlotWeekCalender.Wednesday.IsSlotPresent}"
+                        Command="{Binding DoctorSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                        CommandParameter="{Binding SlotWeekCalender.Wednesday.Date}">
+
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                            <Binding Path="SlotWeekCalender.Wednesday.IsSelected"/>
+                            <Binding Source="{StaticResource SelectedButtonStyle}" />
+                            <Binding Source="{StaticResource WeekCalenderButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="Wed" FontWeight="Normal"/>
+                        <LineBreak/>
+                        <Run Text="{Binding SlotWeekCalender.Wednesday.Day}"/>
+                        <Run Text="{Binding SlotWeekCalender.Wednesday.Month}"/>
+                    </TextBlock>
+                </Button>
+
+                <Button Grid.Column="5" IsEnabled="{Binding SlotWeekCalender.Thursday.IsSlotPresent}"
+                        Command="{Binding DoctorSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                        CommandParameter="{Binding SlotWeekCalender.Thursday.Date}">
+
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                            <Binding Path="SlotWeekCalender.Thursday.IsSelected"/>
+                            <Binding Source="{StaticResource SelectedButtonStyle}" />
+                            <Binding Source="{StaticResource WeekCalenderButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="Thu" FontWeight="Normal"/>
+                        <LineBreak/>
+                        <Run Text="{Binding SlotWeekCalender.Thursday.Day}"/>
+                        <Run Text="{Binding SlotWeekCalender.Thursday.Month}"/>
+                    </TextBlock>
+                </Button>
+
+                <Button Grid.Column="6" IsEnabled="{Binding SlotWeekCalender.Friday.IsSlotPresent}"
+                        Command="{Binding DoctorSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                        CommandParameter="{Binding SlotWeekCalender.Friday.Date}">
+
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                            <Binding Path="SlotWeekCalender.Friday.IsSelected"/>
+                            <Binding Source="{StaticResource SelectedButtonStyle}" />
+                            <Binding Source="{StaticResource WeekCalenderButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="Fri" FontWeight="Normal"/>
+                        <LineBreak/>
+                        <Run Text="{Binding SlotWeekCalender.Friday.Day}"/>
+                        <Run Text="{Binding SlotWeekCalender.Friday.Month}"/>
+                    </TextBlock>
+                </Button>
+
+                <Button Grid.Column="7" IsEnabled="{Binding SlotWeekCalender.Saturday.IsSlotPresent}"
+                        Command="{Binding DoctorSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                        CommandParameter="{Binding SlotWeekCalender.Saturday.Date}">
+
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                            <Binding Path="SlotWeekCalender.Saturday.IsSelected"/>
+                            <Binding Source="{StaticResource SelectedButtonStyle}" />
+                            <Binding Source="{StaticResource WeekCalenderButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="Sat" FontWeight="Normal"/>
+                        <LineBreak/>
+                        <Run Text="{Binding SlotWeekCalender.Saturday.Day}"/>
+                        <Run Text="{Binding SlotWeekCalender.Saturday.Month}"/>
+                    </TextBlock>
+                </Button>
+
+                <Button Grid.Column="8" IsEnabled="{Binding SlotWeekCalender.Sunday.IsSlotPresent}"
+                        Command="{Binding DoctorSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                        CommandParameter="{Binding SlotWeekCalender.Sunday.Date}">
+
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                            <Binding Path="SlotWeekCalender.Sunday.IsSelected"/>
+                            <Binding Source="{StaticResource SelectedButtonStyle}" />
+                            <Binding Source="{StaticResource WeekCalenderButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="Sun" FontWeight="Normal"/>
+                        <LineBreak/>
+                        <Run Text="{Binding SlotWeekCalender.Sunday.Day}"/>
+                        <Run Text="{Binding SlotWeekCalender.Sunday.Month}"/>
+                    </TextBlock>
+                </Button>
+
+                <Button Grid.Column="11" Style="{StaticResource DefaultButtonStyle}" 
+                        Padding="10" FontSize="50" Margin="0,0,0,10"
+                        Command="{Binding DoctorSelection.CalenderCommand, Source={StaticResource Locator}}">
+                    <Image Source="{StaticResource CalenderImageSource}"/>
+                </Button>
+
+            </Grid>
+
+        </Border>
+        
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Background="#F1F1F1">
+
+        </StackPanel>
+
+        <Viewbox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                 Width="50" Height="50" Margin="10"
+                 HorizontalAlignment="Center" VerticalAlignment="Top">
+            <local:ProgressBarUc Visibility="{Binding IsProgressBarVisible, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"/>
+        </Viewbox>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextAlignment="Center" Text="{Binding NoAppointmentsText}" Foreground="Gray"
+                   Visibility="{Binding IsNoAppointmentsTextVisible, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVisibleHiddenCollapsed}, Mode=TwoWay}" 
+                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}"/>
+        
+        <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" Style="{DynamicResource DoctorSelectionScrollViewer}"
+                          PreviewMouseRightButtonDown="UIElement_OnPreviewMouseRightButtonDown" Background="Red"
+                          PreviewMouseRightButtonUp="UIElement_OnPreviewMouseRightButtonDown">
+            <ListView x:Name="DoctorListView" Margin="0,10,0,0" 
+                      Visibility="{Binding IsDoctorAppointmentSlotsVisible, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                      ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                      BorderThickness="0" HorizontalAlignment="Left" 
+                      ItemsSource="{Binding DoctorDetailsBooking,Mode=TwoWay}">
+
+                <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Loaded">
+                    <cmd:EventToCommand Command="{Binding ListLoaded}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <ListView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Button Width="{Binding SizeHelperModel.ResolutionHelper.DoctorSelectionButtonWidth,Source={StaticResource Locator}}"
+                            Padding="10,5,5,5"
+                            Command="{Binding DoctorSelection.SelectDoctorCommand, Source={StaticResource Locator}}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource DoctorDetailsConverter}">
+                                    <Binding Path="DoctorId"/>
+                                    <Binding Path="DoctorName"/>
+                                </MultiBinding>
+                            </Button.CommandParameter>
+                            <Button.Style>
+                            <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                <Binding Path="IsSelected"/>
+                                <Binding Source="{StaticResource SelectedDoctorButtonStyle}" />
+                                <Binding Source="{StaticResource DoctorButtonsStyle}" />
+                            </MultiBinding>
+                        </Button.Style>
+
+                         <TextBlock Text="{Binding DoctorNameToDisplay}" TextWrapping="Wrap" Padding="5"/>
+                    </Button>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        </ScrollViewer>
+
+        <DockPanel x:Name="AppointmentSlotsDockPanel" Grid.Row="1" Grid.Column="1" Background="Transparent" Margin="20,15" 
+                   Visibility="{Binding IsDoctorAppointmentSlotsVisible, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVisibleHiddenCollapsed}}" >
+
+            <TextBlock DockPanel.Dock="Top" Text="{Binding SelectedDateText}" Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonLargeFont, Source={StaticResource Locator}}"/>
+
+            <ScrollViewer DockPanel.Dock="Top" Margin="5,0,5,0" 
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden"
+                          Style="{StaticResource FavsScrollViewer}" 
+                          Background="Transparent"
+                          PreviewMouseRightButtonDown="UIElement_OnPreviewMouseRightButtonDown" 
+                          PreviewMouseRightButtonUp="UIElement_OnPreviewMouseRightButtonDown">
+
+            <ListView x:Name="ListOfSessionGroupBox" Background="Transparent" BorderThickness="0" 
+                      ItemsSource="{Binding AppointmentSessionSlots,Mode=TwoWay}"
+                      Width="{Binding ActualWidth, ElementName=AppointmentSlotsDockPanel}">
+
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+
+                        <GroupBox x:Name="BranchAppointmentsGroupBox" Margin="0,10"
+                                  Foreground="#08645F" BorderBrush="#9ECECA" BorderThickness="1"
+                                  FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockSmallFont, Source={StaticResource Locator}}"
+                                  Width="{Binding ActualWidth, ElementName=AppointmentSlotsDockPanel, Converter={StaticResource ActualWidthMinusMarginConverter}}">
+                            
+                                <GroupBox.Header>
+                                    <TextBlock Padding ="10" Text="{Binding SiteName}"/>
+                                </GroupBox.Header>
+                            
+                            <ListView ItemsSource="{Binding}" BorderThickness="0" Background="Transparent"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                      Width="{Binding ActualWidth, ElementName=BranchAppointmentsGroupBox}">
+                            
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"
+                                                   Width="{Binding ActualWidth, ElementName=BranchAppointmentsGroupBox}"/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{DynamicResource DefaultButtonStyle}" Content="{Binding StartTime}"
+                                                Padding="10" Margin="10" Width="Auto" Height="Auto" 
+                                                HorizontalAlignment="Left" VerticalAlignment="Top"
+                                                Command="{Binding DoctorSelection.SlotCommand, Source={StaticResource Locator}}" 
+                                                CommandParameter="{Binding SlotId}" IsEnabled="{Binding SlotStatus}">
+                                        </Button>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            
+                        </GroupBox>
+
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            </ScrollViewer>
+
+        </DockPanel>
+
+    </Grid>
+    
+</UserControl>

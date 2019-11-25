@@ -1,0 +1,226 @@
+﻿@model EMIS.PatientFlow.Entities.Kiosk
+
+@{
+    ViewBag.Title = "KioskDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+   
+    $(document).ready(function () {
+        
+        var status = '@Model.Status';
+        if ( status== 1) {
+            $("#MakeOnline").hide();
+        }
+        else {
+            $("#OnlineStatus").removeClass("greenCircle").addClass("redCircle");
+            $("#OnlineStatus").addClass("redCircle");
+            $("#MakeOffline").hide();
+        }
+        $("#MakeOffline").click(function () {
+            $.ajax({
+                url: '@Url.Action("UpdateKioskStatus", "Home")',
+                data: {
+                    KioskId:'@Model.Id',
+                    connectionId: "abc",
+                    Status:0
+                },
+
+                success: function (result) {
+                    $("#OnlineStatus").removeClass("greenCircle").addClass("redCircle");
+                    $("#OnlineStatus").addClass("redCircle");
+                    $("#MakeOnline").show();
+                    $("#MakeOffline").hide();
+                    $('#MakeOnline').css('display', '');
+                    //return false;
+                },
+                error: function (xhr) {
+                    //  alert(xhr.statusText);
+                    //alert('error');
+                }
+
+            });
+        })
+
+        $("#MakeOnline").click(function () {
+            $.ajax({
+                url: '@Url.Action("UpdateKioskStatus", "Home")',
+                data: {
+                    KioskId: '@Model.Id',
+                    connectionId: "abc",
+                    Status:1
+                },
+
+                success: function (result) {
+                    $("#OnlineStatus").removeClass("redCircle").addClass("greenCircle");
+                    $("#OnlineStatus").addClass("greenCircle");
+                    $("#MakeOffline").show();
+                    $("#MakeOnline").hide();
+                    $('#MakeOffline').css('display', '');
+                    //return false;
+                },
+                error: function (xhr) {
+                    //  alert(xhr.statusText);
+                    //alert('error');
+                }
+
+            });
+        })
+        
+    });
+</script>   
+
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Kiosks
+            </span>
+            <span><img src="~/images/arrow.png"></span>
+            <span class="rightBlockSubHeading">
+                @Model.KioskName
+            </span>
+            <a href="#" class="tooltip">
+                <div class="greenCircle" id="OnlineStatus"></div>
+                <span id="MakeOffline">
+                    Make Offline
+                </span>
+                <span id="MakeOnline">
+                    Make Online
+                </span>
+            </a>
+        </div>
+        <div class="rightBlockTopButtonContainer">
+            <ul>
+                <li>
+                    <a href="#" class="settings tooltip">
+                        <div class="menu">
+                            <ul>
+                                <li>
+                                    Clone Kiosk
+                                </li>
+                                <li>
+                                    Divert All
+                                </li>
+                                <li>
+                                    Restart Kiosk
+                                </li>
+                                <li>
+                                    Audit Trail
+                                </li>
+                            </ul>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href='KioskEdit?Id=@Model.Id' class="edit"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="rightBlockContent">
+        <div>
+            <p class="leftTxt">
+                PC Name:
+            </p>
+            <p class="rightTxt">
+                @Model.PcName
+            </p>
+        </div>
+        <div>
+            <p class="leftTxt">
+                IP Address:
+            </p>
+            <p class="rightTxt">
+                @Model.IpAddress
+            </p>
+        </div>
+        @*<div>
+            <p class="leftTxt">
+                Status:
+            </p>
+            <p class="rightTxt">
+                @Model.Status
+            </p>
+        </div>*@
+        <div>
+            <p class="leftTxt">
+                Status:
+            </p>
+            <p class="rightTxt">
+                @if (Model.Status == 1)
+                {
+                    <span >Online</span>
+                }
+                else
+                {
+                    <span>Offline</span>
+                }
+            </p>
+        </div>
+        <div>
+            <p class="leftTxt">
+                Linked To:
+            </p>
+            <p class="rightTxt">
+                <a href="#" class="linkedToLink">Organisation</a>
+            </p>
+        </div>
+        <div>
+            <p class="leftTxt">
+                Show Time:
+            </p>
+            <p class="rightTxt">
+                21:00
+            </p>
+        </div>
+        <div>
+            <p class="leftTxt">
+                Hours Screen Awake:
+            </p>
+            <p class="rightTxt">
+                07:00 - 21:00
+            </p>
+        </div>
+        <div>
+            <p class="leftTxt">
+                Languages:
+            </p>
+
+            <p class="rightTxt">
+                @foreach (var item in Model.LanguageList)
+                {
+                    <span>@item.LanguageDefaultText</span><br /><br />
+                }
+                
+                @*<span>Spanish</span><br /><br />
+                <span>French</span><br /><br />
+                <span>German</span>*@
+            </p>
+            @*<p class="rightTxt">
+                <span>Chinese</span><br /><br />
+                <span>Tamil</span><br /><br />
+                <span>Hindi</span><br /><br />
+                <span>Polish</span>
+            </p>*@
+        </div>
+        <div>
+            <p class="leftTxt">
+                Modules:
+            </p>
+            <p class="rightTxt">
+                @foreach (var item in Model.Module)
+                {
+                    <span>@item.ModuleNameToDisplay</span><br /><br />
+                }
+            </p>
+        </div>
+        <div>
+            <p class="leftTxt">
+                Patient Matching:
+            </p>
+            <p class="rightTxt">
+                @Model.PatientMatchTitle
+            </p>
+        </div>
+    </div>

@@ -1,0 +1,153 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.KioskListingViewModel
+@{
+    ViewBag.Title = "Kiosk";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "KioskList")
+
+<script src="~/Scripts/ViewCommonScripts/KioskCommonScript.js"></script>
+
+@Html.Hidden("AddKioskUrl", Url.Action("AddKiosk", "Kiosk"))
+@Html.Hidden("EditKioskUrl", Url.Action("EditKiosk", "Kiosk", new { kioskId = "__id__" }))
+@Html.Hidden("IndexKioskUrl", Url.Action("Index", "Kiosk"))
+
+
+<div style="width: 100%; justify-content: center;padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard"  style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Kiosks</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="KioskActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect KioskAction"
+                    for="KioskActions">
+                    <li class="mdl-menu__item">
+                        <span>
+                            <a class="mdl-navigation__link" id="RestartKiosk"
+                               href="#">Restart kiosk</a>
+                        </span>
+                    </li>
+                    <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">
+                        <span>
+                            <a class="mdl-navigation__link" id="KioskKeys"
+                               href="#">Kiosk Keys</a>
+                        </span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Delete</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="kioskname">Kiosk Name</th>
+                        <th id="kiosktitle">Kiosk Title</th>
+                        <th id="ipaddr">IP Address</th>
+                        <th id="hostname">Host Name</th>
+                        <th id="kioskversion">Kiosk Version</th>
+                        <th id="usage">Usage</th>
+                        <th id="connectstatus">Connection Status</th>
+                        <th id="organisationname">Organisation</th>
+                    </tr>
+                    <tr class="search-row hidden">
+                        <td></td>
+                        <td>kiosk Name</td>
+                        <td>Kiosk Title</td>
+                        <td>IP Address</td>
+                        <td>Host Name</td>
+                        <td>Kiosk Version</td>
+                        <td>Usage</td>
+                        <td>Connection Status</td>
+                        <td>Organisation Name</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.KioskList)
+                    {
+                        <tr>
+                            <td>
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="@item.Id">
+                                    <input type="checkbox" id="@item.Id" class="mdl-checkbox__input kioskCheckBox" name="kioskActionCheckbox" />
+                                </label>
+                            </td>
+                            <td data-id="@item.Id">@item.KioskName</td>
+                            <td>@item.Title</td>
+                            <td>@item.IpAddress</td>
+                            <td>@item.PcName</td>
+                            <td>@item.KioskVersion</td>
+                            <td>@item.Usage</td>
+                            <td data-cguid="@item.ConnectionGuid">@item.KioskStatus</td>
+                            <td>@item.OrganisationName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <content class="mdl-tooltip mdl-tooltip--large" for="kioskname">Kiosk Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="kiosktitle">Kiosk Title</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="ipaddr">IP Address</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="hostname">Host Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="kioskversion">Kiosk Version</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="usage">Usage</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="connectstatus">Connection Status</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="organisationname">Organisation</content>
+        </div>
+        <footer class="mdl-mini-footer">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(function () {
+            var eventCategory = 'Kiosks';
+            var successMessage = '@TempData["successMessage"]'
+            var errorMessage = '@TempData["ErrorMessage"]'
+            if (successMessage != '') {
+                createSnackbar(successMessage);
+            }
+            if (errorMessage != '') {
+                createSnackbar(errorMessage);
+            }
+
+            var DeleteMessage =  @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null) {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+    </script>
+
+}

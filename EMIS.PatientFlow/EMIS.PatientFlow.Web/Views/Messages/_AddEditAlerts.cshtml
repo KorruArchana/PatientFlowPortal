@@ -1,0 +1,515 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.AlertsViewModel
+@using EMIS.PatientFlow.Common.Enums;
+@{
+    Layout = null;
+}
+
+@Html.Partial("_GoogleAnalytics","AddEditAlert")
+
+<script type="text/javascript">
+    var selKeyList = null;
+    function LoadEntityTree() {
+        $.ui.dynatree.nodedatadefaults["icon"] = false;
+        $.get('@Url.Action("BuildDepartmentMemberTree", "Alerts")' + '?alertId=' + '@Model.Id', function(data) {
+            var treeData = {};
+            treeData = $.parseJSON(data);
+            $("#loader_div").hide();
+            $("#divkioskdeptreedetails").show();
+            $("#divkioskdeptreedetails").dynatree({
+                checkbox: true,
+                selectMode: 3,
+                children: treeData,
+                onSelect: function(select, node) {
+                    if(node.getLevel() == 1)
+                    {
+                        if(!node.hasSubSel){
+                            node.select(true);
+                        }
+                    }
+                    if(node.getLevel() == 3)
+                    {
+                        if(!node.parent.parent.hasSubSel){
+                            node.select(true);
+                        }
+                    }
+                    if(node.getLevel() == 2)
+                    {
+                        if(!node.parent.hasSubSel){
+                            node.select(true);
+                        }
+                    }
+                    var partsel = new Array();
+                    selKeyList=null;
+                    $(".dynatree-partsel:not(.dynatree-selected)").each(function () {
+                        var parentnode = $.ui.dynatree.getNode(this);
+                        for (var i=0;i<parentnode.childList.length;i++)
+                        {
+                            if(parentnode.childList[i].bSelected)
+                            {
+                                partsel.push(parentnode.childList[i].data.key);
+                            }
+                        }
+                        selKeyList = partsel.join(", ");
+                    });
+                }
+
+            });
+            $("#divkioskdeptreedetails").dynatree("getTree").reload();
+        }).done(function(){
+            var partselected = new Array();
+            selKeyList=null;
+            $(".dynatree-partsel:not(.dynatree-selected)").each(function () {
+                var parentnode =$.ui.dynatree.getNode(this);
+                for (var i=0;i<parentnode.childList.length;i++)
+                {
+                    if(parentnode.childList[i].bSelected) {
+                        partselected.push(parentnode.childList[i].data.key);
+                    }
+                }
+                selKeyList = partselected.join(", ");
+            });
+            return false;
+        });
+    }
+    function LoadEntityDetailsTree(orgIds) {
+        $.ui.dynatree.nodedatadefaults["icon"] = false;
+        $.get('@Url.Action("BuildDepartmentMemberTreeByOrganisationId", "Kiosk")' + '?orgIds=' + orgIds, function (data) {
+            var treeData = {};
+            treeData = $.parseJSON(data.treeList);
+            $("#loader_div").hide();
+            $("#divkioskdeptreedetails").show();
+            $("#divkioskdeptreedetails").dynatree({
+                checkbox: true,
+                selectMode: 3,
+                children: treeData,
+                onSelect: function (select, node) {
+                    if (node.getLevel() == 1) {
+                        if (!node.hasSubSel) {
+                            node.select(true);
+                        }
+                    }
+                    if (node.getLevel() == 3) {
+                        if (!node.parent.parent.hasSubSel) {
+                            node.select(true);
+                        }
+                    }
+                    if (node.getLevel() == 2) {
+                        if (!node.parent.hasSubSel) {
+                            node.select(true);
+                        }
+                    }
+
+                    var partsel = new Array();
+                    $(".dynatree-partsel:not(.dynatree-selected)").each(function () {
+                        var parentnode = $.ui.dynatree.getNode(this);
+                        for (var i = 0; i < parentnode.childList.length; i++) {
+                            if (parentnode.childList[i].bSelected) {
+                                partsel.push(parentnode.childList[i].data.key);
+                            }
+                        }
+                        selKeyList = partsel.join(", ");
+                    });
+                }
+            });
+
+            $("#divkioskdeptreedetails").dynatree("getTree").reload();
+        });
+    }
+    function IsChildSelected(node,selectednode, unSelectednode)
+    {
+        if(jQuery.inArray(node.key, selectednode)!==-1)
+            node.select = true;
+
+        if(jQuery.inArray(node.key, unSelectednode)!==-1)
+            node.select = false;
+    }
+    var treeDBData = {};
+    function RefreshDepartmentMemberTree(orgIds) {
+        $.ui.dynatree.nodedatadefaults["icon"] = false;
+        $.get('@Url.Action("BuildDepartmentMemberTreeByOrganisationId", "Kiosk")' + '?orgIds=' + orgIds, function (data) {
+            treeDBData = {};
+            treeDBData = $.parseJSON(data.treeList);
+            $("#loader_div").hide();
+            $("#divkioskdeptreedetails").dynatree("destroy");
+            $("#divkioskdeptreedetails").empty();
+            $("#divkioskdeptreedetails").dynatree({
+                checkbox: true,
+                selectMode: 3,
+                children: treeDBData,
+                onSelect: function(select, node) {
+                    if(node.getLevel() == 1)
+                    {
+                        if(!node.hasSubSel){
+                            node.select(true);
+                        }
+                    }
+                    if(node.getLevel() == 3)
+                    {
+                        if(!node.parent.parent.hasSubSel){
+                            node.select(true);
+                        }
+                    }
+                    if(node.getLevel() == 2)
+                    {
+                        if(!node.parent.hasSubSel){
+                            node.select(true);
+                        }
+                    }
+                    selKeyList=null;
+                    var partsel = new Array();
+                    $(".dynatree-partsel:not(.dynatree-selected)").each(function () {
+                        var parentnode = $.ui.dynatree.getNode(this);
+                        for (var i=0;i<parentnode.childList.length;i++)
+                        {
+                            if(parentnode.childList[i].bSelected)
+                            {
+                                partsel.push(parentnode.childList[i].data.key);
+                            }
+                        }
+                        selKeyList = partsel.join(", ");
+                    });
+                }
+            });
+            $("#divkioskdeptreedetails").dynatree("getTree").reload();
+        });
+
+    }
+
+   
+    $(".saveEditBtn").click(function(e) {
+        var partselected = new Array();
+        selKeyList=null;
+        $(".dynatree-partsel:not(.dynatree-selected)").each(function () {
+            var parentnode = $.ui.dynatree.getNode(this);
+            var selNodes = parentnode.tree.getSelectedNodes();
+            var selKeys = $.map(selNodes, function(node1){
+                partselected.push(node1.data.key);
+            });
+        });
+        selKeyList = partselected.join(", ");
+       if(selKeyList!=null) {
+         
+            getDepartmentList(selKeyList);
+            getMemberList(selKeyList);
+            $("#SelectedDepartments").val($("#deplist").val());
+            $("#SelectedMembers").val($("#finalmemlist").val());
+        }
+    });
+
+   
+
+    function clearKiostList() {
+        $("#LinkedKiosk").empty();
+    }
+
+    $('#AddEditAlertForm').submit(function(e) {
+
+        var operation = $("#Operation").val();
+        var ageMax = parseInt($("#Age2").val());
+        var ageMin = parseInt($("#Age1").val());
+        if(operation == "Between")
+        {
+            if(ageMax < ageMin)
+            {
+                $("#ageMax").html("Enter an age greater than first.");
+                $("#ageMin").html('');
+                return false;
+            }
+        }
+        else if(operation == 'LessThan' || operation == 'GreaterThan')
+        {
+            if(ageMin <= 0 || ageMin >= 150)
+            {
+                $("#ageMin").html("Enter a valid age between 1 and 150.");
+                return false;
+            }
+        }
+
+        var name = decodeURI($("#OrganisationIds option:selected").text());
+        var id1 = '@Model.Id';
+        if (id1 > 0) {
+            SendGoogleEventClick('event type', 'Alerts', 'Edit', 'Alert Edited(' + name + ')');
+        } else {
+            SendGoogleEventClick('event type', 'Alerts', 'Add', 'New Alert Added(' + name + ')');
+        }
+    });
+    $(document).ready(function () {
+        $("#Department").hide();
+        $("#Member").hide();
+        if(@Model.Id > 0)
+        {
+            LoadEntityTree();
+            var partsel = new Array();
+            $(".dynatree-partsel:not(.dynatree-selected)").each(function () {
+                var node = $.ui.dynatree.getNode(this);
+                partsel.push(node.data.key);
+            });
+
+        }
+
+        var orglistData = [];
+
+        var optionsOrg = {
+            selector: '.ListBoxorg',
+            responseArrayName: 'OrganisationList',
+            searchKeyField: 'organisationName',
+            textField: 'OrganisationName',
+            data: orglistData,
+            idField: 'Id',
+            multiple: false,
+            placeholder: 'Select Organisation'
+        }
+
+        $.ajax({
+            url: '@Url.Action("GetOrganisationsForDropDown", "Organisation")',
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                for(var org in data.OrganisationList)
+                {
+                    var orgData = {
+                        id: data.OrganisationList[org].Id,
+                        text: data.OrganisationList[org].OrganisationName
+                    }
+                    orglistData.push(orgData);
+                }
+
+                select2AjaxSingle(optionsOrg);
+            },
+            error: function (data) {
+                console.log("Get organisations for drop down error");
+            }
+        })
+
+            
+
+        var optionsKiosk = {
+            url: '@Url.Action("GetKioskList", "Kiosk")',
+            selector: '#LinkedKiosk',
+            responseArrayName: 'KioskList',
+            searchKeyField: 'kioskTitle',
+            textField: 'KioskName',
+            idField: 'KioskGuid',
+            multiple: true,
+            placeholder: 'All Kiosks'
+        };
+        select2Ajax(optionsKiosk);
+
+        loadKioskdropdown();
+
+        function loadKioskdropdown() {
+            loadKiostList($('#OrganisationIds').val());
+            if($('#LinkedKiosk').val()==null) {
+                $('#LinkedKiosk').select2('val', "All Kiosks");
+            }
+        }
+
+        function loadKiostList(organisationId) {
+            if (organisationId == null)
+                organisationId = ["0"];
+            $("#LinkedKiosk").prop("disabled", false);
+            select2Ajax(optionsKiosk, { OrganisationId: organisationId });
+        }
+
+        $('#LinkedKiosk').change(function() {
+           var arr = $(this).val();
+            if (arr != null && arr.length > 1) {
+                var $select = $(this);
+                var idToRemove = 'All Kiosks';
+
+                var values = $select.val();
+                //alert(values.indexOf(idToRemove));
+                if (values) {
+                    var i = values.indexOf(idToRemove);
+                    if (i >= 0) {
+                        values.splice(i, 1);
+                        $select.val(values).change();
+                    }
+                }
+            } else if (arr == null) {
+                $('#LinkedKiosk').select2('val', "All Kiosks");
+            }
+
+        });
+
+        $('#OrganisationIds').change(function() {
+
+            if (@Model.Id > 0) {
+                RefreshDepartmentMemberTree($(this).val());
+            } else {
+                if ($(this).val() != null)
+                    LoadEntityDetailsTree($(this).val());
+            }
+
+            if ($(this).val() != null) {
+                clearKiostList();
+                $('<option val="-1">All Kiosks</option>').appendTo('#LinkedKiosk');
+                $('#LinkedKiosk').select2('val', "All Kiosks");
+                loadKiostList($(this).val());
+            }
+        });
+
+        $("#Operation").on('change', function() {
+            if (this.value == "None") {
+                $("#Age1").val('0');
+                $("#Age2").val('0');
+                $("#Age1").attr('disabled', 'disabled');
+                $("#Age2").hide();
+            } else if (this.value == "Between") {
+                $("#Age1").removeAttr('disabled');
+                $("#Age2").show();
+            } else {
+                $("#Age2").val('0');
+                $("#Age1").removeAttr('disabled');
+                $("#Age2").hide();
+            }
+        });
+
+        if($("#Operation").val()=="None")
+        {
+            $("#Age2").hide();
+            $("#Age1").attr('disabled','disabled');
+        }
+        else if($("#Operation").val()=="Between")
+        {
+            $("#Age1").removeAttr('disabled');
+            $("#Age2").show();
+        }
+        else
+        {
+            $("#Age1").removeAttr('disabled');
+            $("#Age2").hide();
+
+        }
+    });
+</script>
+
+
+@using (Ajax.BeginForm("SaveAlert", "Alerts", new AjaxOptions { UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace }, new { @id = "AddEditAlertForm" }))
+{
+    @Html.Hidden("deplist", new { id = "deplist" })
+    @Html.Hidden("finalmemlist", new { id = "finalmemlist" })
+    @Html.HiddenFor(model => model.SelectedDepartments)
+    @Html.HiddenFor(model => model.SelectedMembers)
+    @Html.HiddenFor(x => x.Id)
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Alerts
+            </span>
+            <span><img src="images/arrow.png"></span>
+            <span class="rightBlockSubHeading">
+                Add/Edit Alert
+            </span>
+        </div>
+    </div>
+    <div class="rightBlockContent">
+        <div>
+            <p class="leftTxt">
+                Alert Text:<span class="required-field"> *</span>
+            </p>
+            @Html.TextBoxFor(modelItem => Model.AlertText, new { @class = "rightTxtBox",@maxlength = "300" })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.AlertText)</div>
+        </div>
+        <div>
+            <p class="leftTxt">
+                Display Type:
+            </p>
+            @Html.DropDownListFor(x => x.AlertsDisplayType, (IEnumerable<SelectListItem>)ViewBag.DisplayType, new { @class = "selectBoxLarge", @id = "AlertsDisplayType" })
+        </div>
+        <div>
+            <p class="leftTxt">
+                Linked To:<span class="required-field"> *</span>
+            </p>
+            <p>
+                <div class="rightSelect2 wider">
+                    @Html.ListBoxFor(x => x.OrganisationIds,
+                        Model.OrganisationList,
+                        new
+                        {
+                            multiple = "multiple",
+                            @class = "ListBoxorg"
+                        })
+                </div>
+                <span class="validation-summary-errors">@Html.ValidationMessageFor(model => model.OrganisationIds)</span>
+            </p>
+        </div>
+        <div id="divkioskdeptreedetails" class="rightlinkTxt">
+        </div>
+         <div>
+            <p class="leftTxt">
+                Linked Kiosk:<span class="required-field"> *</span>
+            </p>
+            <div class="rightSelect2 wider">
+                @Html.ListBoxFor(x => x.LinkedKiosk, Model.KioskList, new { multiple = "multiple", @class = "ListBoxorg1" })
+            </div>
+            <span class="validation-summary-errors">@Html.ValidationMessageFor(m => m.LinkedKiosk)</span>
+
+        </div>
+        <div>
+            <p class="leftTxt">
+                Gender:
+            </p>
+            @if (Model.Gender == "None")
+            {
+                <select class="selectBoxLarge selectoption" name="Gender">
+                    <option selected="selected" value="None">None</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select>
+            }
+            else if (Model.Gender == "M")
+            {
+                <select class="selectBoxLarge selectoption" name="Gender">
+                    <option value="None">None</option>
+                    <option value="selected">Male</option>
+                    <option value="F">Female</option>
+                </select>
+            }
+            else if (Model.Gender == "F")
+            {
+                <select class="selectBoxLarge selectoption" name="Gender">
+                    <option value="None">None</option>
+                    <option value="M">Male</option>
+                    <option value="selected">Female</option>
+                </select>
+            }
+            else
+            {
+                <select class="selectBoxLarge selectoption" name="Gender">
+                    <option selected="selected" value="None">None</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select>
+            }
+        </div>
+        <div>
+            <p class="leftTxt">
+                Operation:
+            </p>
+            @Html.DropDownListFor(x => x.Operation, (IEnumerable<SelectListItem>)ViewBag.Operations, new { @class = "selectBoxLarge", @id = "Operation" })
+        </div>
+        <div>
+            <p class="leftTxt">
+                Age:
+            </p>
+            @Html.TextBoxFor(modelItem => Model.Age1, new { @class = "rightTxtBox" })
+            @Html.TextBoxFor(modelItem => Model.Age2, new { @class = "rightTxtBox" })
+            <div id="divVal" class="validation-summary-errors"><label id="ageMin"></label>@Html.ValidationMessageFor(model => model.Age1)</div>
+            <div id="divVal" class="validation-summary-errors"><label id="ageMax"></label>@Html.ValidationMessageFor(model => model.Age2)</div>
+        </div>
+
+        <div class="editBtnContainer">
+            <input type="submit" value="Save" class="saveEditBtn" name="submit" />
+            @if (Model.Id == 0)
+            {
+                <input type="button" value="Cancel" class="cancelEditBtn" name="submit" onclick="return LoadContent(@Convert.ToInt32(NodeType.Alerts), '0')" />
+            }
+            else
+            {
+                <input type="button" value="Cancel" class="cancelEditBtn" name="submit" onclick="return LoadContent(@Convert.ToInt32(NodeType.AlertDetails), '@Model.Id')" />
+            }
+        </div>
+    </div>
+}
+

@@ -1,0 +1,17 @@
+﻿<DatabaseConfiguration>
+  <ConnectionStringProviderTypes>
+    <add name="SDSConfigConnectionStringProvider" type="SDS.Client.DatabasePatcher.SDSConfigConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+  </ConnectionStringProviderTypes>
+  <DatabaseDefinitions>
+    <DatabaseDefinition name="EMISPatientFlowKiosk" isPatchable="true" createOnDemand="true" size="10" growth="1" requiresPatchMaster="false">
+      <ConnectionStringProvider>
+		<SDSConfigConnectionStringProvider>
+		  <Format>{0}</Format>
+		  <Parameters>
+		    <SDSConfigLookup index="0" key="PatientFlowKioskConnectionString"/>
+		  </Parameters>
+      </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+  </DatabaseDefinitions>
+</DatabaseConfiguration>

@@ -1,0 +1,381 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.MemberViewModel
+
+@{
+    ViewBag.Title = "AddEditMember";
+    if (Model.Id > 0)
+    {
+        ViewBag.Module = Model.FullName;
+        ViewBag.Savebutton = "Save Changes";
+    }
+    else
+    {
+        ViewBag.Module = "Add Staff";
+        ViewBag.Savebutton = "Add Member";
+    }
+    ViewBag.FormId = "AddEditMember";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "AddEditMember")
+<script>
+    $(document).ready(function () {
+        var MemTable;
+        var SelectedMem = [];
+        Intialize();
+        function Intialize() {
+
+            $('#deptdropdown').drop();
+            $(".dept-dropdown").addClass("disabled");
+
+            $('form select').each(function () {
+                const event = new onfocusEditEvent($(this));
+            });
+
+            if (@Model.Id == 0) {
+                $('#organisationDropdown').drop({ match: 'text', sortSelect: true });
+                MemTable = $('#member-table').DataTable({
+                    "scrollY": "100px",
+                    "scrollCollapse": true,
+                    "paging": false,
+                    "searching": false,
+                    "info": false,
+                    "language": {
+                        "emptyTable": "Please select an Organisation to view member",
+                    },
+                    createdRow: function (row, data, dataIndex) {
+                        $(row).addClass("highEmphasisBlack caption")
+                    }
+                });
+                SetDefaultOrgDep();
+            }
+
+            if (@Model.Id> 0) {
+                $('#memberActions').css({ 'visibility': 'visible' });
+                $('#memberActions ul').append("\
+                                            <li class='mdl-menu__item' style='display:none'>\
+                                            <span><a class='mdl-navigation__link' href='#' style='color:black' id='memberMessage'>View Messages</a></span>\
+                                            </li>  \
+                                             <li class='mdl-menu__item'>\
+                                            <span><a class='mdl-navigation__link' href='#' style='color:black' id='DeleteMember'>Remove staff</a></span>\
+                                            </li>\
+                                            ")
+                var organisationId =@Model.OrganisationId;
+                GetDepts(organisationId);
+                $(".dept-dropdown").removeClass("disabled");
+                $('#orgFieldset,#MemberNameFieldset').addClass("disableddiv");
+                var departmentId =@Model.DepartmentId;
+                setTimeout(function () {
+                    $('#deptdropdown').drop("set selected", departmentId);
+                }, 150);
+            }
+
+        }
+
+        function SetDefaultOrgDep() {
+            showLoading();
+            if ($('#organisationDropdown').children().length == 2) {
+                $("#organisationDropdown").prop("selectedIndex", 1).change();
+                if ($('#organisationDropdown').val() != '') {
+                    $("#deptdropdown").empty().drop('clear');
+                    var orgid = $('#organisationDropdown').val();
+                    GetDepts(orgid);
+                    GetMembers(orgid);
+                    $('#organisationField').hide();
+                   $(".dept-dropdown").removeClass("disabled");
+                }
+            }
+            hideLoading();
+        }
+
+        $('#member-table').on("click", "tr", function (e) {
+            $('#MemErrorMessage').css({ 'display': 'none' });
+            if ($('#organisationDropdown').val() != '' && $('td').text() != "No data available in table") {
+                $(this).toggleClass("highlight");
+                $(this).find('td').each(function () {
+                    if ($(this).closest('tr').hasClass("highlight"))
+                        $(this).attr('style', 'color:#308AC5 !important');
+                    else
+                        $(this).removeAttr("style");
+                })
+            }
+            if ($('#organisationDropdown').val() != null && $('#deptdropdown').val() != null && $('#deptdropdown').val() != '' && MemTable.rows('.highlight').data().length != 0) {
+                $('#SaveKiosk').removeClass("disabled");
+            }
+            else {
+                $('#SaveKiosk').addClass("disabled");
+            }
+        })
+
+
+        $('#organisationDropdown').change(function () {
+            showLoading();
+            $('#organisationDropdown').val() > 0 ? new onfocusEvent($(this)) : new outFocusEvent($(this));
+            $('#orgErrorMessage,#depErrorMessage,#MemErrorMessage').css({ 'display': 'none' });
+            $("#deptdropdown").empty().drop('clear');
+            $('#staffMemberTable').empty();
+            if ($('#organisationDropdown').val() != '') {
+                var orgid = $('#organisationDropdown').val();
+                GetDepts(orgid);
+                GetMembers(orgid);
+               $(".dept-dropdown").removeClass("disabled");
+            }
+            else {
+                MemTable.clear().draw();
+            }
+        })
+
+        $('#deptdropdown').change(function () {
+            $('#depErrorMessage').css({ 'display': 'none' });
+            $('#deptdropdown').val() > 0 ? new setActiveOutline($(this)) : new setNormalOutline($(this));
+        });
+
+        $('#btnViewMessage,#memberMessage').click(function () {
+            showLoading();
+              var MemberId =@Html.Raw(Json.Encode(Model.Id));
+            var MemberName =@Html.Raw(Json.Encode(Model.FullName));
+            var url = '@Url.Action("GetAlerts", "Staff")?MemberId=' + MemberId + '&MemberName=' + MemberName;
+            window.location.href = url;
+        })
+
+        $('#DeleteMember').click(function () {
+            var organisationId =@Html.Raw(Json.Encode(Model.OrganisationId));
+            var MemberName =@Html.Raw(Json.Encode(Model.FullName));
+            var MemberId =@Html.Raw(Json.Encode(Model.Id));
+           showDialog({
+                            liElement: "Delete",
+                            title: "Remove staff member?",
+                            text:  "Do you want to remove '"  +  MemberName + " '?",
+                            negative: {
+                                title: 'Cancel'
+                            },
+                            positive: {
+                                title: 'Delete',
+                                onClick: function (e) {
+                                    $.ajax({
+                                        type: "Get",
+                                        url: "../Staff/DeleteMember",
+                                        data: "memberId=" + MemberId + "&memberName=" + MemberName  +  "&OrganisationId="  +  organisationId,
+                                        success: function (data) {
+                                             window.location.href = "@Url.Action("Index", "Staff")";
+                                        },
+                                        error: function (data) {
+                                             window.location.href = "@Url.Action("Index", "Staff")";
+                                        }
+                                    })
+                                }
+                            }
+                        })
+
+        })
+
+        function GetMembers(orgid) {
+            MemTable.clear().draw();
+            $.ajax({
+                url: "../Staff/LinkMember",
+                data: "organisationId=" + orgid,
+                dataType:"Json",
+                type: "Get",
+                success: function (data) {
+                    if (data.length>0) {
+                        $('.dataTables_scrollBody').css({ 'max-height': '1000px ', 'height': '300px' });
+                    }
+                    else {
+                        $('.dataTables_scrollBody').css({ 'max-height': '100px ' });
+                        createSnackbar('Failed to get member under ' + $('#organisationDropdown').find(":selected").text() + ' organisation');
+                    }
+                    $.each(data, function (i, Mem) {
+                        MemTable.row.add([Mem.Surname + "," + Mem.Title + ". " + Mem.Firstname, Mem.SessionHolderId, Mem.LoginId]).draw(false);
+                    })
+                    $('#staffMemberTable').append(MemTable);
+                    hideLoading();
+                },
+                error: function (ex) {
+                    hideLoading();
+                    createSnackbar('Failed to get member under' + $('#orgdropdown').text() + 'organisation');
+                }
+            })
+        }
+
+        function GetDepts(orgid) {
+            $.ajax({
+                url: "../Department/GetDepartmentsForOrganisation",
+                datatype: "JSON",
+                data: "organisationId=" + orgid,
+                type: "Get",
+                success: function (data) {
+                    hideLoading();
+                    if (data.length > 1) {
+                        $("#deptdropdown").append('<option value>Select Department</option>');
+                    }
+                    $.each(data, function (i, dept) {
+                        $("#deptdropdown").append('<option value="' + dept.Id + '">' +
+                            dept.DepartmentName + '</option>');
+                    })
+                },
+                error: function (ex) {
+                    hideLoading();
+                    alert('Failed to get departments under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                }
+            });
+        }
+
+        $('#addupdatebtn').on('click', function (e) {
+            var eventCategory = 'Staff';
+            showLoading();
+            if (@Model.Id> 0) {
+                var MemberId =@Model.Id;
+                var DepartmentId = $('#deptdropdown').val();
+                var fullName = $('#MemberFullName').val();
+                $.ajax({
+                    type: "Post",
+                    data: "memberId=" + MemberId + "&departmentId=" + DepartmentId + "&FullName=" + fullName,
+                    url: "../Staff/UpdateMemberDepartment",
+                    dataType: "Json",
+                    success: function (data) {
+                        if (data.success) {
+                            LogEvent(eventCategory, 'Edited', eventCategory);
+                            return (window.location.href = "@Url.Action("Index", "Staff")");
+                        }
+                    },
+                    error: function (xhr) {
+                        return (window.location.href = "@Url.Action("Index", "Staff")");
+                    }
+                });
+
+                //Legend text on page loads in jquery
+                $('form input[type="text"],[type="number"],select').each(function () {
+                    const event = new onfocusEditEvent($(this));
+                });
+            }
+            else {
+                var rowLength = MemTable.rows('.highlight').data().length;
+                   if (rowLength == 0 || $('#organisationDropdown').val() == '' || $('#deptdropdown').val() == '') {
+                hideLoading();
+                if ($('#organisationDropdown').val() == null || $('#organisationDropdown').val().length == 0) {
+                    $('#orgErrorMessage').css({ 'display': 'block' });
+                }
+                if ($('#deptdropdown').val() == null || $('#deptdropdown').val().length == 0) {
+                    $('#depErrorMessage').css({ 'display': 'block' });
+                }
+                if (rowLength == 0 && $('#MemeberFieldset').css('display') != 'none') {
+                    $('#MemErrorMessage').css({ 'display': 'block' });
+                }
+                e.preventDefault();
+            }
+            else {
+                 $.each(MemTable.rows('.highlight').data(), function (index, value) {
+                    SelectedMem.push(new MemberObject(value));
+                })
+                  $.ajax({
+                    url: "../Staff/SaveSyncedMember",
+                    data: "jsonMemberList=" + JSON.stringify(SelectedMem) +
+                        "&organisationId=" + $("#organisationDropdown").val() +
+                        "&departmentId=" + $('#deptdropdown').val(),
+                    type: "Get",
+                      success: function (data) {
+                        LogEvent(eventCategory, 'Added', eventCategory);
+                        return (window.location.href = "@Url.Action("Index", "Staff")");
+            },
+            error: function (data) {
+                 return (window.location.href = "@Url.Action("Index", "Staff")");
+            }
+        })
+
+        }
+      }
+
+        })
+        function MemberObject(value) {
+            this.Surname = value[0].substring(0, value[0].indexOf(','));
+            this.Title = value[0].substring(value[0].indexOf(',') + 1, value[0].indexOf('.'));
+            this.Firstname = value[0].substring(value[0].indexOf('.') + 2);
+            this.SessionHolderId = value[1];
+            this.LoginId = value[2];
+        }
+
+    })
+</script>
+
+<div style="overflow-y:auto;overflow-x:auto;height:100%">
+    @if (Model.Id > 0)
+    {
+        <div style="width:50%;margin:auto;display:none">
+            <br /><br />
+            <button class="mdl-button  mdl-js-button mdl-js-ripple-effect" style="color:#448AFF;font-weight: bold;float:right" id="btnViewMessage">View Messages</button>
+            <br /><br />
+        </div>
+    }
+    @if (Model.Id > 0)
+    {
+        <br /><br />
+        <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Organisation" style="width:50%; margin: auto" id="orgFieldset">
+            <legend>Organisation</legend>
+            @Html.TextBoxFor(m => m.OrganisationName, new { @class = "mdl-textfield__input", @id = "OrganisationName" })
+        </fieldset>
+        <br /><br />
+    }
+    else
+    {
+        <br /><br />
+        <div id="organisationField">
+            <fieldset class="fieldset" name="Organisation" style="width:50%; margin: auto">
+                <legend style="position:static">Organisation</legend>
+                @Html.DropDownListFor(model => model.OrganisationList, Model.OrganisationList, "Organisation",
+                                                                                                                                                                                                                                                  new
+                                                                                                                                                                                                                                                  {
+                                                                                                                                                                                                                                                      @class = "ui fluid search  dropdown ui-dropdown-min-width orgDropdown",
+                                                                                                                                                                                                                                                      @id = "organisationDropdown",
+                                                                                                                                                                                                                                                  })
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:50%;margin:auto">
+                <span id="orgErrorMessage" style="display:none">Select an organisation</span>
+            </div>
+            <br /><br />
+        </div>
+    }
+    @if (Model.Id > 0)
+    {
+        <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Kiosk Title" style="margin:auto;width:50%" id="MemberNameFieldset">
+            <legend>Staff Member</legend>
+            @Html.TextBoxFor(m => m.FullName, new { @class = "mdl-textfield__input", @id = "MemberFullName" })
+        </fieldset>
+    }
+    else
+    {
+        <fieldset class="memberfieldsetTable" id="MemeberFieldset">
+            <legend style="color:darkgrey;font-size:20px">Select one or more staff members</legend>
+            <div class="mdl-card_table memberStyle">
+                <table class="mdl-data-table mdl-js-data-table membertable" style="width:100%" id="member-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Staff Member
+                            </th>
+                            <th>
+                                ID
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffMemberTable"></tbody>
+                </table>
+            </div>
+        </fieldset>
+        <div class="validation-summary-errors validationMessage" style="width:50%;margin:auto">
+            <span id="MemErrorMessage" style="display:none">Select at least one Member</span>
+        </div>
+    }
+    <br /><br />
+    <fieldset class="fieldset" name="Department" style="width:50%; margin: auto">
+        <legend style="position:static">Department</legend>
+        @Html.DropDownListFor(model => model.SelectedDepartment, Enumerable.Empty<SelectListItem>(), "Department",
+         new
+         {
+             @class = "ui fluid search  dropdown dept-dropdown ui-dropdown-min-width depDropdown",
+             @id = "deptdropdown",
+         })
+    </fieldset>
+    <div class="validation-summary-errors validationMessage" style="width:50%;margin:auto">
+        <span id="depErrorMessage" style="display:none">Select a department</span>
+    </div>
+    <br /><br />
+</div>
+

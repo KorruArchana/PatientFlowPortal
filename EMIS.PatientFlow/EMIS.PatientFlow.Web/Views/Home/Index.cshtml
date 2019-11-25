@@ -1,0 +1,23 @@
+﻿@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*@Html.Partial("_GoogleAnalytics", "Home")*@
+
+<div style="overflow-x:hidden; overflow-y:hidden; height:100%; width:100%; align-items:center; display: flex" class="lightblueBackground">
+    <div class="homeText mdl-card mdl-shadow--2dp" style="border-radius: 5px !important;">
+        <div style="height:320px;width:568px; background:url('../Images/egton-420039-cast.jpg') center / cover;">
+        </div>
+        <div style="background-color:#ffffff;">
+            <div style="padding:24px 0px">
+                <img style="width:60px; height:8px" src="~/Images/Patient Flow Text Logo.png" />
+            </div>
+            <div class="h6" style="height:20px; align-items:center; margin-bottom:34px; color:#006eb6;">
+                @ViewBag.HeaderMessage
+            </div>
+            <div class="body1 highEmphasisBlack" style="align-items:center;margin-bottom:40px;padding: 0px 16px;">
+                @ViewBag.BodyMessage
+            </div>
+        </div>
+    </div>
+</div>

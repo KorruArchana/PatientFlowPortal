@@ -1,0 +1,420 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.OrganisationViewModel
+
+@{
+    ViewBag.Title = "AddOrganisation";
+    ViewBag.Module = "Add Organisation";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+    ViewBag.Title = "AddOrganisation";
+    ViewBag.Savebutton = "Save";
+    ViewBag.Controller = "Organisation";
+    ViewBag.FormId = "AddOrganisations";
+    ViewBag.SaveAction = "SaveOrganisation";
+}
+
+@Html.Partial("_GoogleAnalytics", "AddOrganisation")
+<script type="text/javascript">
+
+    var OrgSystemType = 'EMIS - WEB';
+    if ('@System.Configuration.ConfigurationManager.AppSettings.AllKeys.Contains("SystemType")' == "True") {
+        OrgSystemType = '@System.Configuration.ConfigurationManager.AppSettings["SystemType"]';
+    }
+    var showSupplierId = "False";
+    if ('@System.Configuration.ConfigurationManager.AppSettings.AllKeys.Contains("ShowSupplierId")' == "True") {
+        showSupplierId = '@System.Configuration.ConfigurationManager.AppSettings["ShowSupplierId"]';
+    }
+
+    $(document).ready(function () {
+        var IsValidSiteNumber, IsValidOrgKey, IsValidOrgName = IsValidOrgKey = IsValidSiteNumber = true;
+        var orgsystemTypeId;
+        var OrganisationId = $('#orgId').val();
+        Initialize();
+        function Initialize() {
+            if (showSupplierId == "True") {
+                $('#SupplierIdField').css("display", "block");
+            }
+
+            $('#hidePassword').hide();
+            $('#systemTypeDropdown').drop();
+            if (OrgSystemType.toUpperCase() == 'EMIS - WEB') {
+                $('#systemTypeDropdown').drop('set selected', "EMIS - Web");
+                $('#SystemTypeId').val(1);
+                orgsystemTypeId = $('#systemTypeDropdown').val();
+
+                $('#EmisWebIPAddressDiv').show();
+                $('#PCSIpAddressDiv').hide();
+                $('#InternalIpAddressDiv').hide();
+                $('#PCSDataBaseNameDiv').hide();
+            }
+            else {
+
+                $('#systemTypeDropdown').drop('set selected', "EMIS - PCS");
+                orgsystemTypeId = $('#systemTypeDropdown').val();
+
+                $('#SystemTypeId').val(2);
+                $('#EmisWebIPAddressDiv').hide();
+            }
+
+            $('#txt_OrganisationName').focus();
+            onfocusEvent($('#txt_OrganisationName'));
+            $('#txt_OrganisationName').closest('fieldset').addClass("Active-outline");
+            $('#txt_OrganisationName').closest('fieldset').removeClass("Normal-outline");
+        }
+
+        $('input[type="text"],[type="password"], select').on('focus focusout', function (e) {
+            if (e.type == "focus") {
+                const event = new onfocusEvent($(this));
+            }
+            else if (e.type == "focusout") {
+                setNormalOutline($(this));
+                if ($(this).val() == "") {
+                    const event = new outFocusEvent($(this));
+                }
+            }
+        });
+
+        $('.systemTypeDropdown').click(function () {
+            setActiveOutline($(this));
+        });
+
+        $('#systemTypeDropdown').change(function () {
+            orgsystemTypeId = $('#systemTypeDropdown').val();
+            var isemisweb = '@Config.IsEmisWebPortal' == 'True';
+
+            if (isemisweb && orgsystemTypeId == 2) {
+                $('#addupdatebtn').hide();
+            }
+            else if (!isemisweb && orgsystemTypeId == 1) {
+                $('#addupdatebtn').hide();
+            }
+            else {
+                $('#addupdatebtn').show();
+            }
+
+            if (orgsystemTypeId == 7) {
+                $('#WebServiceUrlDiv').show();
+            }
+
+            if (orgsystemTypeId == 1 || orgsystemTypeId == 7) {
+                $('#EmisWebIPAddressDiv').show();
+                $('#PCSIpAddressDiv').hide();
+                $('#InternalIpAddressDiv').hide();
+                $('#PCSDataBaseNameDiv').hide();
+            }
+            else {
+                $('#EmisWebIPAddressDiv').hide();
+                $('#PCSIpAddressDiv').show();
+                $('#InternalIpAddressDiv').show();
+                $('#PCSDataBaseNameDiv').show();
+            }
+        });
+
+        $('#SystemTypeField').focusout(function () {
+            $(this).children().eq(0).addClass("Normal-outline");
+            $(this).children().eq(0).removeClass("Active-outline");
+        });
+
+        $('#AddOrganisations').keypress(function (e) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == 13) {
+                $('#AddOrganisations').trigger('submit');
+            }
+        })
+
+        $('#txt_OrganisationName, #txt_SiteNumber, #txt_OrganisationKeyOrDBName').focusout(function () {
+            if ($(this).attr("id") == "txt_OrganisationName" && $('#txt_OrganisationName').val() != "") {
+                IsValidOrganisationName();
+            }
+            else if ($(this).attr("id") == "txt_SiteNumber" && $('#txt_SiteNumber').val() != "") {
+                IsValidOrganisationSiteNumber();
+            }
+            else if ($(this).attr("id") == "txt_OrganisationKeyOrDBName" && $('#txt_OrganisationKeyOrDBName').val() != "") {
+                IsValidOrganisationKey();
+            }
+        });
+
+        function IsValidOrganisationName() {
+            $.ajax({
+                type: "get",
+                dataType: "Json",
+                url: "../Organisation/IsValidOrganisationName",
+                data: "OrganisationName=" + $('#txt_OrganisationName').val() + "&OrganisationId=" + OrganisationId,
+                cache: false,
+                success: function (data) {
+                    if (!data.Result) {
+                        $('#errorOrgName').css({ 'display': 'block' })
+                        IsValidOrgName = false;
+                    }
+                    else {
+                        $('#errorOrgName').css({ 'display': 'none' })
+                        IsValidOrgName = true;
+                    }
+                }
+            });
+        }
+
+        function IsValidOrganisationSiteNumber() {
+            $.ajax({
+                type: "get",
+                dataType: "Json",
+                url: "../Organisation/IsValidOrganisationSiteNumber",
+                data: "OrganisationSiteNumber=" + $('#txt_SiteNumber').val() + "&OrganisationId=" + OrganisationId,
+                success: function (data) {
+                    if (!data.Result) {
+                        $('#SiteNumberError').css({ 'display': 'block' })
+                        IsValidSiteNumber = false;
+                    }
+                    else {
+                        $('#SiteNumberError').css({ 'display': 'none' })
+                        IsValidSiteNumber = true;
+                    }
+                }
+            });
+        }
+
+        function IsValidOrganisationKey() {
+            $.ajax({
+                type: "get",
+                dataType: "Json",
+                url: "../Organisation/IsValidOrganisationKey",
+                data: "OrganisationKey=" + $('#txt_OrganisationKeyOrDBName').val() + "&OrganisationId=" + OrganisationId,
+                success: function (data) {
+                    if (!data.Result) {
+                        $('#OrganisationKeyError').css({ 'display': 'block' })
+                        IsValidOrgKey = false;
+                    }
+                    else {
+                        $('#OrganisationKeyError').css({ 'display': 'none' })
+                        IsValidOrgKey = true;
+                    }
+                }
+            });
+        }
+
+        $('#showPassword').click(function () {
+            $('#hidePassword').css({ 'display': 'block' });
+            $('#showPassword').css({ 'display': 'none' });
+            $('#txt_Password').attr('type', 'text');
+        });
+
+        $('#hidePassword').click(function () {
+            $('#hidePassword').css({ 'display': 'none' });
+            $('#showPassword').css({ 'display': 'block' });
+            $('#txt_Password').attr('type', 'password');
+        })
+
+        var form = $('#AddOrganisations');
+        var validator = form.validate();
+
+        $('#AddOrganisations').submit(function (e) {
+            var eventCategory = 'Organisations';
+            LogEvent(eventCategory, 'Added', eventCategory);
+
+            showLoading();
+            var IPAddress;
+            if (orgsystemTypeId == 1 || orgsystemTypeId == 7) {
+                IPAddress = $('#EmisWebIpAddress').val();
+            }
+            else {
+                IPAddress = $('#PCSIpAddress').val();
+            }
+
+            $('#orgIPAddress').val(IPAddress);
+
+            if (!form.valid()) {
+                e.preventDefault();
+                hideLoading();
+                return false;
+            }
+            else if (!IsValidSiteNumber || !IsValidOrgKey || !IsValidOrgName) {
+                hideLoading();
+                e.preventDefault();
+                return false;
+            }
+        })
+    })
+
+    function SuccessHandling(data) {
+        if (data.success) {
+            window.location.href = '@Url.Action("Index", "Organisation")';
+            hideLoading();
+            return true;
+        } else {
+            hideLoading();
+            var message = data.exceptionMessage;
+            showDialog({
+                    liElement: "Delete",
+                    title: "Technical errror;",
+                    text: message,
+                    negative: {
+                        title: 'Okay'
+                    }
+            });
+        }
+    }
+
+</script>
+
+<div style="width:100%;justify-content:center;flex-grow:1;padding:0px" class="mdl-grid lightblueBackground">
+    @Html.HiddenFor(x => x.Id, new { id = "orgId" })
+    @Html.HiddenFor(x => x.SupplierId)
+    @Html.HiddenFor(x => x.IpAddress, new { id = "orgIPAddress" })
+
+    <div class="mdl-card portalMdlCard DepUserPracticeAdminStyle" style="height: 100%;overflow-y:auto">
+        <br />
+        <div>
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Organisation name" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.OrganisationName, new { @class = "mdl-textfield__input", @id = "txt_OrganisationName" })
+
+                <label class="mdl-textfield__label" for="txt_OrganisationName">Organisation name</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.OrganisationName, "", new { @class = "text-danger" })
+                <span id="errorOrgName" style="display:none">Organisation name has already been taken. Please enter a unique organisation name</span>
+            </div>
+            <br /><br />
+        </div>
+
+        <div id="SystemTypeField">
+            <fieldset class="fieldset" name="System type" style="width:100%;margin:auto">
+                <legend style="position:static">System type</legend>
+                @Html.DropDownListFor(model => model.SystemTypeId, Model.SystemTypesList, "System type",
+                  new
+                  {
+                      @class = "ui fluid dropdown ui-dropdown-min-width systemTypeDropdown",
+                      @id = "systemTypeDropdown",
+                  })
+            </fieldset>
+            <br /><br />
+        </div>
+
+        <div id="EmisWebIPAddressDiv">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="IP address" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.IpAddress, new { @class = "mdl-textfield__input", @id = "EmisWebIpAddress" })
+
+                <label class="mdl-textfield__label" for="EmisWebIpAddress">IP address</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.IpAddress, "", new { @class = "text-danger" })
+            </div>
+            <br /><br />
+        </div>
+
+        <div id="PCSIpAddressDiv">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="IP address" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.IpAddress, new { @class = "mdl-textfield__input", @id = "PCSIpAddress" })
+
+                <label class="mdl-textfield__label" for="PCSIpAddress">IP address</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.IpAddress, "", new { @class = "text-danger" })
+            </div>
+            <br /><br />
+        </div>
+
+        <div id="InternalIpAddressDiv">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Internal IP address" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.InternalIpAddress, new { @class = "mdl-textfield__input", @id = "InternalIpAddress" })
+
+                <label class="mdl-textfield__label" for="InternalIpAddress">Internal IP address</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.InternalIpAddress, "", new { @class = "text-danger" })
+            </div>
+            <br /><br />
+        </div>
+
+        <div>
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="EMS CDB/Site number" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.SiteNumber, new { @class = "mdl-textfield__input", @id = "txt_SiteNumber" })
+
+                <label class="mdl-textfield__label" for="txt_SiteNumber">EMIS CDB / Site number</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.SiteNumber, "", new { @class = "text-danger" })
+                <span id="SiteNumberError" style="display:none">EMS CDB / Site number has already been taken. Please enter a unique EMS CDB / site number</span>
+            </div>
+            <br /><br />
+        </div>
+
+        <div style="display: none" id="SupplierIdField">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Supplier Id" style="width: 100%;margin:auto">
+                <legend>SupplierId</legend>
+                @Html.TextBoxFor(m => m.SupplierId, new { @class = "mdl-textfield__input", @id = "supplierId" })
+
+                <label class="mdl-textfield__label" for="supplierId">Supplier Id</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.SupplierId, "", new { @class = "text-danger" })
+            </div>
+            <br /><br />
+        </div>
+
+        <div>
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="User name" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.Username, new { @class = "mdl-textfield__input", @id = "txt_UserName", @autocomplete = "new-password" })
+
+                <label class="mdl-textfield__label" for="txt_UserName">User name</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
+            </div>
+            <br /><br />
+        </div>
+
+        <div>
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Password" style="width: 100%;margin:auto">
+                <legend></legend>
+                <div class="input-wrapper" style="height:100%; width:100%;">
+                    @Html.PasswordFor(m => m.Password, new { @class = "mdl-textfield__input", @id = "txt_Password", @autocomplete = "new-password" })
+                    <label class="mdl-button mdl-js-button mdl-button--icon " for="txt_Password" style="right:12px !important" id="showPassword">
+                        <i class="material-icons EyeIconStyle">visibility_off</i>
+                    </label>
+                    <label class="mdl-button mdl-js-button mdl-button--icon " for="txt_Password" style="right:12px !important;display:none" id="hidePassword">
+                        <i class="material-icons EyeIconStyle">visibility</i>
+                    </label>
+                    <div class="ShowOrHidePassword mdl-tooltip mdl-tooltip--large" for="showPassword">Show password</div>
+                    <div class="ShowOrHidePassword mdl-tooltip mdl-tooltip--large" for="hidePassword">Hide password</div>
+                </div>
+                <label class="mdl-textfield__label" for="txt_Password">Password</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+            </div>
+            <br /><br />
+        </div>
+
+        <div id="PCSDataBaseNameDiv">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Database Name" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.OrganisationKey, new { @class = "mdl-textfield__input", @id = "txt_OrganisationKeyOrDBName" })
+
+                <label class="mdl-textfield__label" for="txt_OrganisationKeyOrDBName">Database Name</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.OrganisationKey, "", new { @class = "text-danger" })
+                <span id="OrganisationKeyError" style="display:none">This name is taken. Enter a unique database name.</span>
+            </div>
+            <br /><br />
+        </div>
+
+        <div id="WebServiceUrlDiv">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Web Service URL" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.WebServiceUrl, new { @class = "mdl-textfield__input", @id = "txt_WebServiceUrl" })
+
+                <label class="mdl-textfield__label" for="txt_UserName">WebServiceUrl</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.WebServiceUrl, "", new { @class = "text-danger" })
+            </div>
+            <br /><br />
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,153 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.DepartmentViewModel
+@{
+    ViewBag.Title = "Staff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "MemberList")
+<script src="~/Scripts/ViewCommonScripts/StaffCommonScript.js"></script>
+
+@Html.Hidden("IndexMemberUrl", Url.Action("Index", "Staff"))
+@Html.Hidden("AddMemberUrl", Url.Action("AddMember", "Staff"))
+@Html.Hidden("EditMemberUrl", Url.Action("GetMemberDetails", "Staff", new { memberId = "__id__" }))
+@Html.Hidden("GetMessagesUrl", Url.Action("GetAlerts", "Staff", new { memberId = "__id__", MemberName = "__name__" }))
+
+<div style="width: 100%; justify-content: center;padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard"  style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Staff</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                @if (!Model.IsPcsLocalLinked)
+                {
+                    <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                        ADD STAFF
+                    </button>
+                }
+
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="MemberActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect MemberAction"
+                    for="MemberActions">
+                    <li class="mdl-menu__item" style="display:none">
+                        <span><a class="mdl-navigation__link" href="#">View Messages</a></span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Remove staff</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="name">Name</th>
+                        <th id="divert" class="no-sort" style="padding-left:30px">Divert</th>
+                        <th id="id">ID</th>
+                        <th id="org">Organisation</th>
+                        <th id="dep">Department</th>
+                    </tr>
+                    <tr class="search-row hidden">
+                        <td></td>
+                        <td>Name</td>
+                        <td>Divert</td>
+                        <td>ID </td>
+                        <td>Organisation</td>
+                        <td>Department</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.MemberList)
+                    {
+                        <tr>
+                            <td>
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="@item.Id">
+                                    <input type="checkbox" id="@item.Id" class="mdl-checkbox__input" name="memberActionCheckbox" />
+                                </label>
+                            </td>
+                            <td data-id="@item.Id" data-FullName="@string.Format("{0}.{1} {2}",item.Title,item.Firstname,item.Surname)">
+                                @string.Format("{0}, {1} {2}", item.Surname, item.Title, item.Firstname)
+                            </td>
+                            <td class="divertSwitch">
+                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" id="divert_@item.Id">
+                                    <input type="checkbox" class="mdl-switch__input" checked=@item.IsDivertSet onclick="Divert(this.checked,@item.SessionHolderId,@item.OrganisationId,@string.Format(@"""{0}"",""{1}"",""{2}""",item.Title,item.Firstname,item.Surname))">
+                                </label>
+                                @if (item.IsDivertSet)
+                                {
+                                    <content class="mdl-tooltip mdl-tooltip--large" for="divert_@item.Id">Divert is ON</content>
+                                }
+                                @if (!item.IsDivertSet)
+                                {
+                                    <content class="mdl-tooltip mdl-tooltip--large" for="divert_@item.Id">Divert is OFF</content>
+                                }
+                            </td>
+                            <td>@item.SessionHolderId</td>
+                            <td data-orgId="@item.OrganisationId">@item.OrganisationName</td>
+                            <td>@item.DepartmentName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <content class="mdl-tooltip mdl-tooltip--large" for="name">Staff Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="divert">Divert Staff</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="id">Staff ID</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="org">Organisation name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="dep">Department Name</content>
+        </div>
+        <footer class="mdl-mini-footer-page">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+            var eventCategory = 'Staff';
+            var SuccessMessage = @Html.Raw(Json.Encode(TempData["SuccessMessage"]));
+            var ErrorMessage = @Html.Raw(Json.Encode(TempData["ErrorMessage"]));
+            if (SuccessMessage != '' && SuccessMessage != null)
+            {
+                createSnackbar(SuccessMessage);
+            }
+            if (ErrorMessage != '' && ErrorMessage != null) {
+                createSnackbar(ErrorMessage);
+            }
+
+            var DeleteMessage = @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null)
+            {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+    </script>
+}

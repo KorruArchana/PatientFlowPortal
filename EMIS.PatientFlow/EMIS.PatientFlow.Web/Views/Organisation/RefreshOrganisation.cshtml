@@ -1,0 +1,49 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.OrganisationViewModel
+
+@{
+    Layout = null;
+}
+<script src="~/Scripts/bootstrap.js"></script>
+
+<!DOCTYPE html>
+<script type="text/javascript">
+    function load() {
+        $('#cover-spin').show();
+        location.reload();
+    }
+
+</script>
+
+<div id="cover-spin"></div>
+<div class="modal-dialog modal-md">
+    <div class="modal-content" style="overflow-x:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="page-header-text-popup">
+                <span>Site List</span>
+            </p>
+        </div>
+        <table class="table table-responsive table-striped siteListTable" id="portal-table" style="margin-left: 20px;">
+            <thead>
+                <tr>
+                    <th>Site Id</th>
+                    <th>Site Name</th>
+                </tr>
+            </thead>
+            @foreach (var item in Model.SiteList)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(m => item.SiteDbId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(m => item.SiteName)
+                    </td>
+                </tr>
+            }
+        </table>
+        <div class="modal-footer control-float-left field-spacing-popup">
+            <button class="btn btn-primary btn-lg submit-button" id="btnOk" onclick="load()">Ok</button>
+        </div>
+    </div>
+
+</div>

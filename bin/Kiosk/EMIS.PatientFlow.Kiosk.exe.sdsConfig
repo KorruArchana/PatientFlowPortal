@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <appSettings>
+    <!--<add key="RegistrationKey" value="75509f0f-0e86-490c-9356-801ee151e222"/>-->
+    <add key="RegistrationKey" value="db4ae543-130b-4473-bebf-11619341c632" />
+    
+    <add key="ServerURI" value="http://localhost:52704/" />
+    <!--<add key="ServerURI" value="http://10.6.0.141/PatientFlowAPI/" />-->
+    <add key="DBConnection" value="Data Source=localhost;Initial Catalog=EMISPatientFlowKiosk;Trusted_Connection=True;Max Pool Size=1000" />
+    <add key="NewsletterAPIUrl" value="{sdsConfig:NewsletterAPIUrl}" />
+    <add key="AppId" value="{sdsConfig:AppId}" />
+    <add key="LoggingEnabled" value="1" /> <!-- 0 - Means DB Logging Off , 1 - Means DB Logging On -->
+    <add key="FileRecordAPIPwd" value="{sdsConfig:FileRecordAPIPwd}" />
+  </appSettings>
+
+  <system.serviceModel>
+    <bindings>
+      <basicHttpBinding>
+        <binding name="KioskSoap" maxBufferSize="2147483647" maxReceivedMessageSize="2147483647" maxBufferPoolSize="524288" />
+      </basicHttpBinding>
+      <customBinding>
+        <binding name="KioskSoap1">
+          <textMessageEncoding messageVersion="Soap12" />
+          <httpTransport />
+        </binding>
+      </customBinding>
+    </bindings>
+    <client>
+      <endpoint address="http://localhost/TopasTestService/kiosk.asmx" binding="basicHttpBinding" bindingConfiguration="KioskSoap" contract="TopasServiceReference.KioskSoap" name="KioskSoap" />
+    </client>
+  </system.serviceModel>
+  
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="System.Runtime" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-2.6.8.0" newVersion="2.6.8.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Threading.Tasks" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-2.6.8.0" newVersion="2.6.8.0" />
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Drawing" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" newVersion="4.0.0.0" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>

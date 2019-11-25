@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<patchTemplate xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" productGuid="c246665f-2887-4ac4-8247-0d47bef0a871" configPath="PatientFlowWeb\Web.config,PatientFlowServices\Web.config">
+  <patchAction name="PatchDatabase" performOnConfigSwitch="false" abortOnFailure="true">
+    <ndoLocation path="E:\pflow\Database\EMISPatientFlowConfiguration\NDOController.xml" />
+    <targetDatabase name="EMISPatientFlowConfiguration" definitionsRelativePath="Patient Flow Portal_DBDefinition.xml" definitionsSourceFolder="SDS\DatabaseDefinitions" setReleaseVersionOnNdoController="true" />
+  </patchAction>
+  <patchAction name="RecycleIISApplicationPool" performOnConfigSwitch="false" abortOnFailure="false">
+    <appPool appPoolName="PatientFlowServices" />
+  </patchAction>
+  <patchAction name="RecycleIISApplicationPool" performOnConfigSwitch="false" abortOnFailure="false">
+    <appPool appPoolName="PatientFlowWeb" />
+  </patchAction>
+<patchAction name="CopyFiles">
+		<patchFolder relativePath="EMIS.PatientFlow.build.Service\_PublishedWebsites\EMIS.PatientFlow.Services" targetFolder="{AppRoot}\EMIS.PatientFlow.Services" copyType="Contents">
+			<patchFilePattern extension=".pdb" exclude="true"/>
+		</patchFolder>
+	</patchAction>
+<patchAction name="CopyFiles">
+		<patchFolder relativePath="EMIS.PatientFlow.buid.Web\_PublishedWebsites\EMIS.PatientFlow.Web" targetFolder="{AppRoot}\EMIS.PatientFlow.Web" copyType="Contents">
+			<patchFilePattern extension=".pdb" exclude="true"/>
+		</patchFolder>
+	</patchAction>
+  <patchAction name="AddApplicationPoolToIIS" performOnConfigSwitch="false" abortOnFailure="true">
+    <appPoolSettings appPoolName="PatientFlowServices" managedRuntimeVersion="v4.0" enable32BitAppOnWin64="true" managedPipelineMode="Integrated" queueLength="5000" autoStart="true" loadUserProfile="false" />
+  </patchAction>
+  <patchAction name="AddApplicationPoolToIIS" performOnConfigSwitch="false" abortOnFailure="true">
+    <appPoolSettings appPoolName="PatientFlowWeb" managedRuntimeVersion="v4.0" enable32BitAppOnWin64="true" managedPipelineMode="Integrated" queueLength="1000" autoStart="true" loadUserProfile="false" />
+  </patchAction>
+  <patchAction name="AddWebsiteToIIS" performOnConfigSwitch="false" abortOnFailure="true">
+    <websiteDetails websiteName="EMIS.PatientFlow.Services" applicationPoolName="PatientFlowServices" bindingProtocol="http" bindingInfo="*:80:" physicalPath="{AppRoot}\EMIS.PatientFlow.Services" />
+  </patchAction>
+  <patchAction name="AddWebsiteToIIS" performOnConfigSwitch="false" abortOnFailure="true">
+    <websiteDetails websiteName="EMIS.PatientFlow.Web" applicationPoolName="PatientFlowWeb" bindingProtocol="https" bindingInfo="*:443:" physicalPath="{AppRoot}\EMIS.PatientFlow.Web" />
+  </patchAction>
+  <patchAction name="RecycleIISApplicationPool" performOnConfigSwitch="false" abortOnFailure="false">
+    <appPool appPoolName="PatientFlowServices" />
+  </patchAction>
+  <patchAction name="RecycleIISApplicationPool" performOnConfigSwitch="false" abortOnFailure="false">
+    <appPool appPoolName="PatientFlowWeb" />
+  </patchAction>
+</patchTemplate>

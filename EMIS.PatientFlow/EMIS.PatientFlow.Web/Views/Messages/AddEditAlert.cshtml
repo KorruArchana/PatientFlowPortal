@@ -1,0 +1,935 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.AlertsViewModel
+@{
+    ViewBag.Title = "AddEditAlerts";
+    if (Model.Id > 0 || Model.PatientVM.PatientMessageId > 0)
+    {
+        ViewBag.Module = "Update Message";
+        ViewBag.Savebutton = "Save Changes";
+    }
+    else
+    {
+        ViewBag.Module = "Add Message";
+        ViewBag.Savebutton = "Add Message";
+    }
+    ViewBag.SaveAction = "SaveAlert";
+    ViewBag.Controller = "Messages";
+    ViewBag.FormId = "AddEditAlerts";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "Messages")
+<script src="~/Scripts/UserScripts/multiple-select.js"></script>
+<link href="~/Content/multiple-select.css" rel="stylesheet" />
+<link href="~/Content/Calenderstyle.css" rel="stylesheet" />
+<script src="~/Scripts/UserScripts/calenderscript.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var PatientTable;
+
+        Initialize();
+        function Initialize()
+        {
+            $('#organisationDropdown').drop({ match: 'text', sortSelect: true });
+            $('#kioskDropdown').drop({ sortSelect: true });
+            $('#Underrange').drop();
+            SettingAgeRadioValue();
+            if ($('#organisationDropdown').children().length < 3) {
+                if (@Model.Id== 0 && @Model.PatientVM.PatientMessageId == 0) {
+                    $('#organisationDropdown').prop('selectedIndex', 1);
+                    $('#DepMemberFieldset').removeAttr("disabled")
+                }
+                $('#OrganisationField').hide();
+            }
+            var orgid = $('#organisationDropdown').val();
+            organisationDropdownchange();
+            $('#SpecificPatientDiv').hide();
+            $('#SomePatientDiv').hide();
+            $('#orgErrorMessage').hide();
+
+            $('#AlertMessage').focus();
+            onfocusEvent($('#AlertMessage'));
+            $('#AlertMessage').closest('fieldset').addClass("Active-outline");
+            $('#AlertMessage').closest('fieldset').removeClass("Normal-outline");
+
+            PatientTable = $('#patient-table').DataTable({
+                //"scrollY": "100px", Has to make it auto
+                "scrollCollapse": true,
+                "paging": false,
+                "searching": false,
+                "sorting": false,
+                "info": false
+            });
+
+            $('#KioskAlertImages').attr('src', '/Images/KioskStandard.png');
+            if ($(window).width()<=768) {
+                SetAlertImageStyleForSmallScreen()
+            }
+            else if ($(window).width() <= 1024 && $(window).width() > 768) {
+                SetAlertImageStyleForMediumScreen()
+            }
+            else if ($(window).width() <= 1440 && $(window).width() >= 1280) {
+                SetAlertImageStyleForScreen()
+            }
+
+            var $radios = $('input:radio[name=AlertsDisplayType]');
+            if ($radios.is(':checked') === false) {
+                $radios.filter('[value=1]').parent().addClass("is-checked");
+                $('#AlertsDisplayTypeVal').val("1");
+            }
+
+            $('#example2').calendar({
+                type: 'date',
+                monthFirst: false,
+                formatter: {
+                    date: function (date, settings) {
+                        if (!date) return '';
+                        var day = date.getDate();
+                        var month = date.getMonth() + 1;
+                        var year = date.getFullYear();
+                        return day + '/' + month + '/' + year;
+                    }
+                }
+            });
+            $("#SelectedDepMembers").multipleSelect({
+                placeholder: "All departments and all staff",
+                filter: true
+            });
+        }
+
+        $('input[type="text"], [name="AlertText"]').on('focus focusout', function (e) {
+            if (e.type == "focus") {
+                const event = new onfocusEvent($(this));
+            }
+            else if (e.type == "focusout") {
+                setNormalOutline($(this));
+                if ($(this).val() == "") {
+                    const event = new outFocusEvent($(this));
+                }
+            }
+        })
+
+        if ($('#Messagefor').is(':checked') === false) {
+            $('#Messagefor').val('1').prop('checked', true);
+        }
+
+        $('input[type=radio][name=AlertsDisplayType]').change(function () {
+            if ($(window).width() <= 768) {
+                SetAlertImageStyleForSmallScreen()
+                SetKioskAlertImages($(this));
+            }
+            else if ($(window).width() <= 1024 && $(window).width() > 768) {
+                SetAlertImageStyleForMediumScreen(),
+                SetKioskAlertImages($(this));
+            }
+            else if ($(window).width() <= 1440 && $(window).width() >= 1280) {
+                SetAlertImageStyleForScreen();
+                SetKioskAlertImages($(this));
+            }
+            else {
+                SetKioskAlertImages($(this));
+            }
+        })
+
+        $(window).resize(function () {
+            if ($(window).width() <= 768) {
+                SetAlertImageStyleForSmallScreen()
+            }
+            else if ($(window).width() <= 1024 && $(window).width() > 768) {
+                SetAlertImageStyleForMediumScreen()
+            }
+            else if ($(window).width() <= 1440 && $(window).width() >= 1280) {
+                SetAlertImageStyleForScreen();
+            }
+            else {
+                SetAlertImageStyleForLargeSceen()
+            }
+        })
+
+        function SetKioskAlertImages(alertImage) {
+            if ($(alertImage).val() == null) {
+                $('#AlertsDisplayTypeVal').val(alertImage);
+            }
+            else {
+                $('#AlertsDisplayTypeVal').val($(alertImage).val());
+            }
+            if ($(alertImage).val() == 1 || alertImage==1) {
+                $('#KioskAlertImages').attr('src', '/Images/KioskStandard.png');
+            }
+            else if ($(alertImage).val() == 2 || alertImage == 2) {
+                $('#KioskAlertImages').attr('src', '/Images/KioskDirectional.png');
+            }
+            else if ($(alertImage).val() == 3 || alertImage == 3) {
+                $('#KioskAlertImages').attr('src', '/Images/KioskImportant.png');
+            }
+        }
+
+        $('input[type=radio][name=Operation]').change(function () {
+            $('#btwnerror').css({ 'visibility': 'hidden' });
+            $('#LessThan_Age1,#GreaterThan_Age1,#Between_Age1,#Between_Age2').addClass('disabled');
+            SettingAgeRadioValue();
+            EnablingAgeRadioButton($(this));
+        });
+
+        function EnablingAgeRadioButton(value) {
+            if ($(value).val() == "LessThan" || value =="LessThan") {
+                $('#LessThan_Age1').removeClass('disabled');
+            }
+            if ($(value).val() == "GreaterThan" || value =="GreaterThan") {
+                $('#GreaterThan_Age1').removeClass('disabled');
+            }
+            if ($(value).val() == "Between" || value == "Between") {
+                $('#Between_Age1').removeClass('disabled');
+                $('#Between_Age2').removeClass('disabled');
+            }
+        }
+
+        $('#AlertMessage').keyup(function () {
+            if (this.value.length > 300) {
+                return false;
+            }
+            $("#Minimumcharacters").text("Remaining characters : " + (300 - this.value.length));
+            if (this.value.length > 0) {
+                $('#messagetexterror').css({ 'display': 'none' });
+            }
+        });
+
+        $('#Between_Age2').change(function () {
+            var value = $(this).val();
+            var age1 = $('#Between_Age1').val();
+            if (age1 != null && age1 > value) {
+                $('#btwnerror').css({ 'visibility': 'visible' });
+            }
+        })
+        $('#Between_Age1').change(function () {
+            var value = $(this).val();
+            var age2 = $('#Between_Age2').val();
+            if (age2 != null && age2 < value) {
+                $('#btwnerror').css({ 'visibility': 'visible' });
+            }
+        })
+
+        $('.btwnrangedrop').click(function () {
+            $(this).addClass('upward')
+        })
+
+        var form = $('#AddEditAlerts');
+        var validator = form.validate();
+
+        $('#AddEditAlerts').submit(function (e) {
+            $('#PatientErrorMessage').css({ 'display': 'none' });
+            showLoading();
+            if (form.valid()) {
+
+                if ($('input[type=radio][name=MessageType]:checked').val() == "Group") {
+                    $('input:radio[name=Gender]').filter('[value=None]').prop('checked', true);
+                    $('input:radio[name=Operation]').filter('[value=None]').prop('checked', true);
+                    $('#Age1,#Age2').val('');
+                    $('#SelectedDepartmentList').val('');
+                    $('#SelectedMemberList').val('');
+                }
+                else {
+                    //Department and Members
+                    var finalvalues = $('#SelectedDepMembers').multipleSelect("getSelects");
+                    var departmentValue=finalvalues.selectedOptGroups;
+                    var memberValue = finalvalues.selectedOptions;
+                    $('#SelectedDepartmentList').val(departmentValue);
+                    $('#SelectedMemberList').val(memberValue);
+
+                    //Age
+                    var ageVal = $("input[type=radio][name=Operation]:checked").val();
+                    var lessthanage1 = $('#LessThan_Age1').drop('get value');
+                    var greaterthanage1 = $('#GreaterThan_Age1').drop('get value');
+                    var btwnage1 = $('#Between_Age1').drop('get value');
+                    var btwnage2 = $('#Between_Age2').drop('get value');
+
+                    if (lessthanage1 != null && ageVal == "LessThan") {
+                        $('#Age1').val(lessthanage1);
+                    }
+                    if (greaterthanage1 != null && ageVal == "GreaterThan") {
+                        $('#Age1').val(greaterthanage1);
+                    }
+                    if (ageVal == "Between" && (btwnage1 != null || btwnage2 != null)) {
+                        $('#Age1').val(btwnage1);
+                        $('#Age2').val(btwnage2);
+                    }
+                }
+            }
+
+            var result = true;
+            if ($('#organisationDropdown').val() == '') {
+                $('#orgErrorMessage').css({ 'display': 'block' });
+                e.preventDefault();
+                hideLoading();
+                result = false;
+            }
+            if ($('input[name=MessageType]:checked').val() == "SpecificPatient") {
+                if ($('#PatientVM_Firstname').val() == "" || $('#PatientVM_Dob').val() == "") {
+                    $('#PatientErrorMessage').css({ 'display': 'block' });
+                    e.preventDefault();
+                    hideLoading();
+                    result = false;
+                }
+            }
+            if ($('#AlertMessage') == null || $('#AlertMessage').val().length <= 0) {
+                $('#messagetexterror').css({ 'display': 'block' });
+                e.preventDefault();
+                hideLoading();
+                result = false;
+            }
+            return result;
+            //if ($('#organisationDropdown') == null || $('#organisationDropdown').val().length <= 0) {
+            //    $('#orgErrorMessage').css({ 'visibility': 'visible' });
+            //    e.preventDefault();
+            //    hideLoading();
+            //}
+        });
+
+        function GetKiosksOfOrg(orgid) {
+            $.ajax({
+                url: "../Kiosk/GetKioskList",
+                datatype: "JSON",
+                data: "organisationId=" + orgid,
+                type: "Get",
+                success: function (data) {
+                    $("#kioskDropdown").empty().drop("clear");
+                    $("#kioskDropdown").append('<option value="" disabled selected> All Kiosks </option>');
+                    $.each(data, function (i, kiosk) {
+                        if (kiosk != null) {
+                            $('#kioskDropdown').append('<option value="' + kiosk.KioskGuid + '">'
+                                + kiosk.KioskName + '</option>');
+                        }
+                    })
+                },
+                error: function (ex) {
+                   // alert('Failed to get kiosks under' + $('#organisationDropdown').text() + 'organisation. ' + ex);
+                }
+            });
+        }
+
+        function GetDeptAndMembOfOrg(orgid) {
+            $.ajax({
+                url: "../Department/GetDepartmentMemberList",
+                datatype: "JSON",
+                data: "OrganisationId=" + orgid,
+                type: "Get",
+                success: function (data) {
+
+                    $.each(data, function (i, dept) {
+                        var group = $('<optgroup value="' + dept.Id + '" label= "' + dept.DepartmentName + '"/>');
+                        $.each(dept.MemberList, function (i, memb) {
+                            group.append('<option value="' + memb.Id + '" > ' + memb.Title + '. ' + memb.Surname + ' ' + memb.Firstname + '</option > ');
+                        })
+                        $("#SelectedDepMembers").append(group);
+                    })
+                            $("#SelectedDepMembers").multipleSelect();
+                },
+                error: function (ex) {
+                    //alert('Failed to get departments under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                }
+            });
+        }
+
+        function checkifPcsLocalOrg(orgid) {
+            $.ajax({
+                url: "../Messages/IsPcsLocalConfiguration",
+                datatype: "JSON",
+                data: "OrganisationId=" + orgid,
+                type: "Get",
+                success: function (data) {
+                    if (data.success) {
+                        if ($('input[name=MessageType]:checked').val() == "SpecificPatient") {
+                            $('#SpecificPatient').parent().hide();
+
+                            $('#AllPatients').attr("checked", "checked");
+                            $('#AllPatients').click();
+                        }
+                        else {
+                            $('#SpecificPatient').parent().hide();
+                        }
+                    }
+                    else {
+                        $('#SpecificPatient').parent().show();
+                    }
+                },
+                error: function (ex) {
+                    //alert('Failed to get departments under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                }
+            });
+        }
+
+        $('.kioskDropdown,.orgDropdown').click(function () {
+            setActiveOutline($(this));
+        });
+
+        $('#KioskFielddiv,#OrganisationField').focusout(function () {
+            $(this).children().eq(0).addClass("Normal-outline");
+            $(this).children().eq(0).removeClass("Active-outline");
+        });
+
+        $('#organisationDropdown').change(organisationDropdownchange);
+
+        function organisationDropdownchange() {
+            $('#orgErrorMessage').css({ 'display': 'none' });
+            $('#organisationDropdown').val().length > 0 ? new onfocusEvent($(this)) : new outFocusEvent($(this));
+            if ($('#organisationDropdown').val() != '') {
+                var orgid = $('#organisationDropdown').val();
+                checkifPcsLocalOrg(orgid);
+                GetKiosksOfOrg(orgid);
+                if ($('input[name=MessageType]:checked').val() == "SomePatients") {
+                    $('#DepMemberFieldset').removeAttr("disabled")
+                    $('#SelectedDepMembers').empty();
+                    GetDeptAndMembOfOrg(orgid);
+                }
+                if ($('input[name=MessageType]:checked').val() == "SpecificPatient") {
+                    $('#SpecificPatientField').show();
+                    $('#PatientDataTableFieldset').hide();
+                    $('#SelectedPatientDetails').hide();
+
+                    $('#PatientVM_Firstname').val("");
+                    $('#PatientVM_Dob').val("");
+                }
+            }
+        }
+
+        $(':radio[value=SpecificPatient]').click(function () {
+            $('#KioskField,#AlertDisplayTypeField, #SomePatientDiv, #PatientDataTableFieldset, #SelectedPatientDetails').hide();
+            $('#SpecificPatientField, #SpecificPatientDiv').show();
+        });
+
+        $(':radio[value=SomePatients]').click(function () {
+            $('#SpecificPatientDiv').hide();
+            $('#SomePatientDiv, #KioskField, #AlertDisplayTypeField').show();
+            organisationDropdownchange();
+
+            $("#LessThan_Age1").drop("set selected", [50]);
+            $("#GreaterThan_Age1").drop("set selected", [50]);
+            $("#Between_Age2").drop("set selected", [50]);
+            $("#Between_Age1").drop("set selected", [25]);
+        });
+
+        $(':radio[value=Group]').click(function () {
+            $('#SpecificPatientDiv, #SomePatientDiv').hide();
+            $('#KioskField, #AlertDisplayTypeField').show();
+        });
+
+        $('#btnSearchPatient').click(function () {
+            $('#PatientErrorMessage').css({ 'display': 'none' });
+            showLoading();
+            var surname = $('#PatientSurname').val();
+            var org = $('#organisationDropdown').val();
+            var sdate = $('#PatientDOB').val();
+
+            var string = surname.trim() + " " + sdate;
+
+            if (org != '') {
+                $.ajax({
+                    url: '/Messages/SearchPatient',
+                    data: 'organisationId=' + org + '&filter=' + string,
+                    type: 'get',
+                    datatype: 'JSON',
+                    success: function (data) {
+                        showLoading();
+                        PatientTable.clear().draw();
+                        $.each(data, function (i, patient) {
+                            PatientTable.row.add([patient.Surname.toUpperCase() + ", " + patient.Firstname + " " + patient.Dob, patient.PatientId]).draw(false);
+                        })
+
+                        if (PatientTable.rows().data().length == 0) {
+                            if ($('#PatientSurname').val() == '')
+                                $('#patient-table').find('.dataTables_empty').text("We could not find a patient with this date of birth. Please check the date and try again.");
+                            else if ($('#PatientDOB').val() == '')
+                                $('#patient-table').find('.dataTables_empty').text(" We could not find a patient with this surname. Please check the spelling and try again.");
+                            else
+                                $('#patient-table').find('.dataTables_empty').text(" We could not find a patient with this date of birth and surname. Please check these details and try again.");
+                        }
+
+                        $('#patientDataTable').append(PatientTable);
+                        if ($('#patient-table').find('.dataTables_empty').length > 0) {
+                            $('#patient-table').find('.dataTables_empty').addClass('not-active');
+                        }
+                        $('#PatientDataTableFieldset').show();
+                        hideLoading();
+                    },
+                    error: function (xhr) {
+                        $('#patient-table').find('.dataTables_empty').text("Failed connection to API");
+                        $('#PatientDataTableFieldset').show();
+                        hideLoading();
+                        if ($('#patient-table').find('.dataTables_empty').length > 0) {
+                            $('#patient-table').find('.dataTables_empty').addClass('not-active');
+                        }
+                    }
+                })
+            }
+            else {
+                hideLoading();
+                $('#orgErrorMessage').css({ 'display': 'block' });
+            }
+
+        });
+
+        $('#patient-table').on("click", "tr", function (e) {
+
+            $('#PatientDataTableFieldset').hide();
+            $('#SpecificPatientField').hide();
+            $('#SelectedPatientDetails').show();
+
+            var nameWithDob = PatientTable.row(this).data()[0];
+            var surname = nameWithDob.slice(0, nameWithDob.indexOf(','));
+            //var firstname = name.slice(name.indexOf(',') + 1, name.indexOf('(')); //For title when we do it, It'll be ( specific
+            nameWithDob.slice(nameWithDob.indexOf(' ', nameWithDob.indexOf(' ') + 1))
+            var firstname = nameWithDob.slice(nameWithDob.indexOf(', ') + 1, nameWithDob.indexOf(' ', nameWithDob.indexOf(' ') +1));
+            var patientDOB = nameWithDob.slice(nameWithDob.indexOf(' ', nameWithDob.indexOf(' ') + 1));
+            var patientName = surname + ', ' + firstname;
+            var patientId = PatientTable.row(this).data()[1];
+
+            $('#PatientName').text(patientName);
+            $('#PatientDateOfBirth').text(patientDOB);
+            $('#PatientId').text(patientId);
+
+            //Assigning selected patient values to module
+            $('#PatientVM_PatientId').val(patientId);
+            $('#PatientVM_Surname').val(surname.trim());
+            $('#PatientVM_Firstname').val(firstname.trim());
+            $('#PatientVM_Dob').val(patientDOB.trim());
+            $('#PatientVM_Organisation').val($('#organisationDropdown').val());
+        })
+
+        $('#btnChangePatient').click(function () {
+            showLoading();
+            $('#PatientDataTableFieldset').hide();
+            $('#SelectedPatientDetails').hide();
+            $('#SpecificPatientField').show();
+            hideLoading();
+        });
+
+        $('#kioskDropdown').change(function () {
+            $('#kioskDropdown').val().length > 0 ? new onfocusEvent($(this)) : new outFocusEvent($(this));
+        })
+
+        //Edit message initialization
+        if (@Model.Id> 0) {
+            var alertText =@Html.Raw(Json.Encode(Model.AlertText));
+            var alertTextLength = alertText.length;
+            $("#Minimumcharacters").text("Remaining characters : " + (300 - alertTextLength));
+            var selectedOptGroup = [];
+            var selectedOptions = [];
+            var messageType = @Html.Raw(Json.Encode(Model.MessageType));
+            var alertDisplayType = @Html.Raw(Json.Encode(Model.AlertsDisplayType));
+             var tags = @Html.Raw(Json.Encode(Model.LinkedKiosk));
+            var orgid = $('#organisationDropdown').val();
+            $('#SpecificPatient').parent().hide();
+            $('#KioskField').show();
+            $('#AlertDisplayTypeField').show();
+            $('input:radio[name=AlertsDisplayType]').filter('[value=' + alertDisplayType + ']').prop('checked', true);
+            SetKioskAlertImages(alertDisplayType);
+            $('#KioskField').show();
+            if (messageType == "Group") {
+
+            }
+            else if (messageType == "SomePatients") {
+                $('#DepMemberFieldset').removeAttr("disabled")
+                $('#SomePatientDiv').show();
+                $('#SelectedDepMembers').empty();
+                var selecteddep = $('#SelectedDepartmentList').val();
+                var selectedmem = $('#SelectedMemberList').val();
+                if (selecteddep) {
+                    selectedOptGroup = selecteddep.split(',');
+                }
+                if (selectedmem) {
+                    selectedOptions = selectedmem.split(',');
+                }
+
+                var operation = @Html.Raw(Json.Encode(Model.Operation));
+                var age1 =@Html.Raw(Json.Encode(Model.Age1));
+                EnablingAgeRadioButton(operation);
+                if (operation == "Between") {
+                    var age2 =@Html.Raw(Json.Encode(Model.Age2));
+                    $("#Between_Age1").drop("set selected", age1);
+                    $("#Between_Age2").drop("set selected", age2);
+                }
+                else if (operation == "GreaterThan") {
+                    $("#GreaterThan_Age1").drop("set selected", age1);
+                }
+                else if (operation == "LessThan") {
+                    $('#LessThan_Age1').drop("set selected", age1);
+                }
+            }
+            setTimeout(function () {
+                $('#kioskDropdown').drop("set selected", tags);
+                $("#SelectedDepMembers").multipleSelect("setSelects", selectedOptions);
+                $("#SelectedDepMembers").multipleSelect("setSelectsOptgrpValue", selectedOptGroup);
+            }, 1000);
+        }
+        else if (@Model.PatientVM.PatientMessageId > 0) {
+            $('#MessageForDiv').hide();
+            $('#AlertDisplayTypeField').hide();
+            $('#KioskField').hide();
+            $('#SomePatientDiv').hide();
+            $('#SpecificPatientDiv').show();
+            $('#PatientDataTableFieldset').hide();
+            $('#SpecificPatientField').hide();
+            $('#SelectedPatientDetails').show();
+            var alertText =@Html.Raw(Json.Encode(Model.AlertText));
+            var alertTextLength = alertText.length;
+            $("#Minimumcharacters").text("Remaining characters : " + (300 - alertTextLength));
+            $('#SpecificPatient').prop('checked', true);
+
+            var firstName = @Html.Raw(Json.Encode(Model.PatientVM.Firstname));
+            var surName = @Html.Raw(Json.Encode(Model.PatientVM.Surname));
+            var dob = @Html.Raw(Json.Encode(Model.PatientVM.Dob));
+            var patientName = surName.toUpperCase() + ', ' + firstName;
+            var patientId = @Html.Raw(Json.Encode(Model.PatientVM.PatientId));
+            var orgId = @Html.Raw(Json.Encode(Model.PatientVM.OrganisationId.ToString()));
+            $("#organisationDropdown").drop("set selected", orgId);
+            $('#PatientVM_Organisation').val(orgId);
+
+            $('#PatientName').text(patientName);
+            $('#PatientDateOfBirth').text(dob);
+            $('#PatientId').text(patientId);
+            $('#PatientVM_Firstname').val(firstName);
+            $('#PatientVM_Dob').val(dob);
+            $("#OrganisationField").addClass("disableddiv");
+            $('#btnChangePatient').hide();
+            $('#PatientDataTableFieldset').hide();
+            $('#SpecificPatientField').hide();
+            $('#SelectedPatientDetails').show();
+        }
+
+        //Legend text on page loads in jquery
+        $('form input[type="text"],[type="textarea"],[type="number"],select').each(function () {
+            if (this.id != 'SelectedDepMembers' && this.id != '') {
+                const event = new onfocusEditEvent($(this));
+            }
+        });
+
+    });
+
+    function SettingAgeRadioValue() {
+        $("#LessThan_Age1").drop("set selected", [50]);
+        $("#GreaterThan_Age1").drop("set selected", [50]);
+        $("#Between_Age2").drop("set selected", [50]);
+        $("#Between_Age1").drop("set selected", [25]);
+
+        $("#LessThan_Age1").prop("selectedIndex", 50);
+        $("#GreaterThan_Age1").prop("selectedIndex", 50);
+        $("#Between_Age2").prop("selectedIndex", 50);
+        $("#Between_Age1").prop("selectedIndex", 25);
+    }
+    function SuccessHandling() {
+        var eventCategory = 'Messages';
+        if (@Model.Id > 0) {
+            LogEvent(eventCategory, 'Edited', eventCategory);
+        }
+        else {
+            LogEvent(eventCategory, 'Added', eventCategory);
+        }
+        var MemberId=@Model.MemberId;
+        var MemberName=@Html.Raw(Json.Encode(Model.MemberName));
+        if (MemberId > 0) {
+            window.location.href = "../Staff/GetAlerts?MemberId=" + MemberId + "&MemberName=" + MemberName
+        }
+        else {
+             window.location.href = '@Url.Action("Index","Messages")';
+        }
+    }
+</script>
+
+<div style="overflow-y: auto; overflow-x: hidden;height:100%;">
+    <br /><br />
+    @Html.HiddenFor(x => x.Id)
+    @Html.HiddenFor(x => x.SelectedDepartments, new { @id = "SelectedDepartmentList" })
+    @Html.HiddenFor(x => x.SelectedMembers, new { @id = "SelectedMemberList" })
+    @Html.HiddenFor(x => x.Age1, new { @id = "Age1" })
+    @Html.HiddenFor(x => x.Age2, new { @id = "Age2" })
+    @Html.HiddenFor(x => x.AlertsDisplayType, new { @id = "AlertsDisplayTypeVal" })
+
+    @Html.HiddenFor(x => x.PatientVM.PatientId, new { @id = "PatientVM_PatientId" })
+    @Html.HiddenFor(x => x.PatientVM.PatientMessageId, new { @id = "PatientVM_PatientMessageId" })
+    @Html.HiddenFor(x => x.PatientVM.Surname, new { @id = "PatientVM_Surname" })
+    @Html.HiddenFor(x => x.PatientVM.Firstname, new { @id = "PatientVM_Firstname" })
+    @Html.HiddenFor(x => x.PatientVM.Dob, new { @id = "PatientVM_Dob" })
+    @Html.HiddenFor(x => x.PatientVM.OrganisationId, new { @id = "PatientVM_Organisation" })
+
+    <div style="width:50%; margin: auto">
+        <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Message" style="width: 100%">
+            <legend></legend>
+            @Html.TextAreaFor(m => m.AlertText, new { @class = "mdl-textfield__input", @id = "AlertMessage", maxlength = "300" })
+            <label class="mdl-textfield__label" for="AlertMessage">Message</label>
+        </fieldset>
+        <span id="Minimumcharacters" style="margin-left: 20px;">300 characters remaining</span>
+        <div class="validation-summary-errors validationMessage" style="margin:auto">
+            <span id="messagetexterror" style="display:none;">Message field is required</span>
+        </div>
+    </div>
+    <br />
+
+    <div style="width: 50%;text-align: left; margin: auto" id="MessageForDiv">
+        <label class="mdl_label" style="font-size:medium">Who is the message for?</label>
+        <br /><br />
+        <label for="AllPatients" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+            @Html.RadioButtonFor(model => model.MessageType, "Group", new { @class = "mdl-radio__button", @id = "AllPatients", @checked = Model.MessageType == "Group" })
+            <span class="mdl-switch__label">All patients</span><br />
+        </label>
+        <br /><br />
+        <label for="SomePatients" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+            @Html.RadioButtonFor(model => model.MessageType, "SomePatients", new { @class = "mdl-radio__button", @id = "SomePatients" })
+            <span class="mdl-switch__label">Some patients</span><br />
+        </label>
+        <br /><br />
+        <label for="SpecificPatient" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+            @Html.RadioButtonFor(model => model.MessageType, "SpecificPatient", new { @class = "mdl-radio__button", @id = "SpecificPatient" })
+            <span class="mdl-switch__label">A specific patient</span><br />
+        </label>
+        <br /><br />
+    </div>
+
+    @if (Model.MessageType == null || Model.MessageType == "Group" || Model.MessageType == "SomePatients")
+    {
+        <div style="width: 50%;text-align: left; margin: auto" id="AlertDisplayTypeField">
+            <label class="mdl_label" style="font-size:medium">Type of message</label>
+            <br /><br />
+
+            @foreach (var type in @Model.AlertsDisplayTypes)
+            {
+                <div>
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                        @Html.RadioButtonFor(x => x.AlertsDisplayType, type.Value, new { @class = "mdl-radio__button", @id = "Messagefor" })
+                        <span class="mdl-switch__label">@type.Text</span>
+                    </label>
+                    <br /><br />
+                </div>
+            }
+            <div style="float:right;margin-top:-15%;margin-right:30%; margin-bottom: 20px">
+                <img src="" id="KioskAlertImages" />
+            </div>
+        </div>
+    }
+
+    <div id="OrganisationField">
+        <fieldset class="fieldset" name="Organisation" style="width:50%; margin: auto">
+            <legend style="position:static">Organisation</legend>
+            @Html.DropDownListFor(model => model.OrganisationId, Model.OrganisationList,"Organisation",
+              new
+              {
+                  @class = "ui fluid search  dropdown ui-dropdown-min-width orgDropdown",
+                  @id = "organisationDropdown",
+              })
+        </fieldset>
+        <div class="validation-summary-errors validationMessage" style="width:50%;margin:auto">
+            <span id="orgErrorMessage" style="display:none">Select at least one organisation</span>
+        </div>
+        <br />
+    </div>
+    <br />
+
+    @*Patient Message Code*@
+    <div id="SpecificPatientDiv">
+
+        <div style="width: 50%;text-align: left; margin: auto;" id="SpecificPatientField">
+            <label class="mdl_label" style="font-size:medium">Search by entering the patient's date of birth or surname</label>
+            <br /><br />
+
+            <div style="width: 100%">
+
+                <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Date of birth" style="width:48%; float: left;margin-right:24px">
+                    <legend></legend>
+                    <div class="ui calendar" id="example2" style="height:100%; width:100%;">
+                        <div class="ui input left icon" style="height:100%; width:100%;">
+                            <i class="material-icons">calendar_today</i>
+                            <input type="text" placeholder="Date of birth" id="PatientDOB" style="border:0px; padding-left:10px !important;padding-top:5px">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="fieldset mdl-textfield mdl-js-textfield " name="Surname" style="width:48%">
+                    <legend></legend>
+                    <div class="ui input left icon">
+                        <i class="material-icons">person</i>
+                        @Html.TextBoxFor(m => m.PatientVM.Surname, new { @class = "mdl-textfield__input", @id = "PatientSurname", })
+                    </div>
+                    <label class="mdl-textfield__label" style="padding-left:25px" for="PatientSurname">Surname</label>
+                </fieldset>
+            </div>
+
+            <a href="#" style="color:#448AFF;font-weight: bold;float:right;text-decoration:none!important; padding:10px 0px; float: right" id="btnSearchPatient">
+                SEARCH
+            </a>
+            <br /><br />
+        </div>
+
+        <div style="width: 50%;text-align: left; margin: auto;" id="PatientDataTableFieldset">
+            <fieldset class="memberfieldsetTable" style="width: 100%">
+                <table class="mdl-data-table mdl-js-data-table membertable" id="patient-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Id</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientDataTable"></tbody>
+                </table>
+            </fieldset>
+        </div>
+        <div class="validation-summary-errors validationMessage" style="width:50%;margin:auto">
+            <span id="PatientErrorMessage" style="display:none">Select at least one Patient</span>
+        </div>
+        <br /><br />
+
+        <div id="SelectedPatientDetails" style="width: 50%;text-align: left; margin: auto; border-radius: 5px; padding: 10px; overflow: auto; border:1px solid lightgray">
+            <label style="float: left">
+                <span id="PatientName" style="font-weight: bold"></span><br />
+                <span id="PatientDateOfBirth" style="font-weight: bold"></span><br />
+                <span id="PatientId"></span><br />
+            </label>
+            <a href="#" style="color:#448AFF;font-weight: bold;float:right;text-decoration:none!important; text-align: center" id="btnChangePatient">
+                CHANGE
+            </a>
+            <br /><br />
+        </div>
+        <br /><br />
+    </div>
+
+
+    <div id="SomePatientDiv">
+        <div id="DepMemField">
+            <fieldset class="fieldset" name="Departments and Staff" style="width:50%; margin: auto; min-width: 50%" disabled id="DepMemberFieldset">
+                <legend>Departments and Staff</legend>
+                @Html.ListBoxFor(x => x.SelectedMemberList, Enumerable.Empty<SelectListItem>(), new { @id = "SelectedDepMembers", @multiple = "multiple" })
+            </fieldset>
+            <br />
+        </div>
+        <br /> <br />
+        <div style="width: 50%;text-align: left; margin: auto">
+            <label class="mdl_label" style="font-size:medium">Gender</label>
+            <br />
+            <br />
+            <label for="None" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                @Html.RadioButtonFor(x => x.Gender, "None", new { @class = "mdl-radio__button", @id = "None", @checked = (Model.Gender == null) })
+                <span class="mdl-switch__label">All genders</span><br />
+            </label>
+            <br />
+            <br />
+            <label for="Female" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                @Html.RadioButtonFor(x => x.Gender, "F", new { @class = "mdl-radio__button", @id = "Female" })
+                <span class="mdl-switch__label">Female</span><br />
+            </label>
+            <br />
+            <br />
+            <label for="Male" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                @Html.RadioButtonFor(x => x.Gender, "M", new { @class = "mdl-radio__button", @id = "Male" })
+                <span class="mdl-switch__label">Male</span><br />
+            </label>
+        </div>
+        <br /><br />
+
+        <div style="width:50%;text-align:left;margin:auto">
+            <label class="mdl_label" style="font-size:medium">Age</label>
+            <br /><br />
+            <table style="width: 100%">
+                <tr>
+                    <td>
+                        <div>
+                            <label for="All" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                                @Html.RadioButtonFor(x => x.Operation, "None", new { @class = "mdl-radio__button", @id = "All", @checked = (Model.Operation) })
+                                <span class="mdl-switch__label">All Ages</span><br />
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="mdl-mini-footer-page IEInlineBlock" style="padding: 12px 24px 0px 0px;display:-webkit-inline-box !important">
+                            <label for="Under" class="mdl-radio mdl-js-radio mdl-js-ripple-effect IEInlineBlock">
+                                @Html.RadioButtonFor(x => x.Operation, "LessThan", new { @class = "mdl-radio__button", @id = "Under" })
+                            </label>
+                            <div class="ui fluid search  dropdown ui-dropdown-min-width rangedrop lessThan disabled IEInlineBlock" id="LessThan_Age1" style="width:50px !important">
+                                <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                <div class="default text body2 highEmphasisBlack" style="padding-top: 2px;">Age1</div>
+                                <div class="menu" id="Age1Menu" style="width: 50px !important;">
+                                    @for (int i = 1; i < 151; i++)
+                                    {
+                                        <div class="item" data-value="@i">@i</div>
+                                    }
+                                </div>
+                            </div>
+                            <span class="mdl-switch__label IEInlineBlock">and under</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="mdl-mini-footer-page IEInlineBlock" style="padding: 12px 24px 0px 0px;display:-webkit-inline-box !important">
+                            <label for="GreaterThan" class="mdl-radio mdl-js-radio mdl-js-ripple-effect IEInlineBlock">
+                                @Html.RadioButtonFor(x => x.Operation, "GreaterThan", new { @class = "mdl-radio__button", @Id = "GreaterThan" })
+                            </label>
+                            <div class="ui fluid search  dropdown ui-dropdown-min-width rangedrop disabled IEInlineBlock" id="GreaterThan_Age1" style="width:50px !important">
+                                <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                <div class="default text body2 highEmphasisBlack" style="padding-top: 2px;">Age1</div>
+                                <div class="menu" id="Age1Menu" style="width: 50px !important;">
+                                    @for (int i = 1; i < 151; i++)
+                                    {
+                                        <div class="item" data-value="@i">@i</div>
+                                    }
+                                </div>
+                            </div>
+                            <span class="mdl-switch__label IEInlineBlock"> and over</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="mdl-mini-footer-page IEInlineBlock" style="padding: 12px 24px 0px 0px;display:-webkit-inline-box !important">
+                            <label for="Between" class="mdl-radio mdl-js-radio mdl-js-ripple-effect IEInlineBlock">
+                                @Html.RadioButtonFor(x => x.Operation, "Between", new { @class = "mdl-radio__button", @Id = "Between" })
+                                <span class="mdl-switch__label" style="width:100%">
+                                    Between
+                                </span>
+                            </label>
+                            <div class="ui fluid search  dropdown ui-dropdown-min-width btwnrangedrop disabled IEInlineBlock betweenValue" id="Between_Age1" style="width:50px !important">
+                                <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                <div class="default text body2 highEmphasisBlack" style="padding-top: 2px;">Age1</div>
+                                <div class="menu" id="Age1Menu" style="width: 50px !important;">
+                                    @for (int i = 1; i < 151; i++)
+                                    {
+                                        <div class="item" data-value="@i">@i</div>
+                                    }
+                                </div>
+                            </div>
+                            <span class="mdl-switch__label IEInlineBlock"> and</span>
+                            <div class="ui fluid search  dropdown ui-dropdown-min-width btwnrangedrop disabled IEInlineBlock betweenValue" id="Between_Age2" style="width:50px !important">
+                                <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                <div class="default text body2 highEmphasisBlack" style="padding-top: 2px;">Age2</div>
+                                <div class="menu body2 highEmphasisBlack" id="Age2Menu" style="width: 50px !important;">
+                                    @for (int i = 1; i < 151; i++)
+                                    {
+                                        <div class="item" data-value="@i">@i</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br />
+    </div>
+    <div id="KioskFielddiv">
+        <fieldset class="fieldset" name="Kiosk" style="width:50%; margin: auto" id="KioskField">
+            <legend style="position:static">Kiosk</legend>
+            @if (Model.KioskList != null)
+            {
+                @Html.DropDownListFor(model => model.LinkedKiosk, Model.KioskList, "All Kiosks",
+                    new
+                    {
+                        @class = "ui fluid search  dropdown ui-dropdown-min-width multiple kioskDropdown",
+                        @id = "kioskDropdown",
+                        @multiple="multiple"
+                    })
+            }
+        </fieldset>
+    </div>
+    <br /><br />
+
+</div>
+

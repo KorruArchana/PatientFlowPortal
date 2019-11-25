@@ -1,0 +1,217 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.AlertsListViewModel
+@using EMIS.PatientFlow.Common.Enums;
+
+<style type="text/css">
+    .select2-search__field {
+        padding: 4px;
+    }
+</style>
+
+@Html.Partial("_GoogleAnalytics")
+
+
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">Alerts List
+        </span>
+    </div>
+    <div class="rightBlockTopButtonContainer">
+
+        <a href="#" style="text-decoration:none" onclick="return LoadAddContent5(escape('AddAlerts'))">
+            <input type="text" class="AddOrEditText AddTextColor" value="Add Alert" readonly="readonly"/>
+            <img src="~/Images/plus.png" />
+        </a>
+    </div>
+</div>
+
+<div id="grdAlert" class="rightBlockContent">
+    <div>
+
+        <span style="margin-top: 10px; width: 350px; float: left; margin-left: 20px; color: #4C4C4C;">@Html.ListBoxFor(x => x.OrganisationIds, Model.OrganisationList, new { multiple = "multiple", @class = "ListBoxorg",id="orgID" }) </span>
+        <button name="btnSearch1" type="submit" class="icon searchBox" data-bind="click:initialize"><i class="fa fa-search"></i>Search</button>
+
+        <input type="text" placeholder="Alert text..." class="rightTxtBox" data-bind="value: alertText, valueUpdate: 'input', executeOnEnter:initialize" />
+        <button name="btnSearch" type="submit" class="icon searchBox" data-bind="click:initialize"><i class="fa fa-search"></i>Search</button>
+
+    </div>
+    <table class="TFtable">
+        <thead>
+            <tr>
+                <th>Alert Text</th>  
+                <th>Alerts Type</th>              
+                <th>Organisation</th>
+                <th>Kiosk Linked</th>
+                <th>Actions</th>
+
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: items">
+            <tr>
+                <td style="width: 60%;"><a href="#" data-bind="text: AlertText, click: $parent.update"></a></td>                
+                <td class="colcenter"><span data-bind="text:AlertsDisplayType"></span></td>
+                <td class="colcenter"><span data-bind="text:OrganisationName"></span></td>
+                <td class="colcenter"><span data-bind="text:KioskName"></span></td>
+                <td class="colcenter"><a href="#" class="deleteLinkBtn" title="Delete Alert" data-bind="click:$parent.deleteAlert"></a></td>
+
+            </tr>
+        </tbody>
+        <tbody data-bind="ifnot: items().length">
+            <tr>
+                <td colspan="3" style="text-align: center">No records found.</td>
+            </tr>
+        </tbody>
+        <tfoot data-bind="if: items().length">
+            <tr style="background-color: white;">
+                <td colspan="5">
+                    <div id="paginationHolder"></div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+@{
+    int pageSize = EMIS.PatientFlow.Web.Helper.Config.PageSize;
+
+}
+<script type="text/javascript">
+
+    var pagedViewModel = function (pageSize) {
+        var self = this;
+        self.items = ko.observableArray();
+        self.alertText = ko.observable('');
+        self.currentPage = ko.observable(1);
+        self.totalCount = ko.observable(1);
+        self.pageSize = pageSize;
+        self.orgId = ko.observable('');
+        self.pageCount = ko.computed(function () {
+            if ((self.totalCount() % self.pageSize) == 0)
+                return parseInt((self.totalCount() / self.pageSize));
+            else
+                return parseInt((self.totalCount() / self.pageSize)) + 1;
+        });
+        self.update = function(item) {
+            return LoadContent(@Convert.ToInt32(EMIS.PatientFlow.Common.Enums.NodeType.AlertDetails), item.Id);
+        };
+        self.deleteAlert = function (item) {
+            if (confirm("Are you sure you want to Delete ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteAlert","Alerts")',
+                    data: { alertId: item.Id },
+                    type: "GET",
+                    success: function (data) {
+                        SendGoogleEventClick('event type', 'Alerts', 'Delete', 'Alert Deleted(' +item.OrganisationName + ')');
+                        self.initialize();
+                    }
+                });
+            }
+        }
+
+        self.initialize = function () {
+            self.currentPage(1);
+            self.totalCount(0);
+            self.items.removeAll();
+            var selectedValues = $('#orgID').val();
+            if (selectedValues != undefined)
+                selectedValues=  String(selectedValues);
+            self.getData(self.currentPage(),selectedValues);
+        }
+
+        self.getData = function (pageNumber,orgId) {
+            var selectedValues = $('#orgID').val();
+            if (selectedValues != undefined)
+                orgId=  String(selectedValues);
+            $.ajax({
+                url: '@Url.Action("GetAlerts", "Alerts")',
+                data: { pageNumber: pageNumber, pageSize: self.pageSize, alertText: self.alertText(),orgId:  orgId},
+                type: "GET",
+                cache: false,
+                success: function (data) {
+                    self.items.removeAll();
+                    self.currentPage(pageNumber);
+                    self.totalCount(data.TotalCount);
+                    if (data.AlertsList.length > 0) {
+                        for (i = 0; i < data.AlertsList.length; i++) {
+                            self.items.push(data.AlertsList[i]);
+                        }
+                    }
+                    self.createPagination();
+                },
+                error: function (data) {
+                }
+            });
+        }
+
+        self.createPagination = function () {
+
+            $("#paginationHolder").pagination({
+                pages: self.pageCount(),
+                itemsOnPage: self.pageSize,
+                currentPage: self.currentPage(),
+                cssStyle: 'light-theme',
+                onPageClick: self.loadPage
+            });
+
+        };
+
+        self.loadPage = function (pageNo, event) {
+            
+            self.getData(pageNo);
+        };
+
+        self.initialize();
+    };
+
+    function AlertViewModel()
+    {
+        var vm = new pagedViewModel(@pageSize);
+        var element = document.getElementById('grdAlert');
+        ko.cleanNode(element);
+        ko.applyBindings(vm, element);
+
+    }
+
+    AlertViewModel();
+    
+    var orglistData = [];
+
+        var options = {
+            selector: '.ListBoxorg',
+            responseArrayName: 'OrganisationList',
+            searchKeyField: 'organisationName',
+            textField: 'OrganisationName',
+            data: orglistData,
+            idField: 'Id',
+            multiple: true,
+            placeholder: 'Select Organisations'
+        }
+
+        $.ajax({
+            url: '@Url.Action("GetOrganisationsForDropDown", "Organisation")',
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                debugger;
+                for(var org in data.OrganisationList)
+                {
+                    var orgData = {
+                        id: data.OrganisationList[org].Id,
+                        text: data.OrganisationList[org].OrganisationName
+                    }
+                    orglistData.push(orgData);
+                }
+
+                select2AjaxSingle(options);
+            },
+            error: function (data) {
+                console.log("Get organisations for drop down error");
+            }
+        })
+
+
+</script>
+
+
+
+
+
+

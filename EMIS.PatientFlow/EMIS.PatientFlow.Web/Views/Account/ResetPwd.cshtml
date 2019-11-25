@@ -1,0 +1,117 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.ResetPasswordViewModel
+
+@{
+    ViewBag.Title = "ResetPwd";
+    ViewBag.Module = "Reset password";
+    ViewBag.Savebutton = "Save";
+    ViewBag.SaveAction = "ResetPassword";
+    ViewBag.Controller = "Account";
+    ViewBag.FormId = "ResetPassword";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var flag = true;
+        $('#UserNameDiv').addClass('disableddiv');
+        $('#txt_Password').focus();
+        onfocusEvent($('#txt_Password'));
+        $('#txt_Password').closest('fieldset').addClass("Active-outline");
+        $('#txt_Password').closest('fieldset').removeClass("Normal-outline");
+
+        $('#showPassword').click(function () {
+            if (flag) {
+                $('#txt_Password').attr('type', 'text');
+                flag = false
+            }
+            else {
+                $('#txt_Password').attr('type', 'password');
+                flag = true;
+            }
+        })
+
+        $('input[type="text"],[type="password"]').on('focus focusout', function (e) {
+            if (e.type == "focus") {
+                const event = new onfocusEvent($(this));
+            }
+            else if (e.type == "focusout" ) {
+                setNormalOutline($(this));
+                if ($(this).val() == "") {
+                    const event = new outFocusEvent($(this));
+                }
+            }
+        });
+
+        $('#showPassword').click(function () {
+            $('#hidePassword').css({ 'display': 'block' });
+            $('#showPassword').css({ 'display': 'none' });
+            $('#txt_Password').attr('type', 'text');
+        });
+
+        $('#hidePassword').click(function () {
+            $('#hidePassword').css({ 'display': 'none' });
+            $('#showPassword').css({ 'display': 'block' });
+            $('#txt_Password').attr('type', 'password');
+        })
+
+        var form = $('#ResetPassword');
+        var validator = form.validate();
+        $('#txt_Password').keyup(function () {
+                $('#txt_ConfirmPassword').val($(this).val());
+        })
+    })
+
+    function SuccessHandling() {
+          window.location.href = '@Url.Action("Index", "Account")';
+    }
+
+</script>
+
+<div style="width: 100%; justify-content: center; flex-grow:1;padding:0px" class="mdl-grid lightblueBackground">
+    <div style="overflow-y:auto;overflow-x:hidden" class="mdl-card portalMdlCard DepUserPracticeAdminStyle">
+        <br />
+        <div id="UserNameDiv">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="User name" style="width: 100%; margin:auto">
+                <legend>User name</legend>
+                @Html.TextBoxFor(m => m.UserName, new { @class = "mdl-textfield__input", @id = "txt_UserName"})
+                <label class="mdl-textfield__label" for="txt_UserName">User name</label>
+            </fieldset>
+            <span class="HelperText">Use this on the login screen.</span>
+        </div>
+        <br /><br />
+        <div>
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="New password" style="width: 100%; margin:auto">
+                
+                <legend></legend>
+                <div class="input-wrapper" style="height:100%; width:100%;">
+                    @Html.PasswordFor(m => m.NewPassword, new { @class = "mdl-textfield__input", @id = "txt_Password", @autocomplete = "new-password" })
+                    <label class="mdl-button mdl-js-button mdl-button--icon " for="txt_Password" style="right:12px !important" id="showPassword">
+                        <i class="material-icons EyeIconStyle">visibility_off</i>
+                    </label>
+                    <label class="mdl-button mdl-js-button mdl-button--icon " for="txt_Password" style="right:12px !important;display:none" id="hidePassword">
+                        <i class="material-icons EyeIconStyle">visibility</i>
+                    </label>
+                    <div class="ShowOrHidePassword mdl-tooltip mdl-tooltip--large" for="showPassword">Show password</div>
+                    <div class="ShowOrHidePassword mdl-tooltip mdl-tooltip--large" for="hidePassword">Hide password</div>
+                </div>
+                <label class="mdl-textfield__label" for="txt_Password">New password</label>
+            </fieldset>
+            <span class="HelperText">Create a password using 8 characters or more. It can be any combination of letters, numbers and symbols</span>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.NewPassword, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <br /><br />
+        <div style="visibility:hidden">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Confirm Password" style="width: 100%; margin:auto">
+                <legend></legend>
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "mdl-textfield__input", @id = "txt_ConfirmPassword", @autocomplete = "new-password" })
+                <label class="mdl-textfield__label" for="txt_Password">Confirm Password</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage">
+                @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+</div>

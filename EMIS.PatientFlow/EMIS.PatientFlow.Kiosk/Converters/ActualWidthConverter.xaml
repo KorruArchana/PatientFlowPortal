@@ -1,0 +1,11 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Converters">
+
+    <local:ActualWidthConverter x:Key="ActualWidthConverter"/>
+    <local:ActualWidthToHalfWidthConverter x:Key="ActualWidthToHalfWidthConverter"/>
+    <local:ActualWidthMinusMarginConverter x:Key="ActualWidthMinusMarginConverter"/>
+    <local:ActualKeyBoardWidthConverter x:Key="ActualKeyBoardWidthConverter"/>
+    <local:ActualWidthMinusParameterConverter x:Key="ActualWidthMinusParameterConverter"/>
+  
+</ResourceDictionary>

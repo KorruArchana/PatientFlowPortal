@@ -1,0 +1,159 @@
+﻿@model EMIS.PatientFlow.Entities.Kiosk
+@using EMIS.PatientFlow.Web.CustomHelper
+@{
+    ViewBag.Title = "KioskEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Include the plugin's CSS and JS: -->
+@*<script src="../js/multiselect.js" type="text/javascript"></script>
+        <link href="../css/multiselect.css" rel="stylesheet" type="text/css" />
+        <link href="../css/style.css" rel="stylesheet" type="text/css" />
+    <!-- Include the plugin's CSS and JS: -->
+    <script type="text/javascript" src="../js/bootstrap-multiselect.js"></script>
+    <link href="../css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="../css/bootstrap-multiselect.css" type="text/css" />*@
+@using (Html.BeginForm("KioskEdit", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+    <div class="rightBlockheader">
+                            <div class="rightBlockHeadingContainer">
+                                <span class="rightBlockHeading">
+                                    Kiosks
+                                </span>
+                                <span><img src="~/images/arrow.png"></span>
+                                <span class="rightBlockSubHeading">
+                                    Kiosk 1
+                                </span>
+                                @if(Model.Status==1)
+                                { 
+                                <div class="greenCircle"></div>
+                                }
+                                else
+                                {
+                                    <div class="redCircle"></div>
+                                }
+                                
+                            </div>
+
+                        </div>
+                        <div class="rightBlockContent">
+                            <div>
+                                <p class="leftTxt">
+                                    PC Name:
+        </p>
+        <input type="text" class="rightTxtBox" value="@Model.PcName" />
+    </div>
+    <div>
+        <p class="leftTxt">
+            IP Address:
+        </p>
+        <p class="rightTxt">
+            @Model.IpAddress
+        </p>
+    </div>
+    <div>
+        <p class="leftTxt">
+    Status:
+							</p>
+        @*@Html.DropDownList("Status", (IEnumerable<SelectListItem>)ViewBag.Status, "", new { @class = "selectBoxLarge" })*@
+
+        @Html.DropDownList("Status", (IEnumerable<SelectListItem>)ViewData["Status"], new { @class="selectBoxLarge" })
+							@*<select class="selectBoxLarge">
+								<option value="1" selected="selected">Online</option>
+                                <option value="0" >Offline</option>
+							</select>*@
+						</div>
+						<div>
+							<p class="leftTxt">
+								Linked To:
+        </p>
+        <select class="selectBoxLarge">
+            <option selected="selected">Organisation</option>
+        </select>
+    </div>
+    <div>
+        <p class="leftTxt">
+            Show Time:
+        </p>
+        <select class="selectBoxSmall">
+            <option selected="selected">21:00</option>
+        </select>
+    </div>
+    <div>
+        <p class="leftTxt">
+            Hours Screen Awake:
+        </p>
+        <select class="selectBoxSmall">
+            <option selected="selected">07:00</option>
+        </select>
+        <select class="selectBoxSmall">
+            <option selected="selected">21:00</option>
+        </select>
+    </div>
+    <div>
+        <p class="leftTxt">
+    Languages:
+							</p>
+       
+                            @Html.DropDownList("LanguageList", (IEnumerable<SelectListItem>)ViewBag.LanguageList, "", new { @class = "selectBoxLarge" })
+                            
+                      
+    @*@Html.Custom_DropdownList("LanguageList", (IEnumerable<CustomSelectList>)ViewBag.LanguageList1, null, "" ?? "", "multiselect", false)*@
+							@*<select class="selectBoxLarge">
+								<option selected="selected">English</option>
+							</select>*@
+						</div>
+						<div>
+							<p class="leftTxt">
+                                 Modules:
+</p>
+							<div class="chkBoxContainer">
+                              
+                                <input type="hidden" value="Arrive Me" name="Module[0].ModuleName">
+                                <input type="hidden" value="Arrive Me" name="Module[0].ModuleNameToDisplay">
+                                <input type="checkbox" class="chkBox" id="option1" value="1" name="Module[0].Id">
+                                <label for="option1">Arrive Me</label><br />
+								<div class="divider"></div>
+                               
+                                <input type="hidden" value="Ask Me" name="Module[1].ModuleName">
+                                <input type="hidden" value="Ask Me" name="Module[1].ModuleNameToDisplay">
+                                <input type="checkbox" class="chkBox" id="option2" name="Module[1].Id" value="2">
+                                <label for="option2">Ask Me</label><br />
+								<div class="divider"></div>
+
+                                <input type="hidden" value="Find Me" name="Module[2].ModuleName">
+                                <input type="hidden" value="Find Me" name="Module[2].ModuleNameToDisplay">
+                                <input type="checkbox" class="chkBox" id="option3" value="3" name="Module[2].Id">
+								<label for="option3">Find Me</label><br/>
+								<div class="divider"></div>
+
+                                <input type="hidden" value="Book Me" name="Module[3].ModuleName">
+                                <input type="hidden" value="Book Me" name="Module[3].ModuleNameToDisplay">
+                                <input type="checkbox" class="chkBox" id="option4" value="4" name="Module[2].Id">
+                                <label for="option4">Book Me</label><br/>
+							</div>
+						</div>
+						<div>
+							<p class="leftTxt">
+								Patient Matching:
+							</p>
+							<div class="chkBoxContainer">
+								<input type="radio" class="radiobtn" id="radio1" name="patientMatching" >
+								<label for="radio1">Day of birth, Year of birth</label><br/>
+								<div class="divider"></div>
+								<input type="radio" class="radiobtn" id="radio2"  name="patientMatching" >
+								<label for="radio2">Gender, Date of birth</label><br/>
+								<div class="divider"></div>
+								<input type="radio" class="radiobtn" id="radio3"  name="patientMatching" >
+								<label for="radio3">Full date of birth</label><br/>
+								<div class="divider"></div>
+								<input type="radio" class="radiobtn" id="radio4"  name="patientMatching" >
+								<label for="radio4">Year of birth</label><br/>
+							</div>
+						</div>
+						<div class="editBtnContainer">
+                           
+                            <input type="submit" value="Save" class="saveEditBtn" name="Submit" />
+							<input type="submit" value="Cancel" class="cancelEditBtn" name="Submit"/>
+						</div>
+					</div>
+}

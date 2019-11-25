@@ -1,0 +1,243 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.MemberViewModel
+
+@{
+    ViewBag.Title = "AddMember";
+}
+<script src="~/Scripts/bootstrap.js"></script>
+@Html.Partial("_GoogleAnalytics", "AddMember")
+
+<script>
+    $(document).ready(function () {
+        var MemTable;
+        var SelectedMem = [];
+        Initialize();
+
+        function Initialize() {
+            $("#deptdropdown").append('<option value>Select Department</option>');
+            $('#orgdropdown').drop();
+            $('#deptdropdown').drop();
+            $('div').find(".dept-dropdown").addClass("disabled");
+
+            MemTable = $("#member-table").DataTable({
+                "scrollY": "100px",
+                "scrollCollapse": true,
+                "paging": false,
+                "searching": false,
+                "info": false,
+            });
+            SetDefaultOrgDep();
+        }
+        function SetDefaultOrgDep() {
+            if ($('#orgdropdown').children().length == 2) {
+                $("#orgdropdown").prop("selectedIndex", 1).change();
+                if ($('#orgdropdown').val() != '') {
+                    $("#deptdropdown").empty().drop('clear');
+                    var orgid = $('#orgdropdown').val();
+                    GetDepts(orgid);
+                    MemTable.clear().draw();
+                    GetMembers(orgid);
+                    $('div').find(".dept-dropdown").removeClass("disabled");
+                }
+            }
+        }
+        $('#member-table tbody').on('click', 'tr', function () {
+            if ($('#orgdropdown').val() != '' && $('td').text() != "No data available in table")
+                $(this).toggleClass('selected');
+            if ($('#orgdropdown').val() != null && $('#deptdropdown').val() != null && $('#deptdropdown').val() != '' && MemTable.rows('.selected').data().length != 0)
+            {
+                $('.submit-button').removeClass("disabled");
+            }
+            else
+            {
+                $('.submit-button').addClass("disabled");
+            }
+        });
+
+        $('.submit-button').click(function () {
+            $('#cover-spin').show();
+            $.each(MemTable.rows('.selected').data(), function (index, value) {
+                SelectedMem.push(new MemberObject(value))
+            });
+
+            $.ajax({
+                url: "../Staff/SaveSyncedMember",
+                data: "jsonMemberList=" + JSON.stringify(SelectedMem) +
+                "&organisationId=" + $("#orgdropdown").val() +
+                "&departmentId=" + $('#deptdropdown').val(),
+                type: "Get",
+                success: function (data) {
+                    $('#cover-spin').hide();
+                    $.each(SelectedMem, function (i, val) {
+                        var membName = $('#deptdropdown').drop('get text') + ' - ' + val.Title + ' ' + val.Firstname + ' ' + val.Surname;
+                        SendGoogleEventClick('event type', 'Members', 'Add', 'Member Added to Department(' + membName + ')');
+                    });
+                    
+                    return (window.location.href = "@Url.Action("Index","Member")");
+                },
+                error: function (data) {
+                    $('#cover-spin').hide();
+                    alert("Failed to save Member:" + data);
+                }
+            });
+        });
+
+        function MemberObject(value) {
+            this.Surname = value[0].substring(0, value[0].indexOf(','));
+            this.Title = value[0].substring(value[0].indexOf(',') + 1, value[0].indexOf('.'));
+            this.Firstname = value[0].substring(value[0].indexOf('.') + 2);
+            this.SessionHolderId = value[1];
+        }
+
+        function GetMembers(OrgId) {
+            $('#cover-spin').show();
+            $.ajax({
+                url: "../Staff/LinkMember",
+                datatype: "JSON",
+                data: "organisationId=" + OrgId,
+                type: "Get",
+                success: function (data) {
+                    $('#cover-spin').hide();
+                    $.each(data, function (i, Mem) {
+                        MemTable.row.add([Mem.Surname + "," + Mem.Title + ". " + Mem.Firstname, Mem.SessionHolderId]).draw(false);
+                    })
+                    $("#AddMemberMask").hide();
+                },
+                error: function (ex) {
+                    $('#cover-spin').hide();
+                    alert('Failed to get Members' + ex);
+                }
+            });
+        }
+
+        function GetDepts(orgid) {
+            $.ajax({
+                url: "../Department/GetDepartmentsForOrganisation",
+                datatype: "JSON",
+                data: "organisationId=" + orgid,
+                type: "Get",
+                success: function (data) {
+                    if (data.length > 1)
+                    {
+                        $("#deptdropdown").append('<option value>Select Department</option>');
+                    }
+                    $.each(data, function (i, dept) {
+                        $("#deptdropdown").append('<option value="' + dept.Id + '">' +
+                            dept.DepartmentName + '</option>');
+                    })
+                },
+                error: function (ex) {
+                    alert('Failed to get departments under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                }
+            });
+        }
+
+        $('#orgdropdown').change(function () {
+            $("#AddMemberMask").fadeIn('slow');
+            $("#deptdropdown").empty().drop('clear');
+            if ($('#orgdropdown').val() != '') {
+                var orgid = $('#orgdropdown').val();
+                GetDepts(orgid);
+                MemTable.clear().draw();
+                GetMembers(orgid);
+                $('div').find(".dept-dropdown").removeClass("disabled");
+            }
+            else {
+                MemTable.clear().draw();
+            }
+        });
+
+        $('#deptdropdown').on("change",function () {
+            if ($('#orgdropdown').val() != null && $('#deptdropdown').val() != null && $('#deptdropdown').val() != '' && MemTable.rows('.selected').data().length != 0) {
+                $('.submit-button').removeClass("disabled");
+            }
+            else {
+                $('.submit-button').addClass("disabled");
+            }
+        });
+        $('.btn-cancel').click(function () {
+            $('#CancelModal').modal('hide');
+        })
+        $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+    })
+</script>
+
+<div id="cover-spin"></div>
+<div class="modal-dialog">
+    <div class="modal-content" style="overflow:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="page-header-text-popup">
+                Add Staff Members
+            </p>
+        </div>
+
+        <div class="modal-body">
+            <div class="control-float-left field-spacing" id="OrganizationDiv">
+                <p class="question-text">Select an Organisation<span class="requiredfield">*</span></p>
+                <input type="hidden" name="select organisation" />
+                @Html.DropDownListFor(x => x.OrganisationId, new SelectList(Model.OrganisationList, "Value", "Text"), "Select Organisation",
+                                                                         new
+                                                                         {
+                                                                             @class = "ui fluid selection dropdown ui-dropdown-min-width",
+                                                                             @id = "orgdropdown"
+                                                                         })
+
+            </div>
+
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Select one or more staff members<span class="requiredfield">*</span></p>
+                <table class="table table-responsive member-table" id="member-table" style="height:50px; min-width: 300px;">
+                    <thead>
+                        <tr>
+                            <th>
+                                Name
+                            </th>
+                            <th>
+                                ID
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div class="control-float-left field-spacing" id="DepartmentDiv">
+                <p class="question-text">Select a department<span class="requiredfield">*</span></p>
+                @Html.DropDownListFor(x => x.SelectedDepartment, Enumerable.Empty<SelectListItem>(),
+                                                               new
+                                                               {
+                                                                   @class = "ui fluid search selection dropdown dept-dropdown ui-dropdown-min-width",
+                                                                   @id = "deptdropdown"
+                                                               })
+            </div>
+
+            <div class="mask" id="AddMemberMask" style="opacity:0.1">
+            </div>
+
+        </div>
+
+        <div class="modal-footer control-float-left field-spacing-popup">
+            <button class="btn btn-default btn-lg cancel-button" type="button">
+                Cancel
+            </button>
+            <button class="btn btn-primary btn-lg submit-button disabled" type="submit">Add Staff Members</button>
+        </div>
+
+    </div>
+</div>
+<div class="modal fade" id="CancelModal" role="dialog" data-keyboard="true">
+    <div class="modal-dialog" style="width:35%;margin-right:2%;margin-bottom:1%">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add Member
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" style="margin-right:5px">No, Stay</button>
+                <button class="btn btn-danger btn-ok" onclick='window.location.href = "@Url.Action("Index","Member")"'>Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

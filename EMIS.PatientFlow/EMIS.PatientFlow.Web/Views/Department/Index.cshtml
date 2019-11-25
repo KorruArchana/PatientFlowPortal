@@ -1,0 +1,103 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.DepartmentListViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "DepartmentList")
+
+<script src="~/Scripts/ViewCommonScripts/DepartmentCommonScript.js"></script>
+
+@Html.Hidden("IndexDepartmentUrl", Url.Action("Index", "Department"))
+@Html.Hidden("AddDepartmentUrl", Url.Action("AddDepartment", "Department"))
+@Html.Hidden("EditDepartmentUrl", Url.Action("EditDepartment", "Department", new { departmentId = "__departmentId__" }))
+
+<style>
+    .mdl-grid {
+        padding: 0px !important;
+    }
+</style>
+
+<div style="width: 100%; justify-content: center;padding: 0px !important;flex-grow:1" class="mdl-grid lightblueBackground">
+    <div class="mdl-card portalMdlCard DepUserPracticeAdminStyle"  style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Departments</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                    Add Department
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="DepartmentActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect DepartmentAction"
+                    for="DepartmentActions">
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Delete</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="department-table">
+                <tbody>
+                    @foreach (var item in Model.Departments)
+                    {
+                        <tr>
+                            <td data-linkCount="@item.LinkCount" data-linkedMessageCount="@item.LinkedMessageCount" class="checkboxWidth">
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="@item.Id">
+                                    <input type="checkbox" id="@item.Id" class="mdl-checkbox__input" name="DepartmentActionCheckbox" />
+                                </label>
+                            </td>
+                            <td data-id="@item.Id" data-name="@item.DepartmentName" class="LeftAlignText">@item.DepartmentName</td>
+                            <td class="LeftAlignText">@item.OrganisationName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+            var eventCategory = 'Departments';
+            var successMessage = '@TempData["SuccessMessage"]'
+            var errorMessage='@TempData["ErrorMessage"]'
+            if (successMessage != '') {
+                createSnackbar(successMessage);
+            }
+            if (errorMessage != '') {
+                createSnackbar(errorMessage);
+            }
+
+            var DeleteMessage =  @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null) {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+
+        })
+    </script>
+}

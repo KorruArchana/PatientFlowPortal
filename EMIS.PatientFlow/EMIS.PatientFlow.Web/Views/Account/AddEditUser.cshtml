@@ -1,0 +1,389 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.RegisterViewModel
+
+@{
+    ViewBag.Title = "AddEditUsers";
+    if (Model.UserId != null)
+    {
+        ViewBag.Module = Model.UserName;
+    }
+    else
+    {
+        ViewBag.Module = "New user";
+    }
+    ViewBag.Savebutton = "Save";
+    ViewBag.SaveAction = "SaveUser";
+    ViewBag.Controller = "Account";
+    ViewBag.FormId = "AddEditUser";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+}
+<style>
+    .input-wrapper {
+        display: inline-block;
+        position: relative
+    }
+</style>
+@Html.Partial("_GoogleAnalytics", "Users")
+<script type="text/javascript">
+    $(document).ready(function () {
+        var flag = true;
+        var formValid = true;
+        var userId =@Html.Raw(Json.Encode(Model.UserId));
+        Intialize();
+        var currentUserName=@Html.Raw(Json.Encode(@HttpContext.Current.User.Identity.Name));
+        if (userId != null) {
+            $('#UserNameDiv').hide();
+            var selectedOrgIds =@Html.Raw(Json.Encode(Model.OrganisationIds));
+            $('#organisationDropdown').drop("set selected", GetstringList(selectedOrgIds))
+            var selectedRole =@Html.Raw(Json.Encode(Model.SelectedRole));
+            SettingRoles(selectedRole);
+            if (selectedRole == "Practice Admin") {
+                $('#OrganisationField').css({ 'display': 'block' })
+            }
+            else {
+                $('#OrganisationField').css({ 'display': 'none' })
+            }
+            DisplayOrganisation();
+            //Legend text on page loads in jquery
+            $('form input[type="text"],[type="number"],select').each(function () {
+                const event = new onfocusEditEvent($(this));
+            });
+        }
+
+        if (userId != null) {
+            $('#UserMenuActions').css({ 'display': 'block' });
+            $('#UserMenuActions ul').append("\
+                                             <li class='mdl-menu__item'>\
+                                            <span><a class='mdl-navigation__link' href='#' style='color:black' id='RemoveUser'>Remove user</a></span>\
+                                            </li>\
+                                              <li class='mdl-menu__item'>\
+                                            <span><a class='mdl-navigation__link' href='#' style='color:black' id='ResetPassword'>Reset password</a></span>\
+                                            </li>\
+                                            ")
+        }
+
+        $('#RemoveUser').click(function () {
+            var userName =@Html.Raw(Json.Encode(Model.UserName));
+            showLoading();
+            if (currentUserName === userName) {
+                showDialog({
+                    liElement: "Delete",
+                    text: "you can't delete your own user account",
+                    negative: {
+                        title: 'GOT IT',
+                        onClick: function (e) {
+                            hideLoading();
+                        }
+                    }
+                });
+            }
+            else {
+                showDialog({
+                liElement: "Delete",
+                title: "Remove user?",
+                text: "Do you want to remove user '" + userName + "'?",
+                negative: {
+                    title: 'cancel',
+                    onClick: function () {
+                        hideLoading();
+                    }
+                },
+                positive: {
+                    title: 'Remove User',
+                    onClick: function (e) {
+                        showLoading();
+                        $.ajax({
+                            type: "Get",
+                            url: "/Account/DeleteUser",
+                            data: "userName=" + userName,
+                            success: function (data) {
+                                hideLoading();
+                                window.location.href = "@Url.Action("Index", "Account")";
+                            },
+                            error: function () {
+                                hideLoading();
+                            }
+                        })
+                    }
+                }
+            })
+            }
+
+        })
+
+        $('#showPassword').click(function () {
+            $('#hidePassword').css({ 'display': 'block' });
+            $('#showPassword').css({ 'display': 'none' });
+            $('#txt_Password').attr('type', 'text');
+        });
+
+        $('#hidePassword').click(function () {
+            $('#hidePassword').css({ 'display': 'none' });
+            $('#showPassword').css({ 'display': 'block' });
+            $('#txt_Password').attr('type', 'password');
+        })
+
+        $('#ResetPassword').click(function () {
+            var userName =@Html.Raw(Json.Encode(Model.UserName));
+            showLoading();
+            var url = '@Url.Action("ResetPassword", "Account")?userName=' + userName;
+            window.location.href = url;
+            hideLoading();
+        })
+
+        function Intialize() {
+            DisplayOrganisation();
+            $('#organisationDropdown').drop({ match: 'text', sortSelect: true });
+            if (!(userId != null)) {
+                SettingRoles("Practice Admin");
+            }
+
+            $('#txt_Email').focus();
+            onfocusEvent($('#txt_Email'));
+            $('#txt_Email').closest('fieldset').addClass("Active-outline");
+            $('#txt_Email').closest('fieldset').removeClass("Normal-outline");
+            var IsPraticeAdmin =@Html.Raw(Json.Encode(@HttpContext.Current.User.IsInRole("Practice Admin")));
+            if (IsPraticeAdmin) {
+                $('#UserRoles').css({'display':'none'});
+            }
+        }
+
+        function DisplayOrganisation() {
+            if ($('#organisationDropdown').children().length <= 2) {
+                $('#organisationDropdown').prop("selectedIndex", 1);
+                $('#OrganisationField').hide();
+            }
+        }
+
+        $('#txt_UserName').keyup(function () {
+            $('#usernameWorderror,#usernameAvailabilityerror').css({ 'display': 'none' });
+        })
+
+        $('#txt_UserName').focusout(function (e) {
+
+            if ($(this).val() != "" && userId== null) {
+                var usernameList = ($('#txt_UserName').val()).split(' ');
+                if (usernameList.length > 1) {
+                    $('#usernameWorderror').css({ 'display': 'block' });
+                    $('#txt_UserName').focus();
+                    formValid = false;
+                }
+                else {
+                    $.ajax({
+                        type: "Get",
+                        url: '../Account/CheckUserNameAvailability',
+                        datatype: 'json',
+                        data: "userName=" + $('#txt_UserName').val(),
+                        success: function (data) {
+                            var data = data == "True" ? 1 : 0;
+                            if (data == "1") {
+                                $('#usernameAvailabilityerror').css({ 'display': 'block' });
+                                formValid = false;
+                            }
+                            else {
+                                formValid = true;
+                            }
+                        },
+                        error: function () {
+                            return false;
+                        },
+                    })
+                }
+            }
+        })
+
+
+        function SettingRoles(Role) {
+            var $radios = $('input:radio[name=SelectedRoles]');
+            if ($radios.is(':checked') === false) {
+                $radios.filter('[value="' + Role+'"]').parent().addClass("is-checked");
+                $radios.filter('[value="' + Role + '"]').prop('checked', true)
+            }
+        }
+
+        function GetstringList(intList) {
+            var stringList = [];
+            if (intList != null) {
+                $.each(intList, function (i, Id) { stringList.push(Id.toString()) })
+            }
+            return stringList;
+        }
+
+        $('input[type="text"],[type="password"]').on('focus focusout', function (e) {
+                    if (e.type == "focus") {
+                        const event = new onfocusEvent($(this));
+            }
+         else if (e.type == "focusout") {
+         setNormalOutline($(this));
+         if ($(this).val() == "") {
+         const event = new outFocusEvent($(this));
+         }
+        }
+        });
+
+        $('#showPassword').click(function () {
+            if (flag) {
+                $('#txt_Password').attr('type', 'text');
+                flag = false
+            }
+            else {
+                $('#txt_Password').attr('type', 'password');
+                flag = true;
+            }
+        })
+
+        $('#organisationDropdown').change(function () {
+            $('#orgErrorMessage').css({ 'display': 'none' });
+        })
+
+        $('input[type=radio][name=SelectedRoles]').change(function () {
+            $('#OrganisationField').css({ 'display': 'none' });
+            if ($(this).val() == "Practice Admin") {
+                $('#OrganisationField').css({'display':'block'})
+            }
+        })
+        var form = $('#AddEditUser');
+        var validator = form.validate();
+
+        $('#AddEditUser').keypress(function (e) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == 13) {
+                $('#AddEditUser').trigger('submit');
+            }
+        })
+
+        $('#AddEditUser').submit(function (e) {
+            showLoading();
+            if ($('input[type=radio][name=SelectedRoles]:checked').val() == "Practice Admin") {
+                if (!($('#organisationDropdown').val() != "")) {
+                    $('#orgErrorMessage').css({ 'display': 'block' });
+                    hideLoading();
+                    return false;
+                }
+            }
+            else if (!formValid) {
+                e.preventDefault();
+                hideLoading();
+                $('#txt_UserName').focus();
+                return false;
+            }
+            else if (!form.valid()) {
+                hideLoading();
+            }
+            hideLoading();
+        })
+    })
+
+    function SuccessHandling() {
+        var eventCategory = 'Users';
+        var userId =@Html.Raw(Json.Encode(Model.UserId));
+
+        if (userId != null) {
+            LogEvent(eventCategory, 'Edited', eventCategory);
+        }
+        else {
+            LogEvent(eventCategory, 'Added', eventCategory);
+        }
+        window.location.href = '@Url.Action("Index", "Account")';
+    }
+</script>
+
+<div style="width: 100%; justify-content: center;flex-grow:1;padding:0px" class="mdl-grid lightblueBackground">
+    <div class="mdl-card portalMdlCard DepUserPracticeAdminStyle" style="height: 100%;overflow:auto;overflow-y:auto">
+        <br />
+        @Html.HiddenFor(m => m.UserId)
+        @Html.AntiForgeryToken()
+        <div>
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Email" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.Email, new { @class = "mdl-textfield__input", @id = "txt_Email" })
+
+                <label class="mdl-textfield__label" for="txt_Email">Email</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <br /><br />
+
+        <div style="margin-bottom: 13px;" id="UserNameDiv">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="User name" style="width: 100%;margin:auto">
+                <legend></legend>
+                @Html.TextBoxFor(m => m.UserName, new { @class = "mdl-textfield__input", @id = "txt_UserName" })
+                <label class="mdl-textfield__label" for="txt_UserName">User name</label>
+            </fieldset>
+            <span class="HelperText">Use this on the login screen.</span>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                <span id="usernameWorderror" style="display:none">User name should be a single word</span>
+                <span id="usernameAvailabilityerror" style="display:none">Username has already been taken. Please enter a unique username.</span>
+            </div>
+        </div>
+
+        @if (Model.UserId == null)
+        {
+            <div style="margin-bottom: 13px;">
+                <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Password" style="width: 100%;margin:auto">
+                    <legend></legend>
+                    <div class="input-wrapper" style="height:100%; width:100%;">
+                        @Html.PasswordFor(m => m.Password, new { @class = "mdl-textfield__input", @id = "txt_Password", @autocomplete = "new-password" })
+                        <label class="mdl-button mdl-js-button mdl-button--icon " for="txt_Password" style="right:12px !important;bottom:0px!important" id="showPassword">
+                            <i class="material-icons EyeIconStyle">visibility_off</i>
+                        </label>
+                        <label class="mdl-button mdl-js-button mdl-button--icon " for="txt_Password" style="right:12px !important;display:none;bottom:0px!important" id="hidePassword">
+                            <i class="material-icons EyeIconStyle">visibility</i>
+                        </label>
+                        <div class="ShowOrHidePassword mdl-tooltip mdl-tooltip--large" for="showPassword">Show password</div>
+                        <div class="ShowOrHidePassword mdl-tooltip mdl-tooltip--large" for="hidePassword">Hide password</div>
+                    </div>
+                    <label class="mdl-textfield__label" for="txt_Password">Password</label>
+                </fieldset>
+                <span class="HelperText">Create a password using 8 characters or more. It can be any combination of letters, numbers and symbols</span>
+                <div class="validation-summary-errors validationMessage" style="width:100%">
+                    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div>
+                <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Confirm password" style="width: 100%;margin:auto">
+                    <legend></legend>
+                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "mdl-textfield__input", @id = "txt_ConfirmPassword", @autocomplete = "new-password" })
+                    <label class="mdl-textfield__label" for="txt_Password">Confirm password</label>
+                </fieldset>
+                <div class="validation-summary-errors validationMessage" style="width:100%">
+                    @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <br /><br />
+        }
+
+        <div id="UserRoles">
+            <label class="UserRoleDivStyle" style="font-size:16px;color:black;margin-left: 0px !important">Role</label>
+            @foreach (var roles in Model.RolesList)
+            {
+                <div class="UserRoleDivStyle">
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                        @Html.RadioButtonFor(m => m.SelectedRoles, roles.Value, new { @class = "mdl-radio__button RolesRadioBtnStyle" })
+                        <span class="mdl-switch__label">@roles.Text</span>
+                    </label>
+                </div>
+            }
+        </div>
+
+        <div id="OrganisationField">
+            <fieldset class="fieldset" name="Organisation" style="width:100%;margin:auto">
+                <legend style="position:static">Organisation</legend>
+                @Html.DropDownListFor(model => model.OrganisationIds, Model.OrganisationList, "Organisation",
+                  new
+                  {
+                      @class = "ui fluid multiple search  dropdown ui-dropdown-min-width orgDropdown",
+                      @id = "organisationDropdown",
+                      @multiple = "multiple"
+                  })
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                <span id="orgErrorMessage" style="display:none">At least one organisation must be selected</span>
+            </div>
+        </div>
+        <br /><br />
+    </div>
+</div>

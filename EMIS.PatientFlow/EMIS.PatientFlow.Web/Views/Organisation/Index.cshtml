@@ -1,0 +1,432 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.OrganisationListViewModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/UserScripts/SearchFunction.js"></script>
+<script src="~/Scripts/UserScripts/ModalPopup.js"></script>
+<script>
+    var dataTable;
+    var OrganisationLinkCount;
+    $(document).ready(function () {
+        showLoading();
+
+        $("#addbtn").click(function () {
+            window.location.href = "@Url.Action("AddOrganisation", "Organisation")";
+        });
+
+        $('#organisation-portal-table ').on("click", "tr:not('.organisation-search-row')", function (e) {
+            var $cell = $(e.target).closest('td');
+            if ($cell.index() > 0 && $cell.index() !== 4) {
+                showLoading();
+                var OrganisationId = $(this).children().eq(1).attr("data-id");
+                window.location.href = '@Url.Action("EditOrganisation", "Organisation")' + '?OrganisationId=' + OrganisationId;
+            }
+        });
+
+        $(document).on('click', "input[name='OrganisationActionCheckbox']", function () {
+            $.each($("input[name='OrganisationActionCheckbox']:checked"), function () {
+                if ($(this).parent().hasClass("is-checked")) {
+                    $(this).parent().removeClass("is-checked");
+                }
+            });
+            $("input[name='OrganisationActionCheckbox']").not(this).prop('checked', false);
+
+            CheckboxFunctionalityForIE($(this), this.checked);
+        });
+
+        DataTableIntialization($(window).width());
+
+        //$(window).resize(function () {
+        //    if ($.fn.dataTable.isDataTable('#organisation-portal-table')) {
+        //        $('.dataTables_paginate,.dataTables_length,.dataTables_info').remove();
+        //        $('#organisation-portal-table').DataTable().destroy();
+        //        DataTableIntialization($(window).width());
+        //    }
+        //})
+
+        function DataTableIntialization(width) {
+            dataTable = $('#organisation-portal-table').DataTable({
+                "dom": "rt<'bottom' lip><'clear'>",
+                bPaginate: true,
+                serverSide: true,
+                bFilter: true,
+                processing: true,
+                info: true,
+                pagingType: "simple",
+                bSortCellsTop: true,
+                searching: true,
+                language: {
+                    paginate: {
+                        processing: '<div class="dataTables_wrapper" > Loading... </div>',
+                        next: ' <i class="material-icons" id="prev">chevron_right</i>',
+                        previous: '<i class="material-icons" id="next">chevron_left</i>'
+                    },
+                    sLengthMenu: width < 380 ? "Rows : _MENU_" : "Rows per Page : _MENU_"
+                },
+                "order": [[1, "asc"]],
+                orderCellsTop: true,
+                columnDefs: [{
+                    "targets": '_all',
+                    "className": "mdl-data-table__cell--non-numeric"
+                },
+                {
+                    "targets": [0, 'no-sort'],
+                    "orderable": false,
+                    bSortable: false
+                }],
+                createdRow: function (row, data, dataIndex) {
+                    $(row).find('td:eq(1)').attr('data-id', data.Id);
+                    $(row).find('td:eq(1)').attr('data-LinkCount', data.LinkCount);
+                    $(row).find('td:eq(1)').attr('data-SystemTypeId', data.SystemTypeId);
+                },
+                columns: [
+                    {
+                        data: null,
+                        className: "center",
+                        render: function (data, type, row) {
+                            var td = '<td>\
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="' + row.Id + '">\
+                                    <input type="checkbox" class="mdl-checkbox__input" name="OrganisationActionCheckbox"  id="'+ row.Id + '"/>\
+                                </label>\
+                            </td>'
+                            return td;
+                        },
+                    },
+                    { data: "OrganisationName" },
+                    { data: "SystemType" },
+                    { data: "SiteNumber" }
+                ],
+                ajax: function (data, callback, settings) {
+                    filterValues = {};
+                    filterValues.draw = data.draw;
+                    filterValues.start = data.start;
+                    filterValues.length = data.length;
+                    filterValues.search = data.search;
+                    filterValues.order = data.order;
+                    filterValues.columns = data.columns;
+                    $.ajax({
+                        url: '../Organisation/GetOrganisationData',
+                        method: 'GET',
+                        data: filterValues
+                    }).done(callback);
+                },
+                "fnDrawCallback": function () {
+                    componentHandler.upgradeAllRegistered();
+                    $('.mdl-tooltip').toggle(function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    }, function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    });
+                }
+            });
+        }
+
+        $('.organisation-search-row td').each(function (index, value) {
+            var row = "";
+            var td = $(this);
+            var title = $(this).text();
+            if (title == 'System Type') {
+                var systemTypeList = @Html.Raw(Json.Encode(ViewBag.SystemTypesList));
+
+                row += "<select class='ui fluid multiple search dropdown table selectionDropdown orgSystemTypeDropdown column_search'\
+                    data-column='" + index + "'\
+                    id='"+ title.trim().replace(' ', '_') + "' multiple='multiple' >";
+                row += '<option value="">Search</option>';
+                $.each(systemTypeList, function (index, value) {
+                    row += '<option value="' + value.Id + '">' + value.Name + '</option>';
+                });
+
+                row += '</select>';
+                var orgSystemType = '#' + title.trim().replace(' ', '_');
+                td.html(row);
+                $(orgSystemType).drop();
+
+                $('.ui.dropdown.table').drop({
+                    fullTextSearch: true
+                })
+
+                setTimeout(function () {
+                    $('.ui.dropdown.table').children().eq(1).remove()
+                },100)
+            }
+            else if (title != '' && title != 'System Type') {
+                $(this).html('<input type="text" data-column="' + index + '" placeholder="Search" class="column_search" style="height: 56px;"/>');
+            }
+            else { $(this).html(""); }
+        });
+
+        $('input[type="Text"]').on('keyup', function () {
+            var i = $(this).attr('data-column');
+            var v = $(this).val();
+            dataTable.column(i).search(v).draw();
+        });
+
+        $('.ui.dropdown.table.orgSystemTypeDropdown').on("change", function () {
+            var selectedValues = [];
+            $(this).find('option:selected').each(function () {
+                selectedValues.push($(this).val());
+            });
+
+            dataTable
+                .column($(this).parent().index())
+                .search(selectedValues)
+                .draw();
+        });
+
+        $('.mdl-mini-footer .mdl-card__actions').append($(".dataTables_paginate,.dataTables_length,.dataTables_info"));
+
+        $('#filterbtn').on('click', function (e) {
+            e.preventDefault();
+            ClearFilter();
+            $('.organisation-search-row').toggleClass('hidden');
+            if (!($('.organisation-search-row').hasClass('hidden'))) {
+                $('.organisation-search-row').show();
+            }
+        });
+
+        $("#organisation-portal-table thead tr").on("click", function () {
+            componentHandler.upgradeAllRegistered();
+        });
+
+        $('#organisation-portal-table_paginate').on("click", function () {
+            componentHandler.upgradeAllRegistered();
+        });
+
+        $('#OrganisationActions').click(function () {
+                $.each($("input[name='OrganisationActionCheckbox']:checked"), function () {
+                    OrganisationLinkCount = $(this).closest('tr').children().eq(1).attr('data-LinkCount');
+                    SystemTypeId = $(this).closest('tr').children().eq(1).attr('data-SystemTypeId');
+                });
+            
+            if (OrganisationLinkCount > 0) {
+                $('#deleteOrgLink').addClass('disableddiv');
+            }
+
+             var isemisweb = '@Config.IsEmisWebPortal' == 'True';
+            var ishide = false;
+            if (isemisweb && SystemTypeId == 2) {
+                ishide = true;
+            }
+            else if (!isemisweb && SystemTypeId == 1) {
+                ishide = true;
+            }  
+
+            if (SystemTypeId == '6' || ishide) {
+                $('#refreshOrgLink').hide();
+            }
+            else {
+                $('#refreshOrgLink').show();
+            }
+       })
+
+        $('ul.OrganisationActions li').click(function () {
+            showLoading();
+            var OrganisationName;
+            var OrganisationId;
+            if ($("input[name='OrganisationActionCheckbox']:checked").length <= 0) {
+                hideLoading();
+                showDialog({
+                    liElement: "Delete",
+                    title: "Delete/Refresh organisation?",
+                    text: "Select a organisation to perform operation.",
+                    negative: {
+                        title: 'Okay'
+                    }
+                });
+            }
+            else {
+                $.each($("input[name='OrganisationActionCheckbox']:checked"), function () {
+                    OrganisationId = $(this).closest('tr').children().eq(1).attr('data-id');
+                    OrganisationLinkCount = $(this).closest('tr').children().eq(1).attr('data-LinkCount');
+                    OrganisationName = $(this).closest('tr').children().eq(1).text();
+                });
+                switch ($(this).find('a').text()) {
+                    case "Delete":
+                        hideLoading();
+                        showDialog({
+                            liElement: "Delete",
+                            title: "Delete organisation?",
+                            text: "Do you want to delete organisation '" + OrganisationName + "'?",
+                            negative: {
+                                title: 'Cancel'
+                            },
+                            positive: {
+                                title: 'Delete',
+                                onClick: function (e) {
+                                    showLoading();
+                                    $.ajax({
+                                        type: "Get",
+                                        url: "../Organisation/DeleteOrganisation",
+                                        data: "&OrganisationId=" + OrganisationId,
+                                        success: function (data) {
+                                            hideLoading();
+                                            window.location.href = '@Url.Action("Index", "Organisation")';
+                                        },
+                                        error: function (data) {
+                                            hideLoading();
+                                            window.location.href = '@Url.Action("Index", "Organisation")';
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                        break;
+
+                    case "Refresh branches and slots":
+                        showLoading();
+                        $.ajax({
+                            type: "GET",
+                            dataType: "Json",
+                            url: "../Organisation/RefreshOrganisation",
+                            data: "&OrganisationId=" + OrganisationId,
+                            success: function (data) {
+                                hideLoading();
+                                if (data.success) {
+                                    location.reload();
+                                }
+                                else {
+                                    GetDeleteTechnicalErrorPopUp(data.exceptionMessage);
+                                }
+                            },
+
+                            error: function (data) {
+                                hideLoading();
+                                GetDeleteTechnicalErrorPopUp(data.exceptionMessage);
+                            }
+                        });
+
+                    default:
+                        break;
+                }
+            }
+        })
+
+        function GetDeleteTechnicalErrorPopUp(errorMessage) {
+            showDialog({
+                liElement: "Delete",
+                title: "Technical errror;",
+                text: errorMessage,
+                negative: {
+                    title: 'Okay'
+                }
+            });
+        }
+        hideLoading();
+    })    
+
+</script>
+
+<div style="width: 100%; justify-content: center; padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard" style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Organisations</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn" onclick="$('#addbtn').click()">
+                    Add Organisation
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="OrganisationActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect OrganisationActions"
+                    for="OrganisationActions">
+                    <li class="mdl-menu__item" id="deleteOrgLink">
+                        <span><a class="mdl-navigation__link" href="#">Delete</a></span>
+                    </li>
+                    <li class="mdl-menu__item" id="refreshOrgLink">
+                        <span><a class="mdl-navigation__link" href="#">Refresh branches and slots</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="organisation-portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="org">Organisation</th>
+                        <th id="systype">System Type</th>
+                        <th id="sitenumber">Site</th>
+                    </tr>
+                    <tr class="organisation-search-row hidden">
+                        <td></td>
+                        <td>Organisation</td>
+                        <td>System Type</td>
+                        <td>Site Number</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <content class="mdl-tooltip mdl-tooltip--large" for="org">Organisation Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="systype">System Type</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="sitenumber">Site Number</content>
+        </div>
+        <footer class="mdl-mini-footer">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+            var eventCategory = 'Organisations';
+            var SuccessMessage = @Html.Raw(Json.Encode(TempData["SuccessMessage"]));
+            var ErrorMessage = @Html.Raw(Json.Encode(TempData["ErrorMessage"]));
+            if (SuccessMessage != '' && SuccessMessage != null) {
+                createSnackbar(SuccessMessage);
+            }
+            if (ErrorMessage != '' && ErrorMessage != null) {
+                createSnackbar(ErrorMessage);
+            }
+
+            var DeleteMessage = @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null)
+            {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            var RefreshMessage = @Html.Raw(Json.Encode(Session["RefreshMessage"]));
+            if (RefreshMessage != '' && RefreshMessage != null) {
+                createSnackbar(RefreshMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+
+    </script>
+}

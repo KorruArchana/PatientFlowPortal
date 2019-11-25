@@ -1,0 +1,49 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.MemberViewModel
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div style="margin-top: 50px;">
+    <dl class="dl-horizontal" style="width:100%">
+        <dt style="width:10%">@Html.DisplayNameFor(model => model.Firstname):</dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.Firstname)</dd>
+
+        <dt style="width:10%">@Html.DisplayNameFor(model => model.Surname):</dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.Surname)</dd>
+
+        <dt style="width:10%"> @Html.DisplayNameFor(model => model.Title):</dt>
+        <dd style="padding-bottom:30px"> @Html.DisplayFor(model => model.Title) </dd>
+
+        <dt style="width:10%">@Html.DisplayNameFor(model => model.LoginId): </dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.LoginId)</dd>
+
+        <dt style="width:10%"> @Html.DisplayNameFor(model => model.WorkStartTime):</dt>
+        <dd style="padding-bottom:30px"> @Html.DisplayFor(model => model.WorkStartTime) </dd>
+
+        <dt style="width:10%"> @Html.DisplayNameFor(model => model.WorkEndTime):</dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.WorkEndTime)</dd>
+
+        <dt style="width:10%"> Department:</dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.DepartmentName)</dd>
+
+        <dt style="width:10%"> Organization:</dt>
+        <dd style="padding-bottom:30px"> @Html.DisplayFor(model => model.OrganisationName) </dd>
+
+        <dt style="width:10%">@Html.DisplayNameFor(model => model.GpCode):</dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.GpCode) </dd>
+
+        <dt style="width:10%"> @Html.DisplayNameFor(model => model.SecurityGroup):</dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.SecurityGroup) </dd>
+
+        <dt style="width:10%">@Html.DisplayNameFor(model => model.StaffCategory):</dt>
+        <dd style="padding-bottom:30px">@Html.DisplayFor(model => model.StaffCategory)</dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

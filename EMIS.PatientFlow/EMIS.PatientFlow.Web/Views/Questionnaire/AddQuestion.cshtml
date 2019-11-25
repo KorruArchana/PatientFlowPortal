@@ -1,0 +1,813 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.QuestionViewModel
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script src="~/Scripts/bootstrap.js"></script>
+
+<link rel="stylesheet" href="~/Content/UserContent/site.css"/>
+
+@Html.Partial("_GoogleAnalytics", "AddEditQuestion")
+
+<script type="text/javascript">
+
+    //declaring the val as global variable
+    var val;
+    var ResultPost, listOfQuestionOptions=[];
+    var i = 0;
+    window.editAnswer = false;
+    $(document).ready(function () {
+        $.fn.dataTable.ext.errMode = 'none';
+        if (localStorage.getItem("isAddQuesOnEdit")=="true")
+        {
+            var NestedQuestions = questions.filter(x => x.QuestionId != @Model.QuestionId && x.QuestionId > 0);
+            if (NestedQuestions.length != 0) {
+                $.each(NestedQuestions, function (index,data) {
+                    $('#NestedQuestionId').prepend('<option value="' + data.QuestionId + '">' + data.QuestionText + '</option>');
+                })
+            }
+        }
+        $('.fa-question').tooltip();
+
+        ResultPost = $('#Answerstable').DataTable({
+            info: false,
+            paging: false,
+            searching: false,
+            ordering: true,
+            rowReorder: {
+                selector: 'td:not(:last-child)',
+            },
+            columnDefs: [{
+                "targets": [0, 2, 3, 4, 6],
+                "visible": false,
+            },
+            {
+                "targets": [1, 5, 7],
+                "orderable": false,
+            },
+            {
+                "targets": [5, 7],
+                "className": "text-center-align",
+            }]
+        });
+
+        Initialize();
+        function Initialize() {
+            $('#answerdiv').hide();
+            $('.Answers-table').hide();
+            $('#LessThan_Age1').val('');
+            $('#GreaterThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+            $('#AddAnswers').show();
+            $('#field1').hide();
+            $('#field2').hide();
+            $('#txt_snomedcode').val('');
+            $('#txt_readcode').val('');
+            $('#txt_snomedcode').attr('disabled', 'disabled');
+            $('#txt_readcode').attr('disabled','disabled');
+            $('#NumOfChar').html($('#questionarea').val().length);
+            var $radios = $('input:radio[name=QuestionType]');
+            if ($radios.is(':checked') === false) {
+                $radios.filter('[value="1"]').prop('checked', true);
+                $('#field2').show();
+            }
+            if ($radios.filter('[value="1"]').is(":checked")) {
+                $('#AddAnswers').hide();
+            }
+            if ($radios.filter(':checked').val() === '4' || $radios.filter(':checked').val() === '3') {
+                $('#SaveQuestion').prop('disabled', true);
+            }
+            else
+                $('#SaveQuestion').prop('disabled', false);
+        }
+        $('#questionarea').on('keyup', function (e) {
+            $('#NumOfChar').html($(this).val().length);
+        });
+
+        //ages
+        $('#AllAges').change(function () {
+            $('#LessThan_Age1').attr('disabled', 'disabled');
+            $('#GreaterThan_Age1').attr('disabled', 'disabled');
+            $('#Between_Age1').attr('disabled', 'disabled');
+            $('#Between_Age2').attr('disabled', 'disabled');
+
+            $('#LessThan_Age1').val('');
+            $('#GreaterThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+
+        });
+        $('#LessThan').change(function () {
+            $('#LessThan_Age1').removeAttr('disabled');
+            $('#GreaterThan_Age1').attr('disabled', 'disabled');
+            $('#Between_Age1').attr('disabled', 'disabled');
+            $('#Between_Age2').attr('disabled', 'disabled');
+
+            $('#GreaterThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+
+        });
+        $('#GreaterThan').change(function () {
+            $('#GreaterThan_Age1').removeAttr('disabled');
+            $('#LessThan_Age1').attr('disabled', 'disabled');
+            $('#Between_Age1').attr('disabled', 'disabled');
+            $('#Between_Age2').attr('disabled', 'disabled');
+
+            $('#LessThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+
+        });
+        $('#Between').change(function () {
+            $('#Between_Age1').removeAttr('disabled');
+            $('#Between_Age2').removeAttr('disabled');
+            $('#LessThan_Age1').attr('disabled', 'disabled');
+            $('#GreaterThan_Age1').attr('disabled', 'disabled');
+            $('#LessThan_Age1').val('');
+            $('#GreaterThan_Age1').val('');
+
+        });
+        //this is for hiding the add answers when the numeric text box is clicked
+        $("input[name='QuestionType']").click(function () {
+            var test = $(this).val();
+            var numeric = $('#NumericTextBox').val();
+            var text = $('#TextBox').val();
+            $('#field1').hide();
+            $('#field2').hide();
+            if (test === numeric || test === text) {
+                $('#SaveQuestion').prop('disabled', false)
+                $('#AddAnswers').hide();
+                if (test === text) {
+                    $('#field2').show();
+                }
+            }
+            else {
+                $('#SaveQuestion').prop('disabled', true)
+                $('#AddAnswers').show();
+               $('#field2').hide();
+            }
+
+        })
+
+        val = $("input[name='QuestionType']:checked").val();
+
+
+        $('#btn_addanswers').click(function () {
+            window.editAnswer = false;
+            //making the first not required as selected
+            $('input:radio[value="NotRequired"]').prop('checked', true);
+            $('#AnswerText').val('');
+            $('#txt_snomedcode').val('');
+            $('#txt_readcode').val('');
+            $('#NestedQuestionId').val('0');
+            $('#txt_snomedcode').attr('disabled', 'disabled');
+            $('#txt_readcode').attr('disabled', 'disabled');
+            var test = $("input[name='QuestionType']:checked");
+            if (test.val() === '2') {
+                $('#NestedQnsDiv').hide();
+            }
+            $('#AddAnswers').hide();
+            $('#field1').show();
+    })
+
+        $('#btn_cancel').click(function () {
+            $('#field1').hide();
+            $('#AddAnswers').show();
+            $('#AnswerText').val('');
+            $('#txt_snomedcode').val('');
+            $('#txt_readcode').val('');
+        })
+        $('#NotRequired').change(function () {
+            $('#txt_snomedcode').attr('disabled', 'disabled');
+            $('#txt_snomedcode').val('');
+            $('#txt_readcode').attr('disabled', 'disabled');
+            $('#txt_readcode').val('');
+        });
+        $('#SnomedCode').change(function () {
+            $('#txt_snomedcode').removeAttr('disabled');
+            $('#txt_readcode').attr('disabled', 'disabled');
+            $('#txt_readcode').val('');
+        });
+        $('#ReadCode').change(function () {
+            $('#txt_readcode').removeAttr('disabled');
+            $('#txt_snomedcode').attr('disabled', 'disabled');
+            $('#txt_snomedcode').val('');
+        });
+
+        $("#btn-save-options").click(function () {
+            val = $("input[name='QuestionType']:checked").val();
+            if ($('#AnswerText').val()=='') {
+                alertify.confirm('Answer Text is required').setHeader('<em> Alert Message </em>');
+            }
+            else {
+                debugger;
+                var QuestionOptions = {};
+                QuestionOptions.QuestionOption = $('#AnswerText').val();
+                var IsSnowmed = false;;
+                if ($("input[id='SnomedCode']:checked").val() == 'SnomedCode') {
+                    IsSnowmed = true;
+                    QuestionOptions.QuestionSnomedOptionCode = $('#txt_snomedcode').val();
+                    QuestionOptions.QuestionClinicalCode = $('#txt_snomedcode').val();
+                }
+                if ($("input[id='ReadCode']:checked").val() == 'ReadCode') {
+                    QuestionOptions.QuestionOptionCode = $('#txt_readcode').val();
+                    QuestionOptions.QuestionClinicalCode = $('#txt_readcode').val();
+                }
+
+                QuestionOptions.NestedQuestionId = $('#NestedQuestionId').val();
+
+                $('.Answers-table').show();
+                $('.dataTables_wrapper').css("position", "relative");
+                $('#field1').hide();
+                $('#AddAnswers').show();
+                if (!(window.editAnswer)) {
+                    i = ResultPost.rows().count();
+                    ResultPost.row.add([++i, QuestionOptions.QuestionOption, QuestionOptions.QuestionOptionNR, QuestionOptions.QuestionSnomedOptionCode, QuestionOptions.QuestionOptionCode, QuestionOptions.QuestionClinicalCode, QuestionOptions.NestedQuestionId, "<td><a class='EditAnswer'>  <i class='fa fa-edit fa-2x ' aria-hidden='true'></i></a><a class='removeDel'>  <i class='fa fa-trash-o fa-2x ' aria-hidden='true'></i></a> </td>"]).draw(false)
+
+                }
+                    else {
+                    window.data[0][1] = QuestionOptions.QuestionOption;
+                    window.data[0][3] = QuestionOptions.QuestionSnomedOptionCode;
+                    window.data[0][4] = QuestionOptions.QuestionOptionCode;
+                    window.data[0][5] = IsSnowmed ? QuestionOptions.QuestionSnomedOptionCode : QuestionOptions.QuestionOptionCode; // QuestionOptionCode based on value  .. Has to update it yet
+                    window.data[0][6] = QuestionOptions.NestedQuestionId;
+                    ResultPost.rows(window.editValue).data(window.data).draw(false)
+                    ResultPost.rows().invalidate();
+                }
+
+                $('#SaveQuestion').prop('disabled', false);
+            }
+            $('input[name="QuestionType"]').attr('disabled', 'disabled');
+            //$('input[name="QuestionType"]').not($("input[name='QuestionType']")[val - 1]).attr('disabled', 'disabled')
+
+        })
+
+        //age validation
+        $('#LessThan_Age1').on('input', function (e) {
+            var age1Val = $('#LessThan_Age1').val();
+            if (age1Val != '') {
+                $('#Age1Error').hide();
+            }
+            else {
+                $('#Age1Error').show();
+            }
+        })
+
+        $('#GreaterThan_Age1').on('input', function (e) {
+            var age2Val = $('#GreaterThan_Age1').val();
+            if (age2Val != '') {
+                $('#greaterAgeError').hide();
+            }
+            else {
+                $('#greaterAgeError').show();
+            }
+        })
+
+        $('#Between_Age1,#Between_Age2').on('input', function (e) {
+            var age1Val = $('#Between_Age1').val();
+            var age2Val = $('#Between_Age2').val();
+            if (age1Val != '' && age2Val != '') {
+                $('#BetweenAgeError').hide();
+            }
+            else {
+                $('#BetweenAgeError').show();
+            }
+        })
+
+        var form = $('#AddQuestion');
+        var validator = form.validate();
+
+        $('#SaveQuestion').click(function () {
+            $('#cover-spin').show();
+            Questionnairequest = {};
+            if (!form.valid()) {
+                alert("Required fields are missing. Form is not valid. ");
+                if ($('#LessThan').is(':checked') && $('#LessThan_Age1').val() == '') {
+                    $('#Age1Error').text("The age field is required");
+                }
+                if ($('#GreaterThan').is(':checked') && $('#GreaterThan_Age1').val() == '') {
+                    $('#greaterAgeError').text("The age field is required");
+                }
+                if ($('#Between').is(':checked') && $('#Between_Age1').val() == '') {
+                    $('#BetweenAgeError').text("the age field is required");
+                }
+            }
+
+            else {
+                var listOfQuestionOptions = [];
+                if (ResultPost.rows().count() > 0) {
+                    ResultPost.rows().every(function (rowIdx) {
+                        var Question = {};
+                        data = this.data();
+                        Question.OptionId = data[0];
+                        Question.QuestionOption = data[1];
+                        Question.QuestionOptionNR = data[2];
+                        Question.QuestionSnomedOptionCode = data[3];
+                        Question.QuestionOptionCode = data[4];
+                        Question.NestedQuestionId = data[6];
+                        listOfQuestionOptions.push(Question);
+                    });
+                }
+                var stringifiedlistOfQuestionOptions = JSON.stringify(listOfQuestionOptions);
+                $('#QuestionOptionsList').val(stringifiedlistOfQuestionOptions);
+                switch ($('input[name="QuestionType"]:checked').val()) {
+                    case '4':
+                        $('#QuestionDisplayType').val('Radio Button');
+                        break;
+                    case '3':
+                        $('#QuestionDisplayType').val('Check Box');
+                        break;
+                    case '2':
+                        $('#QuestionDisplayType').val('Numeric TextBox');
+                        break;
+                    case '1':
+                        $('#QuestionDisplayType').val('TextBox');
+                        break;
+                    default:
+                        $('#QuestionDisplayType').val('TextBox');
+                }
+
+                var serialisedform = form.serializeArray();
+                if ($('input[name="QuestionType"]:checked').val() == 4) {
+                    serialisedform.push({ name: 'QuestionType', value: "4" })
+                }
+                else if ($('input[name="QuestionType"]:checked').val() == 3) {
+                    serialisedform.push({ name: 'QuestionType', value: "3" })
+                }
+                var question = objectifyForm(serialisedform);
+                if (!($('#TextBox').is(':checked'))) {
+                    question.OptionCharLimit = 0;
+                }
+                Questionnairequest = question;
+                var questiontext = $('#questionarea').val();
+                $('#AddQuestionModal').modal('hide');
+                SendGoogleEventClick('event type', 'Questions', 'Add', 'Added Question(' + questiontext + ')');
+            }
+            //to show the error message again when the user click the save message
+            if ($('#LessThan').is(':checked')) {
+                $('#lessThanAge1').show();
+            }
+            if ($('#GreaterThan').is(':checked')) {
+                $('#GreaterthanAge').show();
+            }
+            if ($('#Between').is(':checked')) {
+                $('#BetweenAge1').show();
+            }
+            //to hide errors when user change the radio button list
+            $("input[name='Operation']").on("change", function () {
+
+                if ($('#lessThanAge1').length) {
+                    $('#lessThanAge1').hide();
+                }
+                if ($('#GreaterthanAge').length) {
+
+                    $('#GreaterthanAge').hide();
+                }
+                if ($('#BetweenAge1').length) {
+
+                    $('#BetweenAge1').hide();
+                }
+            })
+        })
+
+        function objectifyForm(formArray) {//serialize data function
+            var returnArray = {};
+            for (var i = 0; i < formArray.length; i++) {
+                returnArray[formArray[i]['name']] = formArray[i]['value'];
+            }
+            return returnArray;
+        }
+
+        //Edit Question
+        if ($('#questionarea').val())
+        {
+            isAddQuest = false;
+            var stringifiedlistOfQuestionOptions = $('#QuestionOptionsList').val();
+            if (stringifiedlistOfQuestionOptions.length > 0)
+                listOfQuestionOptions = JSON.parse(stringifiedlistOfQuestionOptions);
+
+            if (listOfQuestionOptions.length > 0) {
+                $.each(listOfQuestionOptions, function (index, option) {
+                    var QuestionOptions = option;
+                    if (option.QuestionSnomedOptionCode != null && option.QuestionSnomedOptionCode > 0)
+                        QuestionOptions.QuestionClinicalCode = option.QuestionSnomedOptionCode;
+                    if (option.QuestionOptionCode != null && option.QuestionOptionCode.length > 0)
+                        QuestionOptions.QuestionClinicalCode = option.QuestionOptionCode;
+
+                    ResultPost.row.add([QuestionOptions.OptionId, QuestionOptions.QuestionOption, QuestionOptions.QuestionOptionNR, QuestionOptions.QuestionSnomedOptionCode, QuestionOptions.QuestionOptionCode, QuestionOptions.QuestionClinicalCode, QuestionOptions.NestedQuestionId, "<td><a class='EditAnswer'>  <i class='fa fa-edit fa-2x ' aria-hidden='true'></i></a><a class='removeDel'>  <i class='fa fa-trash-o fa-2x ' aria-hidden='true'></i></a></td>"]).draw(false)
+                            });
+                $('#SaveQuestion').prop('disabled', false);
+                $('.Answers-table').show();
+                $('.dataTables_wrapper').css("position", "relative");
+                $('input[name="QuestionType"]').attr('disabled', 'disabled');
+                //$('input[name="QuestionType"]').not($("input[name='QuestionType']:checked").val()).attr('disabled', 'disabled');
+            }
+
+            if (val == '1') {
+                $('#AddAnswers').hide();
+                $('#field2').show();
+            }
+            else if (val == '2') {
+                $('#AddAnswers').hide();
+            }
+            var operation = $("input[name='Operation']:checked").val();
+
+            if (operation == "Less than") {
+                $('input[id="LessThan_Age1"]').prop("disabled", false);
+                $('input[id="LessThan_Age1"]').val(@Model.Age1);
+            }
+            if (operation == "Over") {
+                $('input[id="GreaterThan_Age1"]').prop("disabled", false);
+                $('input[id="GreaterThan_Age1"]').val(@Model.Age1)
+            }
+            if (operation == "Between") {
+                $('input[id="Between_Age1"]').prop("disabled", false);
+                $('input[id="Between_Age2"]').prop("disabled", false);
+                $('input[id="Between_Age1"]').val(@Model.Age1)
+                $('input[id="Between_Age2"]').val(@Model.Age2)
+            }
+        }
+
+        $('#DeleteModal').find('.btn-cancel').click(function () {
+            $('#DeleteModal').modal('hide');
+        });
+
+        $('#DeleteModal').find('.btn-ok').click(function () {
+                ResultPost
+                .rows(window.value)
+                .remove()
+                .draw(false);
+
+            ResultPost.rows().invalidate();
+
+            if (ResultPost.data().count() == 0) {
+                $('#Answerstable').hide();
+                $('#SaveQuestion').prop('disabled',true);
+            }
+            $('#DeleteModal').modal('hide');
+            alertify.success("Answer has been deleted Successfully");
+            if (ResultPost.data().count() <= 0) {
+                $('input[name="QuestionType"]').prop("disabled",false)
+                          }
+        });
+
+        ResultPost.on("click", ".removeDel", function () {
+            window.value = $(this).parents('tr');
+            $('#DeleteModal').modal('show');
+
+        });
+
+        ResultPost.on("click", ".EditAnswer", function () {
+            window.editAnswer = true;
+            window.editValue = $(this).parents('tr');
+            window.data = ResultPost.rows(window.editValue).data();
+            $('#AddAnswers').hide();
+            $('#field1').show();
+            $('#AnswerText').val(window.data[0][1]);
+            $('input[value="NotRequired"]').prop('checked', true);
+            $('#txt_snomedcode').prop("disabled", true);
+            $('#txt_readcode').prop("disabled", true);
+            $('#txt_snomedcode').val('');
+            $('#txt_readcode').val('');
+            if (window.data[0][3] != 0 && window.data[0][3] != undefined) {
+                $('input[value="SnomedCode"]').prop('checked', true);
+                $('#txt_snomedcode').prop("disabled", false);
+                $('#txt_readcode').prop("disabled", true);
+                $('#txt_snomedcode').val(window.data[0][3]);
+            }
+            if (window.data[0][4] != "" && window.data[0][4] != undefined) {
+                $('input[value="ReadCode"]').prop('checked', true);
+                $('#txt_readcode').prop("disabled", false);
+                $('#txt_snomedcode').prop("disabled", true);
+                $('#txt_readcode').val(window.data[0][4]);
+            }
+            $('#NestedQuestionId').val(window.data[0][6]);
+
+        });
+        $('#btnCancelButton').click(function () {
+            Questionnairequest = {};
+            $('#CancelModal').modal('hide');
+        })
+        $('#btnOkButton').click(function () {
+            Questionnairequest = {};
+            $('#CancelModal').modal('hide');
+            $('#AddQuestionModal').modal('hide');
+        })
+        $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+    })
+
+</script>
+
+<div id="cover-spin"></div>
+<div class="modal-dialog modal-md">
+    <div class="modal-content" style="overflow:auto">
+        <div class="modal-header" style="overflow:auto; padding: 20px !important">
+            @if (string.IsNullOrEmpty(Model.QuestionText))
+            {
+            <span> Add Question</span>}
+            else
+            {
+            <span> Edit Question</span>}
+        </div>
+
+        <form id="AddQuestion">
+            <div class="modal-body">
+                @Html.HiddenFor(m => m.QuestionOptionsList, new { @Id = "QuestionOptionsList" })
+                @Html.HiddenFor(m => m.QuestionId)
+                @Html.HiddenFor(m => m.QuestionnaireId)
+                @Html.HiddenFor(m => m.QuestionDisplayType, new { @Id = "QuestionDisplayType" })
+                @Html.HiddenFor(m => m.Order)
+
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">Question<span class="requiredfield">*</span></p>
+                    <label class="control-float-left question-text" style="font-weight: normal"><span id="NumOfChar">0</span>/175 Char</label>
+                    @Html.TextAreaFor(model => model.QuestionText, new { @class = "form-control control-float-left message-textbox options-text", @Id = "questionarea", @maxLength = "175" })
+                    <div id="divVal" class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.QuestionText)</div>
+                </div>
+
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">Answer Type</p>
+
+                    <div>
+                        <label>
+                            @Html.RadioButtonFor(x => x.QuestionType, 4, new { @class = "control-float-left radio-buttons", @Id = "RadioButtonList" })
+                            <span class="options-text">Radio Button List</span>
+                            <i class="fa fa-question questionmark-help" aria-hidden="true" title="select one of several possible answers"></i>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            @Html.RadioButtonFor(x => x.QuestionType, 3, new { @class = "control-float-left radio-buttons", @Id = "CheckboxList" })
+                            <span class="options-text">Checkbox List</span>
+                            <i class="fa fa-question questionmark-help" aria-hidden="true" title="select one of several possible answers"></i>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            @Html.RadioButtonFor(x => x.QuestionType, 2, new { @class = "control-float-left radio-buttons", @Id = "NumericTextBox" })
+                            <span class="options-text">Numeric Text Box</span>
+
+                        </label>
+                    </div>
+                    <div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.QuestionType, 1, new { @class = "control-float-left radio-buttons", @Id = "TextBox" })
+                                        <span class="options-text">TextBox</span>
+                                    </label>
+
+                                </td>
+
+                                <td id="field2" class="options-text" style="padding-left:5px">
+                                    @Html.TextBoxFor(x => x.OptionCharLimit, new { type = "number", Id = "optioncharachterlimit", @style = "max-width:55px" }) character limit(200 max)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+
+                                    <p class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.OptionCharLimit)</p>
+                                </td>
+
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+
+                <table class="table table-responsive Answers-table table-border control-float-left" id="Answerstable" style='border:1px solid #f2f2f2;'>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ANSWER TEXT</th>
+                            <th>NR</th>
+                            <th>SNOMED CODE</th>
+                            <th>READ CODE</th>
+                            <th class="text-center-align">CLINICAL CODE</th>
+                            <th>NESTED QUESTION</th>
+                            <th> </th>
+                        </tr>
+                    </thead>
+                </table>
+
+                <div id="field1" class="control-float-left field-spacing" style="padding-left: 10px;padding-top:20px;">
+                    <label class="control-float-left field-spacing question-text">Answers</label>
+                    <div style="padding:10px;">
+                        <div class="control-float-left field-spacing" style="display:-webkit-box;padding-bottom:0px;">
+                            <p class="question-text">Answer</p><span class="required">*</span>
+                            <input name="AnswerText" type="text" id="AnswerText" placeholder="Answer Text"
+                                   style="display:inline;" class="form-control control-float-left options-text col-md-10 answerOptions" />
+                        </div>
+                        <div class="control-float-left field-spacing" style="display:-webkit-box;padding-bottom:0px;">
+                            <p class="question-text">Code</p>
+                            <br /><br />
+                            <table class="control-float-left field-spacing">
+                                <tr>
+                                    <td class="td-number-input">
+                                        <label>
+                                            <input type="radio" id="NotRequired" value="NotRequired" name="code" style="width:40px;height:15px" class="answerOptions">
+                                            <span class="options-text answerOptions">Not Required</span>
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="td-number-input">
+
+                                        <label>
+                                            <input type="radio" id="SnomedCode" value="SnomedCode" name="code" style="width:40px;height:15px" class="answerOptions">
+                                            <span class="options-text answerOptions">Snomed Code</span>
+                                        </label>
+                                    </td>
+                                    <td class="td-number-input">
+                                        <input type="number" id="txt_snomedcode" name="SnomedCode" class="form-control col-md-15 code-box snowmedCode answerOptions" placeholder="Snomed Code" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="td-number-input">
+                                        <label>
+                                            <input type="radio" id="ReadCode" value="ReadCode" name="code" style="width:40px;height:15px" class="answerOptions">
+                                            <span class="options-text answerOptions">Read Code</span>
+                                        </label>
+                                    </td>
+                                    <td class="td-number-input">
+                                        <input type="text" id="txt_readcode" name="ReadCode" class="form-control col-md-6 code-box answerOptions" placeholder="Read Code" />
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+
+                        <div class="control-float-left field-spacing" id="NestedQnsDiv">
+                            <div>
+                                <p class="question-text">If this answer is selected, go to...</p>
+                            </div>
+                            <br />
+                            <div style="padding-left: 50px" class="answerOptions">
+                                @Html.DropDownList("NestedQuestions", Model.NestedQuestions,
+                                new { @class = "form-control nested-questionStyle", @Id = "NestedQuestionId" })
+                            </div>
+                        </div>
+
+                        <div class="control-float-left field-spacing" style="float: right">
+                            <button style="width:100px;text-align:center" class="btn btn-default" id="btn_cancel" type="button">Cancel</button>
+                            <button style="width:100px;text-align:center" class="btn btn-primary" id="btn-save-options" type="button">Save</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="control-float-left field-spacing" id="AddAnswers">
+                    <span class="options-text">Answers</span>
+                    <br />
+                    <button style="width:100px;text-align:center" class="btn btn-primary" id="btn_addanswers" type="button">Add Answer</button>
+
+                </div>
+
+                <div class="control-float-left field-spacing" style="margin-top:15px;">
+                    <p class="question-text">Gender</p>
+                    <div>
+                        <div>
+                            <label>
+                                @Html.RadioButtonFor(x => x.Gender, "None", new { @class = "control-float-left radio-buttons", @checked = (Model.Gender == null) })
+                                <span class="options-text">All Genders</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                @Html.RadioButtonFor(x => x.Gender, "F", new { @class = "control-float-left radio-buttons" })
+                                <span class="options-text">Female</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                @Html.RadioButtonFor(x => x.Gender, "M", new { @class = "control-float-left radio-buttons" })
+                                <span class="options-text">Male</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">Age:</p>
+                    <table style="margin: 10px; font-size: 20px;">
+                        <tr>
+                            <td>
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.Operation, "None",
+                                        new
+                                        {
+                                        @class = "control-float-left radio-buttons",
+                                        @Id = "AllAges",
+                                        @checked = (Model.Operation == null)
+                                        })
+                                        <span class="options-text">All Ages</span>
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.Operation, "Less than", new { @class = "control-float-left radio-buttons", @Id = "LessThan" })
+                                        <span class="options-text">Less than</span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td class="td-number-input">
+                                @Html.TextBoxFor(m => m.Age1, new { @type = "number", @Id = "LessThan_Age1", disabled = "disabled", min = 1, max = 150, @placeholder = "Age" })
+                            </td>
+                            <td class="td-number-input">years old</td>
+                            <td>
+                                <div id="Age1Error" class="errorMsg"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.Operation, "Over", new { @class = "control-float-left radio-buttons", @Id = "GreaterThan" })
+                                        <span class="options-text">Over</span>
+                                    </label>
+                                </div>
+
+                            </td>
+                            <td class="td-number-input">
+                                @Html.TextBoxFor(m => m.Age1, new { type = "number", Id = "GreaterThan_Age1", disabled = "disabled", min = 1, max = 150, @placeholder = "Age" })
+                            </td>
+                            <td class="td-number-input">years old</td>
+                            <td>
+                                <div id="greaterAgeError" class="errorMsg"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.Operation, "Between", new { @class = "control-float-left radio-buttons", @Id = "Between" })
+                                        <span class="options-text">Between</span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td class="td-number-input">
+                                @Html.TextBoxFor(m => m.Age1, new { type = "number", Id = "Between_Age1", disabled = "disabled", min = 1, max = 150, @placeholder = "Age" })
+                            </td>
+                            <td class="td-number-input" style="text-align: center;">and</td>
+                            <td>
+                                @Html.TextBoxFor(m => m.Age2, new { type = "number", Id = "Between_Age2", disabled = "disabled", min = 1, max = 150, @placeholder = "Age" })
+                            </td>
+                            <td class="td-number-input">years old</td>
+                            <td>
+                                <div id="BetweenAgeError" class="errorMsg"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-footer control-float-left field-spacing-popup">
+            <button class="btn btn-default btn-lg cancel-button" type="button" id="CancelSavingQuestion">Cancel</button>
+            <button class="btn btn-primary btn-lg submit-button" type="button" id="SaveQuestion">Save Question</button>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="DeleteModal" role="dialog" data-keyboard="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Question
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" type="button" style="margin-right:5px">No, cancel</button>
+                <button class="btn btn-danger btn-ok" type="button">Yes, delete it</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="CancelModal" role="dialog" data-keyboard="true">
+    <div class="modal-dialog" style="width:35%;margin-right:2%;margin-bottom:1%">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add/Update Question
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" style="margin-right:5px" id="btnCancelButton">No, Stay</button>
+                <button class="btn btn-danger btn-ok" id="btnOkButton">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

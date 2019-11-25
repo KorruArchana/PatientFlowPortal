@@ -1,0 +1,214 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.AppointmentViewModel
+
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">
+            Appointments
+        </span>
+
+    </div>
+
+</div>
+
+<div id="grdAppointments" class="rightBlockContent">
+    <div>
+        <input type="text" id="txtStartDate" placeholder="From Date..." class="rightTxtBox " data-bind='datepicker: { dateFormat:"dd/mm/yy" }' />
+        <input type="text" id="txtToDate" placeholder="To Date..." class="rightTxtBox" data-bind='datepicker: { dateFormat:"dd/mm/yy" }' />
+        <button name="btnSearch" type="submit" class="icon searchBox" data-bind="click:initialize"><i class="fa fa-search"></i> Search</button>
+    </div>
+    <table class="TFtable">
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Appointment Time</th>
+                <th>Patient Name </th>
+                <th>Email </th>
+                <th>Mobile </th>
+                <th>Home Telephone </th>
+                <th>Work Telephone </th>
+                <th>Post Code </th>
+                <th>Status </th>
+                <th>Session Holder</th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: items">
+            <tr>
+                <td data-bind="text: BookedPatient.Id"></td>
+                <td data-bind="text: AppointmentTimeString"></td>
+                <td data-bind="text: BookedPatient.Title +'. '+ BookedPatient.FirstName +' '+ BookedPatient.FamilyName"></td>
+                <td data-bind="text: BookedPatient.Email"></td>
+                <td data-bind="text: BookedPatient.Dob"></td>
+                <td data-bind="text: BookedPatient.HomeTelephone"></td>
+                <td data-bind="text: BookedPatient.WorkTelephone"></td>
+                <td data-bind="text: BookedPatient.PostCode"></td>
+                <td data-bind="text: AppointmentStatus"></td>
+                <td data-bind="text: SessionHolder.Title +'. '+ SessionHolder.FirstName +' '+ SessionHolder.LastName"></td>
+
+            </tr>
+        </tbody>
+        <tbody data-bind="ifnot: items().length">
+            <tr>
+                <td colspan="9" style="text-align:center">No records found.</td>
+            </tr>
+        </tbody>
+        <tfoot data-bind="if: items().length">
+            <tr style="background-color:white;">
+                <td colspan="9"><div id="paginationHolder"></div></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div style="color: red; margin-left: 40px" data-bind="text : errorMessage">
+        @Html.ValidationMessage("CustomError")
+    </div>
+
+</div>
+@{
+    int pageSize = EMIS.PatientFlow.Web.Helper.Config.PageSize;
+
+}
+<script type="text/javascript">
+
+    var appointmentViewModel = function (pageSize,Id) {
+        var self = this;
+        self.errorMessage=ko.observable('');
+        self.items = ko.observableArray();
+        self.organisation = ko.observable(Id);
+        self.fromDate = ko.observable('');
+        self.toDate = ko.observable('');
+        self.currentPage = ko.observable(1);
+
+        self.totalCount = ko.observable(1);
+        self.pageSize = pageSize;
+        self.pageCount = ko.computed(function () {
+            if ((self.totalCount() % self.pageSize) == 0)
+                return parseInt((self.totalCount() / self.pageSize));
+            else
+                return parseInt((self.totalCount() / self.pageSize)) + 1;
+        });
+
+        self.getDate = function(value){
+            return $.datepicker.formatDate("dd/mm/yy", value);;
+        }
+        self.initialize = function () {
+            self.errorMessage('');
+            var startDate = $('#txtStartDate').datepicker("getDate");
+            var endDate = $('#txtToDate').datepicker("getDate");
+            
+            if(startDate) 
+                self.fromDate($.datepicker.formatDate("dd/mm/yy", startDate));
+            else
+            {
+                startDate = new Date();
+                $('#txtStartDate').datepicker('setDate', new Date());    
+                self.fromDate($.datepicker.formatDate("dd/mm/yy", new Date()));
+            }
+
+            if(endDate) 
+                self.toDate($.datepicker.formatDate("dd/mm/yy",endDate));
+            else
+            {
+                endDate =new Date();
+                $('#txtToDate').datepicker('setDate', $.datepicker.formatDate("dd/mm/yy", new Date()));
+                self.toDate($.datepicker.formatDate("dd/mm/yy", new Date()));
+            }
+
+            self.currentPage(1);
+            self.totalCount(0);
+            self.items.removeAll();
+            if(startDate > endDate)
+            {
+                self.errorMessage('End Date should be greater than Start Date.');
+            }
+            else
+                self.getData(self.currentPage());
+        }
+        self.isCompleted = ko.observable(true);
+
+        self.getData = function (pageNumber) {
+            loadingSpinner.show();
+            self.isCompleted(false);
+            self.errorMessage('');
+            $.connection.hub.stop();
+            $.connection.hub.start().done(function () {
+                $.connection.hub.qs = "token=@Model.Token";
+                hub.server.getAppointments( 
+                    self.organisation(),
+                    self.fromDate(),
+                    self.toDate(),
+                    pageNumber,
+                    self.pageSize);
+                self.currentPage(pageNumber);
+            });
+
+            setTimeout(function() {
+                if(!vm.isCompleted()){
+                    vm.errorMessage('Timeout occurred. Please try after some time.');
+                    loadingSpinner.hide();
+                    vm.isCompleted(true);
+                }
+            }, 30000); 
+        }
+
+        self.createPagination = function () {
+
+            $("#paginationHolder").pagination({
+                pages: self.pageCount(),
+                itemsOnPage: self.pageSize,
+                currentPage: self.currentPage(),
+                cssStyle: 'light-theme',
+                onPageClick: self.loadPage // fires when a page is clicked
+            });
+
+        };
+        self.loadPage = function (pageNo, event) {
+            console.log(pageNo);
+            self.getData(pageNo);
+        };
+
+        self.initialize();
+    };
+    var vm ;
+    var hub;
+    $(document).ready(function () {
+
+        var url = '@EMIS.PatientFlow.Web.Helper.Config.ConfigSiteUrl';
+
+        if (url.substr(-1) == '/') {
+            url = url.substr(0, url.length - 1);
+        }
+        $.connection.hub.logging = true;
+        $.connection.hub.url = url + '/signalr';
+        hub = $.connection.OrganisationHub;
+        if (hub != undefined) {
+            hub.on('Appointments', function(data) {
+                loadingSpinner.hide();
+                vm.isCompleted(true);
+                vm.errorMessage('');
+                vm.items.removeAll();
+                vm.totalCount(data.TotalCount);
+
+                if (data.Appointments != null && data.Appointments.length > 0) {
+                    for (i = 0; i < data.Appointments.length; i++) {
+                        vm.items.push(data.Appointments[i]);
+                    }
+                }
+                vm.createPagination();
+            });
+            $.connection.hub.stop();
+            $.connection.hub.start().done(function() {
+                vm = new appointmentViewModel(@pageSize, @Model.OrganisationId);
+            var element = document.getElementById('grdAppointments');
+            ko.cleanNode(element);
+            ko.applyBindings(vm, element);
+            $('#txtStartDate').datepicker('setDate', new Date());   
+            $('#txtToDate').datepicker('setDate', new Date());
+            $.connection.hub.error(function (error) {
+                vm.errorMessage(error);
+                vm.isCompleted(true);
+                loadingSpinner.hide();
+            });
+        });
+    }
+    });
+</script>

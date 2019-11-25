@@ -1,0 +1,109 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.UserListViewModel
+
+@{
+    ViewBag.Title = "UsersList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "Account")
+<script src="~/Scripts/ViewCommonScripts/AccountCommonScript.js"></script>
+
+
+@Html.Hidden("IndexAccountUrl", Url.Action("Index", "Account"))
+@Html.Hidden("AddAccountUrl", Url.Action("Register", "Account"))
+@Html.Hidden("EditAccountUrl", Url.Action("UpdateUser", "Account", new { userName = "__userName__" }))
+@Html.Hidden("ResetPswdUrl", Url.Action("ResetPassword", "Account", new { userName = "__userName__" }))
+@Html.Hidden("CurrentUserName")
+<script>
+    $(document).ready(function () {
+          $('#CurrentUserName').val(@Html.Raw(Json.Encode(@HttpContext.Current.User.Identity.Name)));
+    })
+</script>
+<div style="width: 100%; justify-content: center;padding: 0px !important;flex-grow:1" class="mdl-grid lightblueBackground">
+    <div class="mdl-card portalMdlCard DepUserPracticeAdminStyle" style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Users</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                    New User
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="UserActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect UserAction"
+                    for="UserActions">
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Remove user</a></span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Reset password</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="user-table">
+                <tbody>
+                    @foreach (var item in Model.Users)
+                    {
+                        <tr>
+                            <td data-name="@item.UserName" class="checkboxWidth">
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="@item.Name">
+                                    <input type="checkbox" id="@item.Name" class="mdl-checkbox__input" name="UserActionCheckbox" />
+                                </label>
+                            </td>
+                            <td class="LeftAlignText">@item.UserName</td> @*THis should be name*@
+                            <td class="LeftAlignText">@item.OrganisationName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+           var eventCategory = 'Users';
+           var successMessage = '@TempData["SuccessMessage"]'
+           var errorMessage = '@TempData["ErrorMessage"]'
+           var resetPwdSuccess = '@TempData["ResetPwdSuccess"]'
+           if (successMessage != '') {
+                createSnackbar(successMessage);
+           }
+           if (errorMessage != '') {
+                createSnackbar(errorMessage);
+           }
+           if (resetPwdSuccess != '') {
+               createSnackbar(resetPwdSuccess);
+           }
+
+           var DeleteMessage =  @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+           var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+           if (DeleteMessage != '' && DeleteMessage != null) {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+           }
+           if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+    </script>
+}

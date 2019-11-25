@@ -1,0 +1,264 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.KioskListingViewModel
+@{
+    ViewBag.Title = "EgtonKiosk";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "KioskList")
+
+<script src="~/Scripts/UserScripts/UserDefinedFunctions.js"></script>
+<script src="~/Scripts/ViewCommonScripts/KioskCommonScript.js"></script>
+
+<script>
+    var dataTable;
+
+    $(document).ready(function () {
+        showLoading();
+        var columnindex = 0;
+        var i = 0;
+
+        DataTableIntialization($(window).width());
+
+        //$(window).resize(function () {
+        //    if ($.fn.dataTable.isDataTable('#kiosk-portal-table')) {
+        //        $('.dataTables_paginate,.dataTables_length,.dataTables_info').remove();
+        //        $('#kiosk-portal-table').DataTable().destroy();
+        //        DataTableIntialization($(window).width());
+        //    }
+        //})
+
+        function DataTableIntialization(width) {
+            dataTable = $('#kiosk-portal-table').DataTable({
+                "dom": "rt<'bottom' lip><'clear'>",
+                bPaginate: true,
+                serverSide: true,
+                bFilter: true,
+                processing: true,
+                info: true,
+                pagingType: "simple",
+                bSortCellsTop: true,
+                searching: true,
+                language: {
+                    processing: '<div class="dataTables_wrapper" > Loading... </div>',
+                    paginate: {
+                        next: ' <i class="material-icons" id="prev">chevron_right</i>',
+                        previous: '<i class="material-icons" id="next">chevron_left</i>'
+                    },
+                    sLengthMenu: width < 380 ? "Rows : _MENU_" : "Rows per Page : _MENU_"
+                },
+                "order": [[1, "asc"]],
+                orderCellsTop: true,
+                columnDefs: [{
+                    "targets": '_all',
+                    "className": "mdl-data-table__cell--non-numeric datawraptext"
+                },
+                {
+                    "targets": [0, 'no-sort'],
+                    "orderable": false,
+                    bSortable: false
+                }],
+                createdRow: function (row, data, dataIndex) {
+                    $(row).find('td:eq(1)').attr('data-id', data.Id);
+                    $(row).find('td:eq(7)').attr('data-cguid', data.ConnectionGuid);                    
+                },
+                columns: [
+                    {
+                        data: null,
+                        className: "center",
+                        render: function (data, type, row) {
+                            var td = '<td>\
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="' + row.Id + '">\
+                                    <input type="checkbox" class="mdl-checkbox__input" name="kioskActionCheckbox"  id="'+ row.Id + '"/>\
+                                </label>\
+                            </td>'
+                            return td;
+                        },
+                    },
+                    { data: "KioskName" },
+                    { data: "Title" },
+                    { data: "IpAddress" },
+                    { data: "PcName" },
+                    { data: "KioskVersion" },
+                    { data: "Usage" },
+                    { data: "KioskStatus" },
+                    { data: "OrganisationName" }
+                ],
+                ajax: function (data, callback, settings) {
+                    filterValues = {};
+                    filterValues.draw = data.draw;
+                    filterValues.start = data.start;
+                    filterValues.length = data.length;
+                    filterValues.search = data.search;
+                    filterValues.order = data.order;
+                    filterValues.columns = data.columns;
+                    $.ajax({
+                        url: '../EgtonKiosk/GetKiosksData',
+                        method: 'GET',
+                        data: filterValues
+                    }).done(callback);
+                },
+                "fnDrawCallback": function () {
+                    componentHandler.upgradeAllRegistered();
+
+                    $('.mdl-tooltip').toggle(function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    }, function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    });
+                }
+            });
+        }
+       
+
+        $('.kiosk-search-row td').each(function (index, value) {
+            var title = $(this).text();
+            if (title != 'Actions' && title != 'Divert' && title != 'Publish' && title != '') {
+                $(this).html('<input type="text" data-column="' + index + '" placeholder="Search" class="column_search" style="height: 56px;"/>');
+            }
+            else { $(this).html(""); }
+        });
+
+        $('input[type="Text"]').on('keyup', function () {
+            var i = $(this).attr('data-column');
+            var v = $(this).val();
+            dataTable.column(i).search(v).draw();
+        });
+        
+        $('.mdl-mini-footer-page .mdl-card__actions').append($(".dataTables_paginate,.dataTables_length,.dataTables_info"));
+        hideLoading();
+    });
+
+</script>
+
+@Html.Hidden("AddKioskUrl", Url.Action("AddKiosk", "Kiosk"))
+@Html.Hidden("EditKioskUrl", Url.Action("EditKiosk", "Kiosk", new { kioskId = "__id__" }))
+@Html.Hidden("IndexKioskUrl", Url.Action("Index", "Kiosk"))
+
+
+<div style="width: 100%; justify-content: center;padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard"  style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Kiosks</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                @if (!User.IsInRole("Practice Admin"))
+                {
+
+                    <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                        ADD KIOSK
+                    </button>
+                }
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="KioskActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect KioskAction"
+                    for="KioskActions">
+                    <li class="mdl-menu__item">
+                        <span>
+                            <a class="mdl-navigation__link" id="Restartkiosk"
+                               href="#">Restart kiosk</a>
+                        </span>
+                    </li>
+                    <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">
+                        <span>
+                            <a class="mdl-navigation__link" id="KioskKeys"
+                               href="#">Kiosk Keys</a>
+                        </span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Delete</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="kiosk-portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="kioskname">Kiosk Name</th>
+                        <th id="kiosktitle">Kiosk Title</th>
+                        <th id="ipaddr">IP Address</th>
+                        <th id="hostname">Host Name</th>
+                        <th id="kioskversion">Kiosk Version</th>
+                        <th id="usage">Usage</th>
+                        <th id="connectstatus">Connection Status</th>
+                        <th id="organisationname">Organisation</th>
+                    </tr>
+                    <tr class="kiosk-search-row hidden">
+                        <td></td>
+                        <td>kiosk Name</td>
+                        <td>Kiosk Title</td>
+                        <td>IP Address</td>
+                        <td>Host Name</td>
+                        <td>Kiosk Version</td>
+                        <td>Usage</td>
+                        <td>Connection Status</td>
+                        <td>Organisation</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <content class="mdl-tooltip mdl-tooltip--large" for="kioskname">Kiosk Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="kiosktitle">Kiosk Title</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="ipaddr">IP Address</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="hostname">Host Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="kioskversion">Kiosk Version</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="usage">Usage</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="connectstatus">Connection Status</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="organisationname">Organisation</content>
+        </div>
+        <footer class="mdl-mini-footer-page">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(function () {
+            var eventCategory = 'Kiosks';
+            var successMessage = '@TempData["successMessage"]'
+            var errorMessage = '@TempData["ErrorMessage"]'
+            if (successMessage != '') {
+                createSnackbar(successMessage);
+            }
+            if (errorMessage != '') {
+                createSnackbar(errorMessage);
+            }
+
+            var DeleteMessage =  @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null) {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+    </script>
+
+}
+

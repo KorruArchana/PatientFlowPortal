@@ -1,0 +1,123 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.ConfirmBooking"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="350" d:DesignWidth="300"
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             xmlns:keyBoard="clr-namespace:EMIS.PatientFlow.Kiosk.KeyBoard"
+             DataContext="{Binding ConfirmBooking, Source={StaticResource Locator}}">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+            <TextBlock TextAlignment="Left" Text="{Binding BookMyAppointmentText}" 
+                       Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold" Margin="0,30,10,0"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}"/>
+
+            <Viewbox Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <local:ProgressBarUc Visibility="{Binding IsProgressBarVisible,  UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"/>
+            </Viewbox>
+            
+            <Grid Background="#F1F1F1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="5*"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="15" >
+                    <TextBlock Style="{StaticResource FirstAvailableAppDateTimeStyle}" 
+                               Text="{Binding BookingDate}" />
+
+                    <TextBlock Style="{StaticResource FirstAvailableAppTimeStyle}" TextWrapping="Wrap">
+                        <Run Text="{Binding BookingTime}"/>
+                        <Run Text="{Binding SlotName}" Style="{StaticResource FirstAvailableAppDocotorAndSlotRunStyle}" Foreground="#3D8480"/>
+                    </TextBlock>
+
+                    <TextBlock Style="{StaticResource FirstAvailableAppDocotorAndSlotStyle}" TextWrapping="Wrap"
+                               Text="{Binding DoctorName}" />
+                </StackPanel>
+                
+                <Line Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" 
+                      Stroke="#DEDEDE" StrokeThickness="3" Margin="0,10"
+                      Y1="0" Y2="{Binding ActualHeight,RelativeSource={RelativeSource Self}}" X1="0" X2="0"/>
+
+                <TextBlock Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15"
+                           Style="{StaticResource FirstAvailableAppDocotorAndSlotStyle}">
+                    <Run Text="{Binding BranchSiteName}"/>
+                </TextBlock>
+                
+            </Grid>
+
+            <TextBlock x:Name="ReasonForAppTextBlock" HorizontalAlignment="Stretch" TextAlignment="Left" 
+                       Visibility="{Binding IsReasonTextVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockSmallFont, Source={StaticResource Locator}}" 
+                       Margin="0,20,0,10" Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold">
+                <Run Text="{Binding EnterReasonForAppointmentText}"/>
+                <Run Text="{Binding OptionalOrMandatoryText}"/>
+            </TextBlock>
+
+            <Border BorderBrush="{Binding TexBoxBorderBrush}" BorderThickness="2"
+                    Visibility="{Binding IsReasonTextVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+                <StackPanel Orientation="Vertical">
+                    <TextBox  keyBoard:TouchScreenKeyboard.TouchScreenKeyboard="True" x:Name="tbkAnswerText" 
+                      Template="{StaticResource TextBoxBaseControlTemplate}"
+                      Height="{Binding SizeHelperModel.ResolutionHelper.ButtonsMinimumHeight, Source={StaticResource Locator}}"
+                      VerticalContentAlignment="Top" Margin="0,0,0,20" 
+                      Foreground="{Binding TextBoxForegroundColor}" HorizontalAlignment="Left" VerticalAlignment="Top" TextWrapping="Wrap" 
+                      MinHeight="{Binding SizeHelperModel.ResolutionHelper.DayButtonHeight,Source={StaticResource Locator}}" MaxLength="200" Padding="5"
+                      FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}"
+                      Width="{Binding ActualWidth, ElementName=ReasonForAppTextBlock}"
+                      Text="{Binding SelectedAnswer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    </TextBox>
+
+                    <TextBlock Background="{x:Null}" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                               Foreground="{Binding TextBoxForegroundColor}" Padding="5"
+                               FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" >
+                        <Run Text="{Binding EnteredCharText,Mode=TwoWay}"/>
+                        <Run Text="/"/>
+                        <Run Text="{Binding MaximumCharText}"/>
+                    </TextBlock>
+                    
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{Binding CannotBeMoreThanXCharText}" HorizontalAlignment="Left" VerticalAlignment="Top"
+                       Foreground="#DB4F4B" Margin="0,15,0,10"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}"/>
+        </StackPanel>
+
+        <Button Grid.Row="1" Grid.Column="1" Padding="20"
+                Style="{StaticResource NextButtonStyle}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                FontWeight="Bold"
+                Content="{Binding BookMyAppointmentText}"
+                Command="{Binding ConfirmBooking.BookMyAppointmentCommand, Source={StaticResource Locator}}"
+                IsHitTestVisible="{Binding EnableScreenTap}"/>
+
+    </Grid>
+    
+</UserControl>

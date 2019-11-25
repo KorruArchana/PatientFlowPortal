@@ -1,0 +1,103 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SingleAppointmentUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             mc:Ignorable="d" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding SingleAppointment, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </UserControl.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2.5*"/>
+            <RowDefinition Height="4.5*"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.25*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="0.25*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom">
+            <DockPanel Margin="0,0,0,30">
+                <TextBlock TextWrapping="Wrap" DockPanel.Dock="Left"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+                           Foreground="{DynamicResource LightGrayColor}" Margin="0,15,0,5"
+                           HorizontalAlignment="Left" VerticalAlignment="Top" TextAlignment="Left">
+                    <Run Text="{Binding HiText, Mode=TwoWay}"/>
+                    <Run Text="{Binding PatientNameText, Mode=TwoWay}" Style="{DynamicResource HighLightMessageStyleRun}"/>
+                </TextBlock>
+                <Button Style="{StaticResource NoneButtonStyle}" Height="55" Padding="10,3"
+                        MinWidth="200" MaxWidth="400" HorizontalAlignment="Right"
+                        Command="{Binding SingleAppointment.NotYouCommand, Source={StaticResource Locator}}">
+                    <TextBlock Text="{Binding NotYouText}"/>
+                </Button>
+            </DockPanel>
+            <Line Stroke="#DEDEDE" StrokeThickness="2" Margin="0,0,0,10"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                  X2="{Binding ActualWidth,RelativeSource={RelativeSource Self}}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="1"  Margin="0,20,0,0" 
+                    Visibility="{Binding AppointmentDetail.IsEnabled,Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+            <TextBlock Padding="10" TextAlignment="Left" Foreground="{DynamicResource LightGrayColor}"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}">
+                <Run Text="{Binding AppointmentText}"/>
+                <Run FontWeight="{Binding AppointmentDetail.AppointmentTimeStyle}"  Text="{Binding AppointmentDetail.Time}"/>
+                <Run Text="{Binding DataContext.WithText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TextBlock}}}"/>
+                <Run FontWeight="Bold" Text="{Binding AppointmentDetail.Name}"/>
+            </TextBlock>
+
+            <Button Margin="0,20,0,0" Height="100"
+                Style="{StaticResource NextButtonStyle}"
+                Command="{Binding SingleAppointment.ConfirmCommand, Source={StaticResource Locator}}" 
+                HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock  FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockXXLargeFont, Source={StaticResource Locator}}" 
+                               FontWeight="Bold" Padding="5">
+                    <Run Text="{Binding CheckInText}"/>
+                    <Run Text="&gt;"/>
+
+                    </TextBlock>
+                 </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <Button x:Name="ErrorButton" Grid.Row="1" Grid.Column="1" 
+                HorizontalContentAlignment="Left" VerticalContentAlignment="Stretch"
+                HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                MinHeight="150" Margin="0,20,0,0" 
+                Style="{StaticResource ErrorAppointmentButtonStyle}"
+                Visibility="{Binding AppointmentDetail.IsErrorMessageVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+            <DockPanel HorizontalAlignment="Left" VerticalAlignment ="Top" >
+                <Image DockPanel.Dock="Left" Source="{Binding AppointmentDetail.ErrorAppointmentImagepath}" 
+                       Margin="0,10,0,5" Width="40" HorizontalAlignment="Left" VerticalAlignment ="Top" />
+                <TextBlock DockPanel.Dock="Left" Padding="5,0,5,0"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}">
+                    <Run Text="{Binding AppointmentDetail.Time}" FontWeight="SemiBold"/>
+                    <Run Text="{Binding DataContext.WithText, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Button}}}"/>
+                    <Run Text="{Binding AppointmentDetail.Name}" FontWeight="SemiBold"/>
+                    <LineBreak/>
+                    <Run Text="{Binding AppointmentDetail.ErrorMessage}"/>
+                </TextBlock>
+            </DockPanel>
+        </Button>
+
+        <Button Content="{Binding Close}" Grid.Row="2" Grid.Column="1"  
+                Margin="0,15" Height="70" 
+                Style="{DynamicResource CloseButtonStyle}"
+                Command="{Binding SingleAppointment.CloseCommand, Source={StaticResource Locator}}"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                Visibility="{Binding AppointmentDetail.IsErrorMessageVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"/>
+
+    </Grid>
+  </UserControl>

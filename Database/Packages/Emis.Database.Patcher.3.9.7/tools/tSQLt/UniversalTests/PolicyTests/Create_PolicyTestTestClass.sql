@@ -1,0 +1,2 @@
+
+exec tSQLt.NewTestClassToRunBeforeFunctionalTests 'PolicyTest';

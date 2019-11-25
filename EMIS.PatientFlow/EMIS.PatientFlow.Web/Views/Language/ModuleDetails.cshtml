@@ -1,0 +1,110 @@
+﻿@using EMIS.PatientFlow.Entities
+@model  List<Module>
+
+@Html.Partial("_GoogleAnalytics")
+
+<table id="ModuleDetailsTable">
+
+    @if (Model != null)
+    {
+        foreach (var item in Model)
+        {
+            <tr>
+                <td  style="display: none">@item.Id</td>
+                <td class ="modulenametotranslate" align ="center">
+                    <div class="lt-list-box">
+                        <textarea rows="4" cols="50" class="ListBox TextForTranslation " readonly="readonly" >@item.ModuleName</textarea>
+                    </div>
+                </td>
+                <td align="center"><input type="button" class="Translation @item.ModuleName" /> </td>
+                <td align="center">
+                <div class="lt-list-box">
+                    <textarea rows="4" cols="50" class="ListBox" >@item.TranslatedText</textarea>
+                </div>
+                </td>
+                <td align="center" style="display: none">@item.TranslationRefId</td>
+            </tr>
+        }
+    }
+
+</table>
+<br />
+<br />
+@if (Model != null)
+    {
+        if (Model.Count > 0) {
+        
+    <div class="listboxdiv">
+    <br />
+    <br />
+    <p class="leftTxt">
+
+    </p>
+    <span class="translationspan">
+        <input type="button" value="Save" class="saveEditBtnTranslation rightTxtBox"  />
+    </span>
+
+   </div>
+        }
+
+}
+<script>
+
+    $(".Translation").click(function () {
+        var Currentobject = $(this);
+        var fromLanguage = "en";
+        var toLanguage = $(".selectBoxLanguage option:selected").val();
+        var textToTranslate = Currentobject.parent().parent().find('td:eq(1)').find('textarea').val();
+        $.ajax({
+          
+            url:   '@Url.Action("Translate", "Language")',
+            data: { fromLanguage: fromLanguage, toLanguage: toLanguage, textToTranslate: textToTranslate },
+            type: "GET",
+            async: false,
+            success: function (data) {
+                
+                Currentobject.parent().parent().find('td:eq(3)').find('textarea').val($.parseJSON(data).data.translations[0].translatedText)
+             },
+            error: function (data) {
+            }
+        });
+
+    });
+    
+
+    $(".saveEditBtnTranslation").click(function () {
+
+        var modelList = [];
+        $("#ModuleDetailsTable tr").each(function () {
+            var model = {};
+            var object = $(this);
+            var language = {};
+            model.Id = parseInt(object.find('td:eq(0)').html());
+            model.TranslationTypeId = parseInt(currentitem.attr("rel"));
+            var language = {};
+            language.LanguageCode =  $(".selectBoxLanguage option:selected").val();
+            model.Language = language;
+            model.TranslatedText = object.find('td:eq(3)').find('textarea').val();
+            model.TranslationRefId = parseInt(object.find('td:eq(4)').html());
+            modelList.push(model);
+        });
+        $.ajax({
+            
+            url: '@Url.Action("SaveModuleTranslations", "Language")',
+            data: { "moduleVM": modelList },
+            type: "post",
+            success: function (data) {
+                if (parseInt(data) > 0) {
+                    alert("Saved Sucessfully");
+
+                }
+                else {
+                    alert("Technical Issue, Please try again");
+                }
+                },
+             error: function (data) {
+                    alert("Technical Issue, Please try again");
+                }
+            });
+        });
+ </script>

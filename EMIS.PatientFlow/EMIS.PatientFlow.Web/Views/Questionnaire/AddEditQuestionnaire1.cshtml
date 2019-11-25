@@ -1,0 +1,641 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.QuestionnaireViewModel
+
+@{
+    Layout = "~/Views/Shared/_layout.cshtml";
+}
+<script src="~/Scripts/bootstrap.js"></script>
+@Html.Partial("_GoogleAnalytics", "AddEditQuestionnaire")
+
+<style>
+    .modal-header {
+        padding: 20px !important;
+        font-size: 23px;
+    }
+
+    .modal-footer {
+        margin: 0 20px 20px 20px !important;
+        float: right !important;
+    }
+</style>
+
+<script>
+    var options = { "backdrop": "static", keyboard: true };
+    var questions = [];
+    var Questionnairequest = {};
+    var deletedQuestions = [];
+    var editQuesIndex = -1;
+    var isAddQuest = true;
+    var nestedQuestionIds = [];
+    var QuestionsTable;
+    $(document).ready(function () {
+
+        $('input[type=radio][name=Isanonymous]').change(function () {
+            if ($('input[name=Isanonymous]:checked').val() == "False") 
+                $('#frequency').show();
+            else 
+                $('#frequency').hide();
+        })
+
+        if ($('#orgdropdown').children('option').length == 2) {
+            $('#orgdropdown').prop('selectedIndex', 1);
+            getkiosks($('#orgdropdown').children('option').eq(1).val());
+            $('#orgdropdown').addClass("disabled");
+        }
+        $.fn.dataTable.ext.errMode = 'none';
+        $('body').tooltip();
+        if ($('#Re-do').is(':checked'))
+        {
+            $('#frequency').removeAttr("disabled");
+        }
+        else
+        {
+            $('#frequency').attr("disabled");
+        }
+
+        $('#OneTime').change(function () {
+            $('#frequency').attr("disabled","disabled");
+            $('#frequency').val("");
+        })
+
+        $('#Re-do').change(function () {
+            $('#frequency').removeAttr("disabled");
+            $('#frequency').val("");
+        })
+        QuestionsTable = $('#Questionstable').DataTable({
+            info: false,
+            paging: false,
+            searching: false,
+            ordering: true,
+            rowReorder: {
+                selector: 'td:not(:last-child)',
+            },
+            columnDefs: [{
+                "targets": [1, 11, 12],
+                "orderable": false
+            }, {
+                "targets": [0,2, 3, 4, 5, 6, 7, 8, 9, 10],
+                "visible": false,
+                }
+          ],
+            "fnRowCallback": function (nRow, aData, iDisplayIndex) {
+                var oSettings = this.fnSettings();
+                aData[0] = oSettings._iDisplayStart + iDisplayIndex + 1;
+                return nRow;
+            }
+        });
+        $('.dataTables_wrapper').css("position", "absolute");
+    
+        function setModalMaxHeight(element) {
+            this.$element = $(element);
+            this.$content = this.$element.find('.modal-content');
+            var borderWidth = this.$content.outerHeight() - this.$content.innerHeight();
+            var dialogMargin = $(window).width() < 768 ? 20 : 60;
+            var contentHeight = $(window).height() - (dialogMargin + borderWidth);
+            var headerHeight = this.$element.find('.modal-header').outerHeight() || 0;
+            var footerHeight = this.$element.find('.modal-footer').outerHeight() || 0;
+            var maxHeight = contentHeight - (headerHeight + footerHeight);
+
+            this.$content.css({
+                'overflow': 'hidden'
+            });
+
+            this.$element
+                .find('.modal-body').css({
+                    'max-height': maxHeight,
+                    'overflow-y': 'auto'
+                });
+        }
+
+        $('.modal').on('show.bs.modal', function () {
+            $(this).show();
+            setModalMaxHeight(this);
+        });
+
+        $(window).resize(function () {
+            if ($('.modal.in').length != 0) {
+                setModalMaxHeight($('.modal.in'));
+            }
+        });
+
+        $('.Questions-table').hide();
+        $('.dataTables_wrapper').css("position", "absolute");
+        $('#OrgKioskPublishDiv').hide();
+        $('.submit-button').prop('disabled',true)
+        $('#orgdropdown').drop();
+        $('#kioskdropdown').drop();
+        $('.kioskdropdown').addClass('disabled');
+
+        $('#orgdropdown').change(function () {
+            $("#kioskdropdown").empty().drop("clear");
+            $("#kioskdropdown").append('<option value="" disabled selected> Select Kiosks </option>');
+            getkiosks($('#orgdropdown').val());
+        });
+
+        function getkiosks(orgid) {
+            $.ajax({
+                url: '/Kiosk/GetKioskList',
+                datatype: 'JSON',
+                type: "Get",
+                data: 'organisationId=' + orgid,
+                success: function (data) {
+                    $.each(data, function (i, kiosk) {
+                        $("#kioskdropdown").append('<option value="' + kiosk.Id + '">' +
+                            kiosk.KioskName + '</option>');
+                    });
+                    $('.kioskdropdown').removeClass('disabled');
+                }
+            });
+        }
+
+        $("#addQuestionsBtn").click(function () {
+            $.ajax({
+                type: "GET",
+                url: '../Questionnaire/AddQuestion',
+                datatype: "html",
+                success: function (data) {
+                    isAddQuest = true;
+                    $('#AddQuestionModal').html(data);
+                    $('#AddQuestionModal').modal(options);
+                    $('#AddQuestionModal').modal('show');
+                    $('.dataTables_wrapper').css("position", "relative");
+                },
+                error: function () {
+                    alert("Dynamic content load failed.");
+                }
+            });
+        });
+
+        $('#QuestionnaireNametxtbx').on('input', function (e) {
+            var nameVal = $('#QuestionnaireNametxtbx').val();
+            if (nameVal != '') {
+                $('#QuestionnaireNameError').hide();
+            }
+            else {
+                $('#QuestionnaireNameError').show();
+            }
+        })
+
+        $('#frequency').on('input', function (e) {
+            var freqVal = $('#frequency').val();
+            if (freqVal != '') {
+                $('#frequencyTypeError').hide();
+            }
+            else {
+                $('#frequencyTypeError').show();
+            }
+        })
+
+        $('#orgdropdown').on('keyup', function (e) {
+            var orgValue = $('#orgdropdown').val();
+            if (orgValue) {
+                $('#organisationError').hide();
+            }
+        })
+
+        $('#kioskdropdown').on('change', function (e) {
+            if ($('#kioskdropdown').val() == null) {
+                $('#checkBox').prop('checked', false);
+                $('#PublishIsActive').val("false");
+                $('#checkBox').prop('disabled', true);
+            }
+            else
+                $('#checkBox').prop('disabled', false);
+        })
+
+        var form = $('#AddEditQuestionnaireForm');
+        var validator = form.validate();
+
+        $('#AddEditQuestionnaireForm').submit(function () {
+            $('#cover-spin').show();
+            if (!form.valid()) {
+                $('#cover-spin').show();
+                if ($('#Re-do').is(':checked') && $('#frequency').val() == '') {
+                    $('#frequencyTypeError').text("Frequency is Required");
+                }
+                if ($('#QuestionnaireNametxtbx').val() == '')
+                {
+                    $('#QuestionnaireNameError').text("Questionnaire Name is Required");
+                }
+                if ($('#orgdropdown').val() == '' || $('#orgdropdown').val() == null) {
+                    $('#organisationError').text("Organisation is Required");
+                }
+                alert("Required fields are missing. Form is not valid. ");
+            }
+            else {
+                var listOfQuestions = [];
+                if (QuestionsTable.rows().count() > 0) {
+                    QuestionsTable.rows().every(function (rowIdx) {
+                        var QuestionDetails = {};
+                        data = this.data();
+                        QuestionDetails.Order = data[0];
+                        QuestionDetails.QuestionText = data[1];
+                        QuestionDetails.QuestionnaireId = data[2];
+                        QuestionDetails.QuestionOptionsList = data[3];
+                        QuestionDetails.QuestionId = data[4];
+                        QuestionDetails.OptionCharLimit = data[5];
+                        QuestionDetails.Gender = data[6];
+                        QuestionDetails.Operation = data[7];
+                        QuestionDetails.Age1 = data[8];
+                        QuestionDetails.Age2 = data[9];
+                        QuestionDetails.QuestionType = data[10];
+                        QuestionDetails.QuestionDisplayType = data[11];
+                        listOfQuestions.push(QuestionDetails);
+                    })
+                }
+                   
+                var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                $('#QuestionsListData').val(stringifiedlistOfQuestions);
+                var stringifiedlistOfdeletedQuestions = JSON.stringify(deletedQuestions);
+                var questionnaireName = $('#QuestionnaireNametxtbx').val();
+                if (@Model.QuestionnaireId> 0)
+                {
+                    $('#StringifiedDeletedQuestions').val(stringifiedlistOfdeletedQuestions);
+                    SendGoogleEventClick('event type', 'Questionnaires', 'Edit', 'Questionnaire edited(' + questionnaireName + ')');
+                }
+                else {
+                    SendGoogleEventClick('event type', 'Questionnaires', 'Add', 'Added Questionnaire(' + questionnaireName + ')');
+                }
+            }
+        });
+        $('#AddQuestionModal').on('hidden.bs.modal', function () {
+            $('#cover-spin').hide();
+            $('.dataTables_wrapper').css("position", "relative");
+            if (!jQuery.isEmptyObject(Questionnairequest)) {
+                $('.Questions-table').show();
+                $('.dataTables_wrapper').css("position", "relative");
+                $('#checkBox').prop('disabled', false);
+                
+                if (isAddQuest) {
+                    var i = QuestionsTable.rows().count();
+                    console.log(i);
+                    QuestionsTable.row.add([Questionnairequest.Order=++i, Questionnairequest.QuestionText, Questionnairequest.QuestionnaireId, Questionnairequest.QuestionOptionsList, 0, Questionnairequest.OptionCharLimit, Questionnairequest.Gender, Questionnairequest.Operation, Questionnairequest.Age1, Questionnairequest.Age2, Questionnairequest.QuestionType, Questionnairequest.QuestionDisplayType, "<td><a class='QuestionEditModal'><i class='fa fa-edit fa-2x' title='Edit' aria-hidden='true'></i></a><a class='DeleteQuestion'><i class='fa fa-trash-o fa-2x' title='Delete' aria-hidden='true'></i></a></td>"]).draw(false);
+                    console.log(Questionnairequest);
+                    questions.push(Questionnairequest);
+                    console.log(questions);
+                    $('#OrgKioskPublishDiv').show();
+                    $('.submit-button').prop('disabled', false);
+                    if ($('.kioskdropdown').hasClass('disabled'))
+                        $('#checkBox').prop('disabled', true);
+                }
+                else {
+                    window.QuestionEditdata[0][0] = Questionnairequest.Order ;
+                    window.QuestionEditdata[0][1] = Questionnairequest.QuestionText ;
+                    window.QuestionEditdata[0][2] = Questionnairequest.QuestionnaireId;
+                    window.QuestionEditdata[0][3] = Questionnairequest.QuestionOptionsList;
+                    window.QuestionEditdata[0][4] = Questionnairequest.QuestionId ;
+                    window.QuestionEditdata[0][5] = Questionnairequest.OptionCharLimit;
+                    window.QuestionEditdata[0][6] = Questionnairequest.Gender;
+                    window.QuestionEditdata[0][7] = Questionnairequest.Operation;
+                    window.QuestionEditdata[0][8] = Questionnairequest.Age1;
+                    window.QuestionEditdata[0][9] = Questionnairequest.Age2;
+                    window.QuestionEditdata[0][10] = Questionnairequest.QuestionType;
+                    window.QuestionEditdata[0][11] = Questionnairequest.QuestionDisplayType;
+                    QuestionsTable.rows(window.QuestionEdititem).data(window.QuestionEditdata).draw(false);
+                    QuestionsTable.rows().invalidate();
+                    questions.splice(editQuesIndex, 1, Questionnairequest)
+                }
+
+            }
+        })
+      
+
+        if (@Model.QuestionnaireId > 0)
+        {
+            //converting already present questions to jquery object
+            SetLinkedKioskValues();
+            if ($('#kioskdropdown').val() == null) {
+                $('#checkBox').prop('checked', false);
+                $('#PublishIsActive').val("false");
+                $('#checkBox').prop('disabled', true);
+                $('.orgdropdown').removeClass('disabled');
+            }
+            else {
+                $('.orgdropdown').addClass('disabled');
+            }
+            $('.kioskdropdown').removeClass('disabled');
+          
+            var isAnonymous =@Html.Raw(Json.Encode(Model.Isanonymous));
+            isAnonymous == true ? $('#frequency').hide() : $('#frequency').show();
+
+            var tags = @Html.Raw(Json.Encode(Model.Questions));
+            var frequency = @Json.Encode(Model.Frequency);
+            $.each(tags, function (index, eachquestion) {
+                questions.push(eachquestion);
+
+                //Getting Nested question Id's
+                var optionslist = JSON.parse(eachquestion.QuestionOptionsList);
+                $.each(optionslist, function (index, option) {
+                    if (option.NestedQuestionId > 0)
+                        nestedQuestionIds.push(option.NestedQuestionId);
+                });
+                QuestionsTable.row.add([eachquestion.Order, eachquestion.QuestionText, eachquestion.QuestionnaireId, eachquestion.QuestionOptionsList, eachquestion.QuestionId, eachquestion.OptionCharLimit,eachquestion.Gender, eachquestion.Operation, eachquestion.Age1, eachquestion.Age2, eachquestion.QuestionType, eachquestion.QuestionDisplayType, "<td><a class='QuestionEditModal'><i class='fa fa-edit fa-2x' title='Edit' aria-hidden='true'></i></a><a class='DeleteQuestion'><i class='fa fa-trash-o fa-2x' title='Delete' aria-hidden='true'></i></a></td>"]).draw(false);
+            });
+            jQuery.unique(nestedQuestionIds);
+
+            if (QuestionsTable.rows().count() > 0) {
+                $('.Questions-table').show();
+                $('.dataTables_wrapper').css("position", "relative");
+                $('#OrgKioskPublishDiv').show();
+                $('.submit-button').prop('disabled', false)
+            }
+            if (frequency == 0) {
+                $('#frequency').val('');
+                $('#frequency').attr('disabled', true);
+                $('#OneTime').attr('checked', 'checked');
+            }
+        }
+
+        $('#checkBox').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#PublishIsActive').val("true");
+            else
+                $('#PublishIsActive').val("false");
+        })
+
+        $('#DeleteQuestionnaireModal').find('.btn-cancel').click(function () {
+            $('#DeleteQuestionnaireModal').modal('hide');
+        });
+
+        $('#DeleteQuestionnaireModal').find('.btn-ok').click(function () {
+            var index = window.item.index()
+            if (index > -1) {
+                questions.splice(index, 1);
+            }
+            var quesionId = QuestionsTable.rows(window.item).data()[0][4];
+            deletedQuestions.push(quesionId);
+            QuestionsTable.rows(window.item).remove().draw(false);
+            QuestionsTable.rows().invalidate();
+           
+            if (QuestionsTable.rows().count() < 1) {
+                $('.Questions-table').hide();
+                $('.dataTables_wrapper').css("position", "absolute");
+                $('#OrgKioskPublishDiv').hide();
+                $('.submit-button').prop('disabled', true)
+            }
+            $('#DeleteQuestionnaireModal').modal('hide');
+            alertify.success("Question has been deleted Successfully");
+            SendGoogleEventClick('event type', 'Questions', 'Delete', 'Deleted Question(' + questions[0].QuestionText + ')');
+        })
+
+        QuestionsTable.on('click', '.DeleteQuestion', function (e) {
+            window.item = $(this).closest('tr');
+            $('#DeleteQuestionnaireModal').modal('show');
+
+        });
+
+        QuestionsTable.on('click', '.QuestionEditModal', function (e) {
+            $('#cover-spin').show();
+            window.QuestionEdititem = $(this).closest('tr');
+            editQuesIndex = window.QuestionEdititem.index();
+
+            window.QuestionEditdata = QuestionsTable.rows(window.QuestionEdititem).data()
+            var Editquestion = {};
+            Editquestion.Order = window.QuestionEditdata[0][0];
+            Editquestion.QuestionText = window.QuestionEditdata[0][1];
+            Editquestion.QuestionnaireId = window.QuestionEditdata[0][2];
+            Editquestion.QuestionOptionsList = window.QuestionEditdata[0][3];
+            Editquestion.QuestionId = window.QuestionEditdata[0][4];
+            Editquestion.OptionCharLimit = window.QuestionEditdata[0][5];
+            Editquestion.Gender = window.QuestionEditdata[0][6];
+            Editquestion.Operation = window.QuestionEditdata[0][7];
+            Editquestion.Age1 = window.QuestionEditdata[0][8];
+            Editquestion.Age2 = window.QuestionEditdata[0][9];
+            Editquestion.QuestionType = window.QuestionEditdata[0][10];
+            Editquestion.QuestionDisplayType = window.QuestionEditdata[0][11];
+            var stringifiedQuestion = JSON.stringify(Editquestion);
+
+            $.ajax({
+                type: "POST",
+                url: '../Questionnaire/EditQuestion',
+                data: { "StringifiedQuestion": stringifiedQuestion },
+                datatype: "html",
+                success: function (data) {
+                    $('#cover-spin').hide();
+                    isAddQuest = false;
+                    $('.dataTables_wrapper').css("position", "relative");
+                    $('#AddQuestionModal').html(data);
+                    $('#AddQuestionModal').modal(options);
+                    $('#AddQuestionModal').modal('show');
+                    SendGoogleEventClick('event type', 'Questions', 'Edit', 'Edited Question(' + Editquestion.QuestionText + ')');
+                },
+                error: function () {
+                    alert("Dynamic content load failed.");
+                }
+            });
+        });
+    });
+
+    function jquerystringformat() {
+        var argcount = arguments.length,
+            string,
+            i;
+
+        if (!argcount) {
+            return "";
+        }
+        if (argcount === 1) {
+            return arguments[0];
+        }
+        string = arguments[0];
+        for (i = 1; i < argcount; i++) {
+            string = string.replace(new RegExp('\\{' + (i - 1) + '}', 'gi'), arguments[i]);
+        }
+        return string;
+    }
+
+    function SetLinkedKioskValues() {
+        var tags = @Html.Raw(Json.Encode(Model.LinkedKiosk));
+        var linkedKiosk = [];
+        if (tags != null) {
+            $.each(tags, function (i, kioskId) { linkedKiosk.push(kioskId.toString()) })
+            $('#kioskdropdown').drop("set selected", linkedKiosk);
+        }
+    }
+
+    function SuccessHandling(data) {
+        return (window.location.href = "@Url.Action("Index", "Questionnaire")");
+    }
+
+</script>
+
+<div>
+    <p class="page-header-text">
+        @if (Model.QuestionnaireId > 0)
+        {<span> Edit Questionnaire</span> }
+        else
+        { <span>Add Questionnaire</span>            }
+    </p>
+
+    @using (Ajax.BeginForm("SaveQuestionnaire", "Questionnaire", new AjaxOptions
+    { UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace, OnSuccess = "SuccessHandling(data)" }, new { @id = "AddEditQuestionnaireForm" }))
+    {
+        @Html.HiddenFor(m => m.QuestionnaireId)
+        @Html.HiddenFor(m => m.Questions, new { @id = "Questions" })
+        @Html.HiddenFor(m => m.QuestionsListData)
+        @Html.HiddenFor(m => m.StringifiedDeletedQuestions)
+        @Html.HiddenFor(m => m.IsActive, new { @id = "PublishIsActive" })
+
+        <div class="control-float-left field-spacing">
+            <p class="question-text">Questionnaire Name<span class="requiredfield">*</span></p>
+            @Html.TextBoxFor(model => model.Title, Model.Title, new { @maxLength = "300", placeholder = "Questionnaire Name", @class = "form-control control-float-left options-text", @Id = "QuestionnaireNametxtbx" })
+            <div id="QuestionnaireNameError" class="errorMsg"></div>
+        </div>
+
+        <div class="control-float-left field-spacing">
+            <p class="question-text">Anonymous</p>
+            <p class="options-text">Should the question responses be stored anonymously or added to the patient's file?</p>
+            <div>
+                <label>
+                    @Html.RadioButtonFor(x => x.Isanonymous, true, new { @class = "control-float-left radio-buttons", @checked = "checked" })
+                    <span class="options-text">Anonymous</span>
+
+                </label>
+            </div>
+
+            <div>
+                <label>
+                    @Html.RadioButtonFor(x => x.Isanonymous, false, new { @class = "control-float-left radio-buttons" })
+                    <span class="options-text">Add to patient's record</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-float-left field-spacing" id="frequency">
+            <p class="question-text">Frequency</p>
+            <p class="options-text">Is this a one time questionnaire or should the patient re-do it at some point?</p>
+            <div>
+                <label>
+                    @Html.RadioButtonFor(x => x.FrequencyType, 0, new { @id = "Re-do", @class = "control-float-left radio-buttons", @checked = (Model.FrequencyType == 0) })
+                    <span class="options-text">Re-do every</span>
+                </label>
+                @Html.TextBoxFor(m => m.Frequency, new { @type = "number", @Id = "frequency", @class = "td - number - input", min = 1 })
+                <span class="options-text">days</span>
+                <div id="frequencyTypeError" class="errorMsg"></div>
+            </div>
+
+            <div>
+                <label>
+                    @Html.RadioButtonFor(x => x.FrequencyType, 1, new { @id = "OneTime", @class = "control-float-left radio-buttons", @disabled = "disabled" }) @*Has to enable it while writing implementation*@
+                    <span class="options-text">One time only</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-float-left field-spacing">
+            <table class="table table-responsive Questions-table table-border" id="Questionstable" style='border:1px solid #f2f2f2;width:100% ;height:50px;'>
+                <thead>
+                    <tr>
+                        <th>QUESTION ORDER</th>
+                        <th>QUESTION</th>
+                        <th>QUESTIONNAIRE ID</th>
+                        <th>QUESTION OPTION LIST</th>
+                        <th>ID</th>
+                        <th>OPTION CHAR LIMIT</th>
+                        <th>GENDER</th>
+                        <th>OPERATION</th>
+                        <th>AGE1</th>
+                        <th>AGE2</th>
+                        <th>ANSWER TYPE ID</th>
+                        <th>ANSWER TYPE</th>
+                        <th></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="control-float-left field-spacing">
+            <p class="question-text">Questions</p>
+            <button type="button" id="addQuestionsBtn" class="btn btn-success btn-sm btn-add-edit" style="margin-top:0px">
+                Add Questions
+                <i class="fa fa-plus-circle"></i>
+            </button>
+        </div>
+
+        <div id="OrgKioskPublishDiv">
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Availability</p>
+                <p class="question-text">Organisation<span class="requiredfield">*</span></p>
+                @Html.DropDownListFor(x => x.OrganisationId, Model.OrganisationList, "Select Organisation", new { @class = "ui fluid search dropdown", @id = "orgdropdown" })
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.OrganisationId)</div>
+                <div id="organisationError" class="errorMsg"></div>
+            </div>
+
+            <div class="control-float-left field-spacing">
+
+                <p class="question-text">Kiosk</p>
+                @if (Model.QuestionnaireId > 0)
+                {
+                    @Html.DropDownListFor(x => x.LinkedKiosk, Model.KioskList,
+                                                             new
+                                                             {
+                                                                 @class = "ui fluid multiple search selection dropdown ui-dropdown-min-width kioskdropdown",
+                                                                 @id = "kioskdropdown",
+                                                                 @multiple = "multiple"
+                                                             })
+                }
+                else
+                {
+                    @Html.DropDownListFor(x => x.LinkedKiosk, Enumerable.Empty<SelectListItem>(), "Select Kiosks",
+                                                    new
+                                                    {
+                                                        @class = "ui fluid multiple search selection dropdown ui-dropdown-min-width kioskdropdown",
+                                                        @id = "kioskdropdown",
+                                                        @multiple = "multiple"
+                                                    })
+                }
+            </div>
+
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Publish Questionnaire</p>
+                <label class="switch">
+                    <input type="checkbox" id="checkBox" checked=@Model.IsActive>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <div style="float: right; margin-top: 150px; margin-bottom: 50px;">
+
+            <button class="btn btn-default btn-lg cancel-button" type="button" data-target="#CancelQuestionnaireModal" data-toggle="modal">
+                Cancel
+            </button>
+
+            <button class="btn btn-primary btn-lg submit-button" type="submit">Save Questionnaire</button>
+
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="AddQuestionModal" role="dialog">
+</div>
+
+<div class="modal fade" id="DeleteQuestionnaireModal" role="dialog" data-keyboard="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Are you sure you want to delete <span></span>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" type="button" style="margin-right:5px">No, cancel</button>
+                <button class="btn btn-danger btn-ok" type="button">Yes, delete it</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="CancelQuestionnaireModal" role="dialog" data-keyboard="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add/Update Questionnaire
+            </div>
+            <div class="modal-body">
+                Are you sure you want to Cancel
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" data-dismiss="modal" style="margin-right:5px">No, Stay </button>
+                <button class="btn btn-danger btn-ok" onclick='window.location.href = "@Url.Action("Index","Questionnaire")"'>Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

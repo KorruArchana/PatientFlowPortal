@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<patchTemplate productGuid="BA40216C-0119-4DA1-8C0B-50D1CAAB6188">
+  <patchAction name="CopyFiles">
+    <patchFolder relativePath="EMIS.PatientFlow.build.Kiosk" copyType="Contents">
+      <patchFilePattern extension=".pdb" exclude="true"/>
+    </patchFolder>
+  </patchAction>
+</patchTemplate>

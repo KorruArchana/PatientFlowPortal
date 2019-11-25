@@ -1,0 +1,296 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.DepartmentViewModel
+@using EMIS.PatientFlow.Common.Enums
+<div id="divSuccessMsg"></div>
+
+@Html.Partial("_GoogleAnalytics","DepartmentDetails")
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">
+            Department
+        </span>
+        <span><img src="~/images/arrow.png"></span>
+        <span class="rightBlockSubHeading">
+            @Model.DepartmentName
+        </span>
+
+    </div>
+    <div class="rightBlockTopButtonContainer">
+
+        <a href="#" style="text-decoration:none" onclick="return LoadEditContent('EditDepartment', @Model.Id)">
+            <input class="AddOrEditText EditTextColor" type="text" value="Edit Department" readonly="readonly" />
+            <img src="~/Images/edit-icon.png" />
+        </a>
+
+    </div>
+</div>
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockSubHeading">
+            Members under @Model.DepartmentName
+        </span>
+    </div>
+    <div class="rightBlockTopButtonContainer">
+
+        <a href="#" id="AddMember" style="text-decoration:none" onclick="LoadMembers(@Model.Id, @Model.OrganisationId)">
+            <input type="text" class="AddOrEditText AddTextColor" value="Add Member" readonly="readonly"/>
+            <img src="~/Images/plus.png" />
+        </a>
+
+    </div>
+</div>
+<div id="syncMemberViewDialog" title="Sync Member">
+
+    <div id="memberList" class="treeviewDialog">
+
+    </div>
+    <div align="center">
+        <input type="submit" value="Save" onclick="SaveSyncedMembers()" />
+    </div>
+</div>
+<div class="rightBlockContent">
+    <div id="gridContainer">
+        <table class="TFtable">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Member Name</th>
+                    <th>Session Holder ID</th>
+                    <th>Actions</th>
+                    <th>Divert</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: items">
+                <tr>
+                    <td data-bind="text: Title"></td>
+                    <td><a href="#" data-bind="click: $parent.details"><span data-bind="text: Firstname "></span><label> </label><span data-bind="text: Surname "></span></a></td>
+                    <td data-bind="text: SessionHolderId"></td>
+
+                    <td class="colcenter">
+                        <span><a href="#" class="editLinkBtn" title="Edit Member" data-bind="click: $parent.update"></a></span>
+                        <span> <a href="#" class="deleteLinkBtn" title="Delete Member" data-bind="click: $parent.deleteMember"></a></span>
+                    </td>
+                    <td class="colcenter">
+                        <span data-bind="if:IsDivertSet==false"> <a href="#" title="Set Divert On" data-bind="click: $parent.setDivertOn">Set Divert On</a></span>
+                        <span data-bind="if:IsDivertSet"> <a href="#"  title="Set Divert Off" data-bind="click: $parent.setDivertOff" style="font-weight:bold">Set Divert Off</a></span>
+                    </td>
+
+                </tr>
+            </tbody>
+            <tbody data-bind="ifnot: items().length">
+                <tr>
+                    <td colspan="4" style="text-align:center">No records found.</td>
+                </tr>
+            </tbody>
+            <tfoot data-bind="if: items().length">
+                <tr style="background-color:white;">
+                    <td colspan="5"><div id="paginationHolder"></div></td>
+                </tr>
+            </tfoot>
+        </table>
+        @{
+            int pageSize = EMIS.PatientFlow.Web.Helper.Config.PageSize;
+        }
+
+
+    </div>
+</div>
+<script type="text/javascript">
+     if ('@System.Configuration.ConfigurationManager.AppSettings.AllKeys.Contains("SystemType")' == "True")
+    {
+        var OrgSystemType = '@System.Configuration.ConfigurationManager.AppSettings["SystemType"]';
+         if (('@Model.SystemTypeId' == 1 && OrgSystemType == "EMIS - PCS") || ('@Model.SystemTypeId' == 2 && OrgSystemType == "EMIS - Web")) {
+            $('#AddMember').hide();
+        }
+    }
+    else
+    {
+       if ('@Model.SystemTypeId' == 2) {
+         $('#AddMember').hide();
+         }
+     }
+    $(function() {
+        $("#syncMemberViewDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            hide: "fade",
+            width: '400',
+            height: '400',
+            draggable: false,
+            zIndex: 10000
+        });
+    });
+
+    function LoadMembers(departmentId, organisationId)
+    {
+
+        $.ajax({
+            url: '@Url.Action("LinkMember", "Member")',
+            data:
+                {
+                    organisationId: organisationId,
+                    departmentId: departmentId
+                },
+            type: "GET",
+            success: function (data) {
+                $("#syncMemberViewDialog").dialog("open");
+                $('#memberList').html( data );
+            },
+            error: function (data) {
+
+            }
+        });
+    }
+
+
+
+    var memberList = [];
+
+    function SaveSyncedMembers() {
+        $.ajax({
+            url: '@Url.Action("SaveSyncedMembers", "Member")',
+            data: {
+                jsonMemberList: JSON.stringify(memberList),
+                organisationId: '@Model.OrganisationId'
+            },
+            type: "POST",
+            success: function (d) {
+
+                $.each(memberList, function (i, val) {
+                    var name = '@Model.DepartmentName' + ' - ' + val.Title + ' ' + val.Firstname + ' ' + val.Surname;
+                    SendGoogleEventClick('event type', 'Members', 'Add', 'Member Added to Department(' +  name + ')');
+                });
+
+                $("#syncMemberViewDialog").dialog('close');
+                $("#Successmodal").dialog("open");
+                vm.getData(1);
+            },
+            error: function() {
+                return false;
+            }
+        });
+    }
+
+
+    var pagedViewModel = function (pageSize,departmentId) {
+        var self = this;
+        self.items = ko.observableArray();
+        self.currentPage = ko.observable(1);
+        self.totalCount = ko.observable(1);
+        self.pageSize = pageSize;
+        self.pageCount = ko.computed(function () {
+            if ((self.totalCount() % self.pageSize) == 0)
+                return parseInt((self.totalCount() / self.pageSize));
+            else
+                return parseInt((self.totalCount() / self.pageSize)) + 1;
+        });
+        self.update = function(item) {
+            return LoadEditContent('EditMember', item.Id);
+        };
+        self.deleteMember = function(item) {
+            var name = '@Model.DepartmentName' + ' - ' + item.Title + ' ' + item.Firstname + ' ' + item.Surname;
+            return LoadDeleteContent5('DeleteMember', item.Id, departmentId, 'Member Deleted from Department (' + name + ')');
+        };
+        self.details = function(item) {
+            return LoadContent('@Convert.ToInt32(NodeType.MemberDetails)', item.Id);
+        };
+        self.setDivertOn = function (item) {
+            $.ajax({
+                url: '@Url.Action("SetDivert","Member")',
+                data: {
+                    status: true,
+                    sessionHolderId: item.SessionHolderId,
+                    organisationId: '@Model.OrganisationId'
+                },
+                type: "GET",
+                success: function (data) {
+
+                    var changedIdx = self.items.indexOf(item);
+                    item.IsDivertSet=true;
+                    self.items.splice(changedIdx , 1); // removes the item from the array
+                    self.items.splice(changedIdx, 0, item); // adds it back
+                    var name = item.Title + ' ' + item.Firstname + ' ' + item.Surname;
+                    SendGoogleEventClick('event type', 'Doctordivert', 'On', 'Doctor Divert Enabled(' + name + ')');
+                },
+                error: function (data) {
+                }
+            });
+        }
+
+        self.setDivertOff = function (item) {
+            $.ajax({
+                url: '@Url.Action("SetDivert","Member")',
+                data: {
+                    status: false,
+                    sessionHolderId: item.SessionHolderId,
+                    organisationId: '@Model.OrganisationId'
+                },
+                type: "GET",
+                success: function (data) {
+                    var changedIdx = self.items.indexOf(item);
+                    item.IsDivertSet=false;
+                    self.items.splice(changedIdx , 1); // removes the item from the array
+                    self.items.splice(changedIdx, 0, item); // adds it back
+                    var name =  item.Title + ' ' + item.Firstname + ' ' + item.Surname;
+                    SendGoogleEventClick('event type', 'Doctordivert', 'Off', 'Doctor Divert Disabled(' + name + ')');
+                },
+                error: function (data) {
+                }
+            });
+        }
+
+
+
+        self.initialize = function () {
+            self.currentPage(1);
+            self.totalCount(0);
+            self.items.removeAll();
+            self.getData(self.currentPage());
+        }
+
+        self.getData = function (pageNumber) {
+            $.ajax({
+                url: '@Url.Action("GetMembers","Department")',
+                data: { pageNumber: pageNumber, pageSize: self.pageSize,departmentId:departmentId},
+                type: "GET",
+                success: function (data) {
+                    self.items.removeAll();
+                    self.currentPage(pageNumber);
+                    self.totalCount(data.TotalCount);
+                    if (data.MemberList.length > 0) {
+                        for (i = 0; i < data.MemberList.length; i++) {
+                            self.items.push(data.MemberList[i]);
+                        }
+                    }
+                    self.createPagination();
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+
+        self.createPagination = function () {
+            $("#paginationHolder").pagination({
+                pages: self.pageCount(),
+                itemsOnPage: self.pageSize,
+                currentPage: self.currentPage(),
+                cssStyle: 'light-theme',
+                onPageClick: self.loadPage
+            });
+
+        };
+
+        self.loadPage = function (pageNo, event) {
+            self.getData(pageNo);
+        };
+
+        self.initialize();
+    };
+    var vm;
+    $(document).ready(function () {
+        vm = new pagedViewModel('@pageSize','@Model.Id');
+        var element = document.getElementById('gridContainer');
+        ko.cleanNode(element);
+        ko.applyBindings(vm, element);
+    });
+</script>

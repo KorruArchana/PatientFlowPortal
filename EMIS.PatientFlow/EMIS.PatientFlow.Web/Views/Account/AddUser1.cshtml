@@ -1,0 +1,179 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.RegisterViewModel
+
+@{
+    ViewBag.Title = "AddUser";
+}
+<script src="~/Scripts/UserScripts/multiple-select.js"></script>
+<link href="~/Content/multiple-select.css" rel="stylesheet" />
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script src="~/Scripts/bootstrap.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        Intialize();
+        function Intialize() {
+            $('#organisationdiv').hide();
+            $('#orgdropdown').drop();
+            $('#Rolesdropdown').drop();
+        }
+        $('#txtUserName').on('keydown', function (e) {
+            if (e.keyCode == 32) {
+                $('#_txtUserName>#errorUserName').text('User name should be a single word').css({ 'color': 'red' });
+                e.preventDefault();
+            }
+            else {
+                $('#_txtUserName>#errorUserName').text('')
+            }
+        });
+        $('#Rolesdropdown').on('change', function () {
+            if (this.value == "Practice Admin") {
+                $('#organisationdiv').toggle();
+                var val = $('#orgdropdown').children('option').eq(1).val();
+                if ($('#orgdropdown').children('option').length == 2) {
+                    $('#orgdropdown').drop('set selected', val);
+                }
+            }
+            else {
+                $('#organisationdiv').hide();
+            }
+        })
+
+           $('.btn-cancel').click(function () {
+            $('#CancelModal').modal('hide');
+        })
+        $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+
+        var form = $('#AddUser');
+        var validator = form.validate();
+
+        $('#AddUser').submit(function () {
+            $('#cover-spin').show();
+            var username = ($('#txtUserName').val()).split(' ');
+            if (username.length > 1) {
+                $('#_txtUserName>#errorUserName').text('User name should be a single word').css({ 'color': 'red' });
+                $('#txtUserName').focus();
+                return false;
+            }
+        })
+    });
+    function SuccessHandling(result) {
+        window.location.href = '@Url.Action("Index","Account")';
+    }
+</script>
+
+
+<div id="cover-spin"></div>
+<div class="modal-dialog modal-md">
+    <div class="modal-content" style="overflow-x:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="page-header-text-popup-User">
+                <span>Add User</span>
+            </p>
+        </div>
+        @using (Ajax.BeginForm("Register", "Account", new AjaxOptions
+        {
+            UpdateTargetId = "ContentContainer",
+            OnSuccess = "SuccessHandling",
+            InsertionMode = InsertionMode.Replace
+        }, new { @id = "AddUser" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="modal-body">
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="control-float-left field-spacing-popup" id="_txtUserName" style="width:100%">
+                    <div style="float:left">
+                        <p class="question-text">User Name</p>
+                    </div>
+                    <div style="float:right;padding-right:25%">
+                        @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control control-float-left options-text textbox-User", @id = "txtUserName" } })
+                        @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                    </div>
+                    <span id="errorUserName"></span>
+                </div>
+
+                <div class="control-float-left field-spacing-popup" style="width:100%">
+                    <div style="float:left">
+                        <p class="question-text">Password</p>
+                    </div>
+                    <div style="float:right;padding-right:25%">
+                        @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control control-float-left options-text textbox-User" } })
+                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="control-float-left field-spacing-popup" style="width:100%">
+                    <div style="float:left">
+                        <p class="question-text">Confirm Password</p>
+                    </div>
+                    <div style="float:right;padding-right:25%">
+                        @Html.EditorFor(model => model.ConfirmPassword, new { htmlAttributes = new { @class = "form-control control-float-left options-text textbox-User" } })
+                        @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="control-float-left field-spacing-popup" style="width:100%">
+                    <div style="float:left">
+                        <p class="question-text">Email</p>
+                    </div>
+                    <div style="float:right;padding-right:25%">
+                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control control-float-left options-text textbox-User" } })
+                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="control-float-left field-spacing-popup" style="width:100%">
+                    <p class="question-text">User Roles</p>
+                    @Html.DropDownListFor(model => model.SelectedRoles, Model.RolesList,
+                        new
+                        {
+                            @class = "ui fluid search dropdown dropdown-menu-center ui-dropdown-min-width-user",
+                            @id = "Rolesdropdown",
+                        })
+                </div>
+                <div class="control-float-left field-spacing-popup nullify-field-spacing " id="organisationdiv" style="width:100%">
+                    <p class="question-text">Organization<span class="requiredfield"> *</span></p>
+                    @Html.DropDownListFor(model => model.OrganisationIds, Model.OrganisationList, "Select Organisation",
+                                              new
+                                              {
+                                                  @class = "ui fluid multiple search selection dropdown dropdown-menu-center ui-dropdown-min-width-user",
+                                                  @id = "orgdropdown",
+                                                  @multiple = "multiple"
+
+                                              })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.OrganisationIds)</div>
+                </div>
+            </div>
+            <div class="modal-footer control-float-left field-spacing-popup">
+                <button class="btn btn-default btn-lg cancel-button" type="button">
+                    Cancel
+                </button>
+                <button class="btn btn-primary btn-lg submit-button" type="submit">Save User</button>
+            </div>
+
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="CancelModal" role="dialog" data-keyboard="true">
+    <div class="modal-dialog" style="width:35%;margin-right:2%;overflow:hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add User
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" style="margin-right:5px">No, Stay</button>
+                <button class="btn btn-danger btn-ok" onclick='window.location.href = "@Url.Action("Index","Account")"'>Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

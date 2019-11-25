@@ -1,0 +1,187 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.SyncServiceViewModel
+
+@using EMIS.PatientFlow.Common.Enums
+
+@Html.Partial("_GoogleAnalytics","RegisterSyncService")
+
+@using (Ajax.BeginForm("Register", "SyncService", new AjaxOptions { OnBegin = "ValidateForm", UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace }))
+{
+    @Html.AntiForgeryToken()
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Register
+            </span>
+            <span><img src="~/images/arrow.png"></span>
+            <span class="rightBlockSubHeading">
+                Add Sync Service
+            </span>
+        </div>
+    </div>
+
+
+    <div class="rightBlockContent">
+        <div>
+            <p class="leftTxt">
+                @Html.LabelFor(m => m.Service.ProductKey):
+            </p>
+            @Html.TextBoxFor(m => m.Service.ProductKey, new { @class = "rightTxtBox", @readonly = true, @style = "width:300px;" })  @Html.ValidationMessageFor(m => m.Service.ProductKey)
+        </div>
+        <div>
+            <p class="leftTxt">
+                Organisations:<span class="required-field"> *</span>
+            </p>
+            <div class="rightSelect2 wider">
+                @Html.ListBoxFor(x => x.OrganisationIds, Model.OrganisationList, new { multiple = "multiple", @class = "ListBoxorg" })
+            </div>
+            <span class="validation-summary-errors">@Html.ValidationMessageFor(m => m.OrganisationIds)</span>
+
+        </div>
+        <div>
+            <p class="leftTxt">
+                Linked Kiosk:<span class="required-field"> *</span>
+            </p>
+            <div class="rightSelect2 wider">
+                @Html.ListBoxFor(x => x.KioskIds, Model.KioskList, new { multiple = "multiple", @class = "ListBoxorg1" })
+            </div>
+            <span class="validation-summary-errors">@Html.ValidationMessageFor(m => m.KioskIds)</span>
+
+        </div>
+        <div>
+            <p class="leftTxt">
+                @Html.LabelFor(m => m.Service.IsActive):
+            </p>
+            <div class="chkBoxContainer"> @Html.CheckBoxFor(m => m.Service.IsActive)</div>
+        </div>
+    </div>
+    <div class="editBtnContainer">
+        <input type="submit" value="Save" class="saveEditBtn" id="Formsubmit" />
+        <input type="button" value="Cancel" class="cancelEditBtn" onclick="return LoadContent(@Convert.ToInt32(NodeType.SyncServices), '0')" />
+    </div>
+
+    <div style="color: red; margin-left: 40px">
+        @Html.ValidationSummary(true)
+        @Html.ValidationMessage("CustomError")
+    </div>
+
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        var orglistData = [];
+
+        var options = {
+            selector: '.ListBoxorg',
+            responseArrayName: 'OrganisationList',
+            searchKeyField: 'organisationName',
+            textField: 'OrganisationName',
+            data: orglistData,
+            idField: 'Id',
+            multiple: true,
+            placeholder: 'Select Organisations'
+        }
+
+        $.ajax({
+            url: '@Url.Action("GetOrganisationsForDropDown", "Organisation")',
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                debugger;
+                for(var org in data.OrganisationList)
+                {
+                    var orgData = {
+                        id: data.OrganisationList[org].Id,
+                        text: data.OrganisationList[org].OrganisationName
+                    }
+                    orglistData.push(orgData);
+                }
+
+                select2AjaxSingle(options);
+            },
+            error: function (data) {
+                console.log("Get organisations for drop down error");
+            }
+        })
+
+
+        var optionsKiosk = {
+            url: '@Url.Action("GetKioskList", "Kiosk")',
+            selector: '#KioskIds',
+            responseArrayName: 'KioskList',
+            searchKeyField: 'kioskTitle',
+            textField: 'KioskName',
+            idField: 'Id',
+            multiple: false,
+            placeholder: 'Select Kiosk'
+        };
+        select2Ajax(optionsKiosk);
+
+        function loadKiostList(organisationId) {
+            if (organisationId == null)
+                organisationId = ["0"];
+            $("#KioskIds").prop("disabled", false);
+            select2Ajax(optionsKiosk, { OrganisationId: organisationId.slice(-1).pop() });
+        }
+
+        function clearKiostList() {
+            $("#KioskIds").empty();
+        }
+
+        $('#OrganisationIds').change(function() {
+            clearKiostList();
+            loadKiostList($(this).val());
+        });
+
+    });
+
+    function ValidateForm() {
+        var org = $('#OrganisationIds').val();
+        var kioks = $('#KioskIds').val();
+
+        var Orgtext = "<li> Organisation is required. </li>";
+        var KioskText = "<li> Kiosk is required. </li>";
+
+
+        if (org == null || kioks == null) {
+           
+            var innerText = "";
+            if (org == null)
+                innerText = Orgtext;
+            if (kioks == null)
+                innerText  +=  KioskText;
+            $('<div></div>').appendTo('body').html('<div class=validation-errorlist>'
+                + innerText +
+                ' </div>').dialog({
+                modal: true,
+                title: 'Please review the following',
+                autoOpen: true,
+                width: '300',
+                resizable: false,
+                draggable: false,
+                buttons: {
+                    OK: function() {
+                        $(this).dialog("close");
+                    }
+                },
+                close: function(event, ui) {
+                    $(this).remove();
+                }
+            });
+
+            return false;
+        }
+        return true;
+    }
+</script>
+
+
+
+
+
+
+
+

@@ -1,0 +1,8 @@
+PatientFlowKioskServerName	
+PatientFlowKioskDatabaseName		
+PatientFlowKioskConnectionString	
+Schedules	"every 1 minutes"
+ProductKey	
+ServerURI	
+SystemType	EMIS - Web
+ClientSettingsProvider.ServiceUri	

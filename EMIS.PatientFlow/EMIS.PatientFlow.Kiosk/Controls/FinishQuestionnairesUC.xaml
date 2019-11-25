@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.FinishQuestionnairesUc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding FinishQuestionnaires, Source={StaticResource Locator}}">
+    
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    
+    <Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="8*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" 
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                <TextBlock Text="{Binding ThankYouText}" TextAlignment="Center"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}" 
+                           Style="{DynamicResource HighLightMessageStyle}"/>
+
+                <TextBlock Text="{Binding AnswersSavedText}" Margin="0,15,0,0" TextAlignment="Center"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}" 
+                           Foreground="{DynamicResource DarkerGrayColor}" />
+
+                <TextBlock Text="{Binding FeedBackText}" Margin="0,15,0,0" TextAlignment="Center"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                           Foreground="{DynamicResource DarkerGrayColor}" />
+
+            </StackPanel>
+
+            <Button Grid.Row="2" Grid.Column="1" Height="60"
+                    Content="{Binding CloseText, Mode=TwoWay}" 
+                    Style="{DynamicResource DefaultButtonStyle}" 
+                    HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                    Command="{Binding FinishQuestionnaires.CloseCommand, Source={StaticResource Locator}}"/>
+
+        </Grid>
+
+    </Grid>
+      
+</UserControl>

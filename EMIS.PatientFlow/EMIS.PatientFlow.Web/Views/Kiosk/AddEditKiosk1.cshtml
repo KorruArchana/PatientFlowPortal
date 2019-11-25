@@ -1,0 +1,1030 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.KioskEditViewModel
+
+@{
+    ViewBag.Title = "AddEditKiosk";
+}
+@Html.Partial("_GoogleAnalytics", "AddEditKiosk")
+
+<script src="~/Scripts/bootstrap.js"></script>
+
+<style>
+    #dropArea {
+        border: black dashed 1px;
+        height: 150px;
+        text-align: center;
+        width: 400px;
+        padding-bottom: 100px;
+    }
+
+    #dropAreaSiteMap {
+        border: black dashed 1px;
+        height: 150px;
+        text-align: center;
+        width: 500px;
+        padding-bottom: 100px;
+    }
+
+    .color-text {
+        color: #4183c4;
+    }
+</style>
+
+<script>
+    var siteMapList = [];
+    var i = 0;
+    var counter = 0;
+    $(document).ready(function () {
+        $('#SiteMapTable').hide();
+        counter = $('#SiteMapImageId').val();
+        //File Reader for SiteMap
+        File.prototype.readFile = function (callback) {
+            var fileReader = new FileReader();
+            $('#SiteMapTable').show();
+            $('#dropAreaSiteMap').hide();
+            ++counter;
+            $('#SiteMapImageId').val(counter);
+            fileReader.onload = function (e) {
+                $('#SiteMapTable >tbody').append('<tr><td id="' + counter + '"><img src="' + e.target.result + '" style="width:50%;margin-right: 70%"></td><td><input type="text" class="form-control control-float-left options-text" style="width:200%" onchange="SiteMapTextChanged(this)" placeHolder="Site Map Name" /></td> <td style="padding-left:50%"><a href="#" data-keyboard="false" id="Delete" title="Delete" class="DeleteModal"> <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i></a></td>');
+                siteMapList.push({
+                    SiteMapData: e.target.result.substring(e.target.result.indexOf(',') + 1),
+                    SiteMapName: "Default",
+                    SiteMapid: counter
+                });
+            };
+            fileReader.readAsDataURL(this);
+        }
+
+        //File reader for logo
+        File.prototype.convertToBase64 = function (callback) {
+            var fileReader = new FileReader();
+            $('#dragAndDropText').hide();
+            $('#selectTxt').hide();
+            fileReader.onload = function (e) {
+                var className = $(this).attr("class");
+                $('#dropArea').css({'border':'none'});
+                $('#LogoDelete').css({ 'visibility': 'visible','margin-top': '-40%','padding-left':'60%' });
+                $('.uploader').show().attr('src', event.target.result).css({ 'height': '150px', 'width': '175px', 'margin-right': '70%', 'visibility':'visible'});
+                $('#KioskLogo').val(e.target.result.substring(e.target.result.indexOf(',') + 1))
+            };
+            fileReader.readAsDataURL(this);
+        }
+
+        //Drag and drop for Kiosk Logo
+        var dropZone = document.getElementById('dropArea');
+
+        var upload = function (input) {
+            var row = $(input)[0];
+            row.convertToBase64();
+        }
+
+        dropZone.ondrop = function (e) {
+            e.preventDefault();
+            this.className = 'dropArea';
+            upload(e.dataTransfer.files);
+        }
+        dropZone.ondragover = function () {
+            this.className = 'dropArea';
+            return false;
+        }
+        dropZone.ondragleave = function () {
+            this.className = 'dropArea';
+            return false;
+        }
+
+        //Drag and drop for siteMap
+        var dropSiteMap = document.getElementById('dropAreaSiteMap');
+        dropSiteMap.ondrop = function (e) {
+            $('#dragAndDropTextSiteMap').hide();
+            $('#selectTxtSiteMap').hide();
+            e.preventDefault();
+            this.className = 'dropAreaSiteMap';
+            var files_list = e.dataTransfer.files;
+            for (var i = 0; i < files_list.length; i++) {
+                SitemapUpload(e.dataTransfer.files[i]);
+            }
+
+        }
+        dropSiteMap.ondragover = function () {
+            this.className = 'dropAreaSiteMap';
+            return false;
+        }
+        dropSiteMap.ondragleave = function () {
+            this.className = 'dropAreaSiteMap';
+            return false;
+        }
+
+        var SitemapUpload = function (input) {
+            var row = $(input)[0];
+            sitemapImageName = row.name;
+            row.readFile();
+        }
+
+        //Delete Logo
+        $('.DeletelogoModal').on('click', function () {
+            $('#LogoPath').removeAttr('src');
+            $('#selectTxt').css({ 'display': '' });
+            $('#dragAndDropText').css({ 'display': '' });
+            $('#dropArea').css({ 'border': '' });
+            $('#LogoDelete').css({ 'visibility': 'hidden' });
+            $('.uploader').removeAttr("style").css({ 'visibility': 'hidden' });
+            $('#KioskLogo').val("");
+        })
+
+        //Delete SiteMap
+        $(document).on('click', '.DeleteModal', function () {
+            var removedElements = 0;
+            var id = $(this).parent().siblings(":first").attr('id');
+            $(this).closest("tr").remove();
+            if ($('#SiteMapTable tr').length == 1) {
+                $('#SiteMapTable').hide();
+                $('#dropAreaSiteMap').show();
+                $('#dragAndDropTextSiteMap').show();
+                $('#selectTxtSiteMap').show();
+                siteMapList = [];
+            }
+            else {
+                $.each(siteMapList, function (i, v) {
+                    if (id == v.SiteMapid) {
+                        removedElements = i;
+                    }
+                })
+                siteMapList.splice(removedElements, 1);
+            }
+        })
+        //Additional Details
+        var locationLoader;
+        var slotLoader;
+        var memberLoader;
+
+        $('#AddSiteMap').on('click', function () {
+            $('#dropAreaSiteMap').show();
+            $('#dragAndDropTextSiteMap').show();
+            $('#selectTxtSiteMap').show();
+        });
+
+        Intialize();
+        InitializeControls();
+
+        function Intialize() {
+            $('#statusdropdown').drop();
+            $('#memberDropdown').drop();
+            $('#organisationDropdown').drop();
+            $('#languageDropdown').drop();
+            $('#branchDropDown').drop();
+            $('#slotDropdown').drop();
+            $('#demographicDropdown').drop();
+            $('#locationTable').hide();
+
+            if(@Model.KioskInstance.Id==0)
+            {
+                $('#languageDropdown').drop("set selected", 1);
+            }
+            //edit
+            if (@Model.KioskInstance.Id> 0)
+            {
+                //kiosk logo
+              var logoimage =@Html.Raw(Json.Encode(Model.KioskLogoByte));
+              if(logoimage==""){
+                $('#dropArea').show();
+              }
+              else{
+                  $('#dragAndDropText').hide();
+                  $('#selectTxt').hide();
+                  $('#dropArea').css({ 'border': 'none' });
+                  $('#LogoDelete').css({ 'visibility': 'visible', 'margin-top': '-40%', 'padding-left': '60%' });
+                  $('.uploader').attr('src', `data:image/png;base64,${logoimage}`).css({ 'height': '150px', 'width': '175px', 'margin-right': '70%', 'visibility': 'visible' });
+               }
+              //SiteMap
+              var kioskSiteMapList =@Html.Raw(Json.Encode(Model.KioskInstance.KioskSiteMapList));
+               if(kioskSiteMapList.length>0){
+                 $('#SiteMapTable').show();
+                 $('#dropAreaSiteMap').hide();
+                 $.each(kioskSiteMapList, function (i, v) {
+                     v.SiteMapName == "Default" ? $('#SiteMapTable >tbody').append('<tr> <td id="' + i + '"><img src="' + `data:image/png;base64,${v.SiteMapData}` + '"style="width:50%;margin-right: 70%"></td><td><input type="text" class="form-control control-float-left options-text" style="width:200%" onchange="SiteMapTextChanged(this)" placeHolder="Site Map Name"  /></td><td style="padding-left:50%"><a href="#" data-keyboard="false" id="Delete" title="Delete" class="DeleteModal"> <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i></a></td>')
+                         : $('#SiteMapTable >tbody').append('<tr> <td id="' + i + '"><img src="' + `data:image/png;base64,${v.SiteMapData}` + '"style="width:50%;margin-right: 70%"></td><td><input type="text" class="form-control control-float-left options-text" style="width:200%" onchange="SiteMapTextChanged(this)" placeHolder="Site Map Name" value="' + v.SiteMapName + '" /></td><td style="padding-left:50%"><a href="#" data-keyboard="false" id="Delete" title="Delete" class="DeleteModal"> <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i></a></td>');
+                 siteMapList.push({
+                      SiteMapData: v.SiteMapData,
+                      SiteMapName: v.SiteMapName,
+                     SiteMapid: i
+                    });
+                   $('#SiteMapImageId').val(i);
+                  })
+               }
+               else {
+                   $('#SiteMapTable').hide();
+                   $('#dropAreaSiteMap').show();
+               } 
+              var selectedOrgs =@Html.Raw(Json.Encode(Model.KioskInstance.SelectedOrganisationList));
+              $('#organisationDropdown').drop("set selected", GetstringList(selectedOrgs));
+
+              var languageList = @Html.Raw(Json.Encode(Model.KioskInstance.SelectedLanguageList));
+              $('#languageDropdown').drop("set selected", GetstringList(languageList));
+
+              var demographicList =@Html.Raw(Json.Encode(Model.KioskInstance.SelectedDemographicDetails));
+              $('#demographicDropdown').drop("set selected", GetstringList(demographicList));
+            }
+        }
+
+        function GetstringList(intList) {
+            var stringList = [];
+            if (intList != null) {
+                $.each(intList, function (i, Id) { stringList.push(Id.toString()) })
+            }
+            return stringList;
+        }
+        var slotId = 0;
+        var sessionHolderId = 0;
+        if (@Model.KioskInstance.Id > 0) {
+
+            var showDemographicDetails =@Html.Raw(Json.Encode(Model.KioskInstance.ShowDemographicDetails));
+            if (showDemographicDetails == true) {
+                $('.DemographicDetails').show();
+            }
+            else {
+                $('.DemographicDetails').hide();
+            }
+
+            //set Branch,Slot,Member on Edit
+            var allMembersList =@Html.Raw(Json.Encode(Model.SessionHolderList));
+            $('#memberDropdown').empty().drop("clear"); //clear everything assigned from html and has to add through jquery.
+            $.each(allMembersList, function (key, value) {
+                $('#memberDropdown').append('<option value="' + ++sessionHolderId + '"data-value="' + value.SessionHolderId
+                    + '" data-id="' + value.OrganisationId
+                    + '" data-selected =' + value.IsSelected + '>'
+                    + value.FullName + '--' + value.OrganisationName + '</option>');
+            });
+
+            setTimeout(function () {
+                var selectedMemberList = [];
+                $("#memberDropdown option[data-selected='true']").each(function () {
+                    selectedMemberList.push($(this).attr('value'));
+                });
+                $('#memberDropdown').drop('set selected', selectedMemberList)
+            }, 100);
+
+            //slots
+             var slotList =@Html.Raw(Json.Encode(Model.AvailableSlotTypes));
+            $.each(slotList, function (key, value) {
+                $('#slotDropdown').append('<option value="' + ++slotId + '"data-value="' + value.SlotTypeId
+                    + '" data-id="' + value.OrganisationId
+                    + '" data-selected =' + value.IsSelected + '>'
+                    + value.Description + '--' + value.OrganisationName + '</option>');
+            })
+
+            setTimeout(function () {
+                var selectedSlotList = [];
+                $("#slotDropdown option[data-selected='true']").each(function () {
+                    selectedSlotList.push($(this).attr('value'));
+            });
+                $('#slotDropdown').drop('set selected', selectedSlotList);
+            }, 100);
+
+            //Branches
+            locationLoader.container.find(locationLoader.loader).remove();
+            $('#locationTable').show();
+            var branchList = @Html.Raw(Json.Encode(Model.BranchList));
+            $.each(branchList, function (index, branch) {
+                var row = " ";
+                row += '<tr id="' + branch.OrganisationId + '" ><td> <Label>' + branch.OrganisationName + '</Label></td>'
+                    + '<td>  <select data-id="' + branch.OrganisationId + '" class="LinkedSiteId"> ' +
+                    '<option value = 0 > All Branches</option > ' +
+                    $.each(branch.SitesList, function (i, v) {
+                        row += '<option value="' + v.Value + (v.Selected == true ? '" selected >' : '">') + v.Text + '</option>';
+                    }) + row + '</select></td>'
+                if (branch.IsMainLocation) {
+                    row += '<td><input type="checkbox" id="IsMainLocation_' + branch.OrganisationId + '" checked class="chckBoxContainerMainLocation" ></td > ' + '</tr > '
+                }
+                else {
+                    row += '<td><input type="checkbox" id="IsMainLocation_' + branch.OrganisationId + ' " class="chckBoxContainerMainLocation" ></td > ' + '</tr > '
+                }
+                $('#branchLocation').append(row);
+            });
+
+            $('#spinner').fadeOut(1000);
+        }
+
+        var previousOrgSelectedValue = $('#organisationDropdown').val();
+
+        if (@Model.KioskInstance.Id == 0) {
+            InitializeControls();
+            InitializeControlsBeforeAjaxCall();
+        }
+
+        //Values to set for dropdown options
+        var i = 0; //slot
+        var j = 0; //member
+
+        $('#organisationDropdown').on("change", function () {
+            $('#spinner').show();
+            var SelectedOrgValue = $('#organisationDropdown').val();
+            var OrgIdToProcess;
+
+            if (SelectedOrgValue != null) {
+                if (previousOrgSelectedValue == null && SelectedOrgValue.length == 1) {
+                    OrgIdToProcess = SelectedOrgValue;
+                    GetAddInfoForNewlyAddedOrg(OrgIdToProcess);
+                }
+                else if (previousOrgSelectedValue != null && previousOrgSelectedValue.length == SelectedOrgValue.length - 1) {
+                    var difference = [];
+                    jQuery.grep(SelectedOrgValue, function (el) {
+                        if (jQuery.inArray(el, previousOrgSelectedValue) == -1) difference.push(el);
+                        i++;
+                    });
+                    OrgIdToProcess = difference[0];
+                    GetAddInfoForNewlyAddedOrg(OrgIdToProcess);
+                }
+            }
+
+            if (previousOrgSelectedValue != null) {
+                if (SelectedOrgValue != null && previousOrgSelectedValue.length - 1 == SelectedOrgValue.length) {
+                    var difference = [];
+                    jQuery.grep(previousOrgSelectedValue, function (el) {
+                        if (jQuery.inArray(el, SelectedOrgValue) == -1) difference.push(el);
+                        i++;
+                    });
+                    OrgIdToProcess = difference[0];
+                    RemoveAddInfoForUnlinkedOrg(OrgIdToProcess);
+                }
+                else if (previousOrgSelectedValue.length == 1 && SelectedOrgValue == null) {
+                    var difference = [];
+                    jQuery.grep(previousOrgSelectedValue, function (el) {
+                        if (jQuery.inArray(el, SelectedOrgValue) == -1) difference.push(el);
+                        i++;
+                    });
+                    OrgIdToProcess = difference[0];
+                    RemoveAddInfoForUnlinkedOrg(OrgIdToProcess);
+                }
+            }
+            previousOrgSelectedValue = SelectedOrgValue;
+        });
+
+        function GetAddInfoForNewlyAddedOrg(OrgIdToProcess) {
+            $.ajax({
+                url: "../Kiosk/GetAdditionalDetails",
+                type: "Get",
+                dataType: "Json",
+                data: "organisationId=" + OrgIdToProcess,
+                beforeSend: function () {
+                    locationLoader.container.append(locationLoader.loader);
+                    slotLoader.container.append(slotLoader.loader);
+                    memberLoader.container.append(memberLoader.loader);
+                },
+                success: function (data) {
+                    //location
+                    locationLoader.container.find(locationLoader.loader).remove();
+                    $('#locationTable').show();
+                    var branchList = data.branchList;
+                    var row = " ";
+                    row += '<tr id="' + branchList.OrganisationId + '" ><td> <Label>' + branchList.OrganisationName + '</Label></td>'
+                        + '<td>  <select data-id="' + branchList.OrganisationId + '" class="LinkedSiteId" "> ' +
+                        '<option value = 0 > All Branches</option > ' +
+                        $.each(branchList.SitesList, function (i, v) {
+                            if (branchList.SitesList != null)
+                                row += '<option value="' + v.Value + '">' + v.Text + '</option>';
+                        }) + row + + '</select></td>'
+                    row += '<td><input type="checkbox" id="IsMainLocation_' + branchList.OrganisationId + '" class="chckBoxContainerMainLocation" ></td > ' + '</tr > '
+                    $('#branchLocation').append(row);
+                    $('#spinner').fadeOut(1000);
+
+                    //Slots
+                    slotLoader.container.find(slotLoader.loader).remove();
+                    $.each(data.slotList, function (key, value) {
+                        $('#slotDropdown').append('<option value="' + ++i + '"data-value="' + value.SlotTypeId + '' + '" data-id="' + value.OrganisationId + '">'
+                            + value.Description + '--' + value.OrganisationName + '</option>');
+                    })
+
+                    //Member
+                    memberLoader.container.find(memberLoader.loader).remove();
+                    if (data.memberList != null) {
+                        $.each(data.memberList, function (key, value) {
+                            $('#memberDropdown').append('<option value="' + ++j + '"data-value="' + value.SessionHolderId + '' + '" data-id="' + value.OrganisationId + '">'
+                                + value.FullName + '--' + value.OrganisationName + '</option>');
+                        });
+                    }
+                },
+                error: function (data) {
+                    alertify.error("Error! cannot load" + data)
+                }
+            })
+        }
+
+        function RemoveAddInfoForUnlinkedOrg(OrgIdToProcess) {
+            $('#slotDropdown option[data-id =' + OrgIdToProcess + ']').remove();
+            $('#memberDropdown option[data-id =' + OrgIdToProcess + ']').remove();
+            $('#branchLocation tr[id="' + OrgIdToProcess + '"').remove();
+        }
+
+        function InitializeControls() {
+            locationLoader = {
+                loader: $('<div />', { class: 'loader' }),
+                container: $('.locationDiv')
+            };
+            slotLoader = {
+                loader: $('<div />', { class: 'loader' }),
+                container: $('.slotDiv')
+            };
+            memberLoader = {
+                loader: $('<div />', { class: 'loader' }),
+                container: $('.memberdiv')
+            };
+        }
+
+        function InitializeControlsBeforeAjaxCall() {
+            $('#locationTable').hide();
+            //Slots
+            $('#slotDropdown').empty().drop("clear");
+            $('#slotDropdown').val('');
+            $('#slotDropdown').html("");
+            //Member
+            $('#memberDropdown').empty().drop("clear");
+            $('#memberDropdown').val('');
+            $('#memberDropdown').html("");
+        }
+
+        $(document).on('change', '.chckBoxContainerMainLocation', function () {
+            var idArr = $(this).attr("id");
+            if ($(this).is(':checked')) {
+                $(idArr).prop('checked', true);
+            }
+            else {
+                $(idArr).prop('checked', false);
+            }
+        })
+
+        $('#AddEditKiosk').submit(function (e) {
+            $('#cover-spin').show();
+            e.preventDefault();
+            $('#SiteMapList').val(JSON.stringify(siteMapList));
+            //clearing the values in the list
+            var selectedSlotList = [];
+            var selectedMemberList = [];
+            var selectedBranchList = [];
+
+            var slotlist = $('#slotDropdown').val();
+            if (slotlist != null) {
+                $.unique(slotlist);
+            }
+            if (slotlist != null) {
+                $.each(slotlist, function (index, value) {
+                    selectedSlotList.push({
+                        OrganisationId: parseInt($('#slotDropdown option[value=' + value + ']').attr('data-id')),
+                        SlotTypeId: parseInt($('#slotDropdown option[value=' + value + ']').attr('data-value'))
+                    });
+                })
+            }
+
+            var memberList = $('#memberDropdown').val();
+            if (memberList != null) {
+                $.unique(memberList);
+            }
+            if (memberList != null) {
+                $.each(memberList, function (index, value) {
+                    selectedMemberList.push({
+                        OrganisationId: parseInt($('#memberDropdown option[value=' + value + ']').attr('data-id')),
+                        SessionHolderId: parseInt($('#memberDropdown option[value=' + value + ']').attr('data-value'))
+                    });
+                })
+            }
+
+            $('.BranchList tr:not(:first)').each(function (index, el) {
+                var orgId = parseInt($(el).children().eq(1).find('.LinkedSiteId').attr("data-id"));
+                selectedBranchList.push({
+                    organisationId: orgId,
+                    BranchId: parseInt($(el).children().eq(1).find('.LinkedSiteId').val()),
+                    isMainLocation: $(el).children().eq(2).find('#IsMainLocation_' + orgId).is(":checked")
+                });
+            });
+
+            $('#SelectedBranchJson').val(JSON.stringify(selectedBranchList));
+            $('#SelectedSlotJson').val(JSON.stringify(selectedSlotList));
+            $('#SelectedMemberJson').val(JSON.stringify(selectedMemberList));
+            var kioskName = @Html.Raw(Json.Encode(Model.KioskInstance.KioskName));
+            if (@Model.KioskInstance.Id == 0)
+            {
+                SendGoogleEventClick('event type', 'Kiosks', 'Add', 'New Kiosk Added(' + kioskName + ')');
+            }
+            else
+            {
+                SendGoogleEventClick('event type', 'Kiosks', 'Edit', 'Kiosk edited(' + kioskName + ')');
+            }
+        })
+
+        //toggle checked value to true
+        $('#ForceSurvey').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#ForceSurveys').val(true);
+            else
+                $('#ForceSurveys').val(false);
+        })
+        $('#fileQof').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#FileQOF').val(true);
+            else
+                $('#FileQOF').val(false);
+        })
+        $('#removeSkip').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#SkipSurveyQuestion').val(true);
+            else
+                $('#SkipSurveyQuestion').val(false);
+        })
+        $('#confirmArrival').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#AutoConfirmArrival').val(true);
+            else
+                $('#AutoConfirmArrival').val(false);
+        })
+        $('#multipleArrival').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#AutoConfirmMultipleArrival').val(true);
+            else
+                $('#AutoConfirmMultipleArrival').val(false);
+        })
+        $('#doctorDelay').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#ShowDoctorDelays').val(true);
+            else
+                $('#ShowDoctorDelays').val(false);
+        })
+        $('#allowUntimed').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#UntimedAppointments').val(true);
+            else
+                $('#UntimedAppointments').val(false);
+        })
+        $('#showDemographicDetails').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#ShowDemographicDetails').val(true);
+            else
+                $('#ShowDemographicDetails').val(false);
+        })
+        $('#maskDemographicDetails').click(function () {
+            $(this).toggle('checked');
+            if ($(this).is(":checked"))
+                $('#ScrambleDemoDetails').val(true);
+            else
+                $('#ScrambleDemoDetails').val(false);
+        })
+    });
+
+    function SuccessHandling(data) {
+        $('#cover-spin').show();
+        $('#AddEditKioskModal').modal('hide');
+        return (window.location.href = "@Url.Action("Index","Kiosk")");
+    }
+    $('.btn-cancel').click(function () {
+        $('#CancelModal').modal('hide');
+    })
+    $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+    function SiteMapTextChanged(text) {
+       var rowIndex = $(text).closest("tr")[0].rowIndex;
+        $.each(siteMapList, function (index, value) {
+            if (index == rowIndex-1) {
+                value.SiteMapName = text.value == "" || text.value == undefined ? "Default" : text.value;
+            }
+        })
+    }
+    //Select Image for SiteMap
+    function SiteMapImageChanged(input) {
+        var row = $(input)[0];
+        $('#SiteMapTable').show();
+        $('#dropAreaSiteMap').hide();
+        counter = document.getElementById("SiteMapImageId").value;
+        ++counter;
+        document.getElementById("SiteMapImageId").value = counter;
+        if (row.files && row.files[0]) {
+            var filereader = new FileReader();
+            filereader.onload = function (e) {
+                filereader.name = e.target.fileName;
+                $('#SiteMapTable >tbody').append('<tr><td id="' + counter + '"><img class="stack" src="' + e.target.result + '" style="width:50%;margin-right: 70%"></td><td><input type="text" class="form-control control-float-left options-text" style="width:200%" onchange="SiteMapTextChanged(this)" placeHolder="Site Map Name" /></td> <td style="padding-left:50%"><a href="#" data-keyboard="false" id="Delete" title="Delete" class="DeleteModal"> <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i></a></td>');
+                siteMapList.push({
+                    SiteMapData: e.target.result.substring(e.target.result.indexOf(',') + 1),
+                    SiteMapName: "Default",
+                    SiteMapid: counter
+                });
+            }
+        }
+        filereader.readAsDataURL(input.files[0]);
+    }
+
+    //Select Image for logo
+    function LogoImageChanged(input) {
+        var row = $(input)[0];
+        if (row.files && row.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#dragAndDropText').hide();
+                $('#selectTxt').hide();
+                $('#dropArea').css({ 'border': 'none' });
+                $('#LogoDelete').css({ 'visibility': 'visible', 'margin-top': '-40%', 'padding-left': '60%' });
+                $('.uploader').show().attr('src', event.target.result).css({ 'height': '150px', 'width': '175px', 'margin-right': '70%', 'visibility': 'visible' });
+                $('#KioskLogo').val(e.target.result.substring(e.target.result.indexOf(',') + 1))
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+</script>
+<div id="cover-spin"></div>
+<div class="modal-dialog modal-lg">
+    <div class="modal-content" style="overflow:auto">
+        <div class="modal-header" style="overflow:auto; padding: 20px !important">
+            <p class="page-header-text-popup">
+
+                @if (Model.KioskInstance.Id > 0)
+            {
+                <span>Edit Kiosk</span>}
+        else
+        {
+            <span>Add Kiosk</span>}
+            </p>
+        </div>
+        @*@using (Ajax.BeginForm("SaveKiosk", "Kiosk", new AjaxOptions
+    {
+        UpdateTargetId = "ContentContainer",
+        InsertionMode = InsertionMode.Replace,
+        OnSuccess = "SuccessHandling"
+    }, new { @id = "AddEditKiosk" }))
+        {*@
+            @Html.HiddenFor(m => m.KioskInstance.KioskLogoByte, new { @id = "KioskLogo" })
+            @Html.HiddenFor(m => m.KioskInstance.Id)
+            @Html.HiddenFor(m => m.BranchJson, new { @id = "SelectedBranchJson" })
+            @Html.HiddenFor(m => m.SlotJson, new { @id = "SelectedSlotJson" })
+            @Html.HiddenFor(m => m.MemberJson, new { @id = "SelectedMemberJson" })
+            @Html.HiddenFor(m => m.SiteMapJson, new { @id = "SiteMapList" })
+            @Html.HiddenFor(m => m.KioskInstance.ForceSurvey, new { @id = "ForceSurveys" })
+            @Html.HiddenFor(m => m.KioskInstance.SkipSurveyQuestion, new { @id = "SkipSurveyQuestion" })
+            @Html.HiddenFor(m => m.KioskInstance.AutoConfirmArrival, new { @id = "AutoConfirmArrival" })
+            @Html.HiddenFor(m => m.KioskInstance.AutoConfirmMultipleArrival, new { @id = "AutoConfirmMultipleArrival" })
+            @Html.HiddenFor(m => m.KioskInstance.FileasKioskUser, new { @id = "FileQOF" })
+            @Html.HiddenFor(m => m.KioskInstance.ShowDoctorDelay, new { @id = "ShowDoctorDelays" })
+            @Html.HiddenFor(m => m.KioskInstance.AllowUntimed, new { @id = "UntimedAppointments" })
+            @Html.HiddenFor(m => m.KioskInstance.ShowDemographicDetails, new { @id = "ShowDemographicDetails" })
+            @Html.HiddenFor(m => m.KioskInstance.ScrambleDemographicDetails, new { @id = "ScrambleDemoDetails" })
+
+
+        <div class="modal-body">
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Kiosk Name<span class="requiredfield">*</span></p>
+                @Html.TextBoxFor(model => model.KioskInstance.KioskName, new { @class = "form-control control-float-left options-text", @placeHolder = "Kiosk Name" })
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">
+                    @Html.ValidationMessageFor(model => model.KioskInstance.KioskName)
+                </div>
+            </div>
+
+            <div id="spinner" class="spinner" style="display:none;">
+                <img id="img-spinner" />
+            </div>
+
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Logo Image</p>
+                <div id="dropArea">
+                    <p class="container">
+                        <fieldset>
+                            <label>
+                                <span class="btn" id="dragAndDropText" style="margin-bottom:10%">To attach an image drag and drop here (or)</span>
+                                <img class="uploader" src="" style="visibility:hidden;" id="LogoPath" />
+                                <span class="btn color-text" id="selectTxt" style="margin-right:18%;margin-top:-70%">select image from your computer</span>
+                                <span id="FileName"></span>
+                                <input style="visibility:hidden" type="file" name="file" onchange="LogoImageChanged(this)" title="">
+                            </label>
+                        </fieldset>
+                    </p>
+                    <div style="visibility:hidden" id="LogoDelete">
+                        <a href="#" data-keyboard="false" id="Delete" title="Delete" class="DeletelogoModal">
+                        <i class="fa fa-trash-o fa-2x" aria-hidden="true"></i>
+                        </a>
+                    </div> 
+                </div>
+            </div>
+
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Title<span class="requiredfield">*</span></p>
+                @Html.TextBoxFor(model => model.KioskInstance.Title, new { @class = "form-control control-float-left options-text", @placeHolder = "Title" })
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">
+                    @Html.ValidationMessageFor(model => model.KioskInstance.Title)
+                </div>
+            </div>
+
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Status<span class="requiredfield">*</span></p>
+
+                @Html.DropDownListFor(model => model.KioskInstance.Status, (IEnumerable<SelectListItem>)ViewData["Status"],
+                                                                              new
+                                                                              {
+                                                                                  @class = "ui fluid search selection dropdown dept-dropdown ui-dropdown-min-width",
+                                                                                  @id = "statusdropdown",
+                                                                                  @placeHolder = "Select a Status"
+                                                                              })
+            </div>
+            <div class="control-float-left field-spacing nullify-field-spacing">
+                <p class="question-text">Linked To<span class="requiredfield">*</span></p>
+
+                @Html.DropDownListFor(model => model.KioskInstance.SelectedOrganisationList, Model.OrganisationSelectList, "Select Organisation",
+                                         new { @class = "ui fluid search multiple dropdown ui-dropdown-min-width", @id = "organisationDropdown", @multiple = "multiple" })
+
+            </div>
+            <div class="control-float-left field-spacing nullify-field-spacing locationDiv">
+                <p class="question-text">Location</p>
+                <table class="table table-bordered table-striped table-hover BranchList" id="locationTable">
+                    <thead>
+                        <tr>
+                            <th>Organistion Name</th>
+                            <th>Branch List</th>
+                            <th>Is Main Location</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branchLocation"></tbody>
+                </table>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Modules<span class="requiredfield">*</span></p>
+
+                @for (int i = 0; i < Model.AvailableModules.Count; i++)
+            {
+                @Html.HiddenFor(model => model.AvailableModules[i].Id)
+                @Html.CheckBoxFor(model => model.AvailableModules[i].IsSelected)
+                @Html.LabelFor(model => model.AvailableModules[i].IsSelected, Model.AvailableModules[i].ModuleName)
+                <br />
+        }
+            </div>
+            <div class="control-float-left field-spacing">
+                <h3>Mapping Information</h3>
+            </div>
+            <div class="control-float-left field-spacing nullify-field-spacing">
+                <p class="question-text">Languages</p>
+
+                @Html.DropDownListFor(x => x.KioskInstance.SelectedLanguageList, Model.LanguageSelectList, "select Language",
+                                          new
+                                          {
+                                              @class = "ui fluid search selection dropdown  ui-dropdown-min-width multiple",
+                                              @id = "languageDropdown",
+                                              @multiple = "multiple",
+                                          })
+                @*language validation is not working*@
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">
+                    @Html.ValidationMessageFor(model => model.SelectedLanguageList)
+                </div>
+            </div>
+            <div class="control-float-left field-spacing slotType nullify-field-spacing">
+                <p class="question-text">Slot Type</p>
+                @Html.DropDownListFor(model => model.KioskInstance.SelectedSlotTypes, Enumerable.Empty<SelectListItem>(), "Select Slot type",
+                   new
+                   {
+                       @class = "ui fluid multiple search selection dropdown ui-dropdown-min-width slotDiv",
+                       @id = "slotDropdown",
+                       @multiple = "multiple",
+                       @placeHolder = "Select Slot Types"
+                   })
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Arrival Matching</p>
+
+                @foreach (var item in Model.AvailablePatientMatches)
+            {
+                @Html.RadioButtonFor(model => model.KioskInstance.PatientMatchId,
+                                                      item.Id,
+                                                      new
+                                                      {
+                                                          @class = "radiobtn",
+                                                          @id = "radio_" + item.Id
+                                                      })
+
+
+                <label for="radio_@item.Id">@item.ScreenTitle</label><br />
+                <div class="divider"></div>
+        }
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">
+                    @Html.ValidationMessageFor(model => model.KioskInstance.PatientMatchId)
+                </div>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Appointment Matching</p>
+
+                @foreach (var item in Model.AvailableAppointmentMatches)
+            {
+                @Html.RadioButtonFor(model => model.KioskInstance.AppointmentMatchId,
+                                                      item.Id,
+                                                      new
+                                                      {
+                                                          @class = "radiobtn",
+                                                          @id = "appointmentMatch_" + item.Id
+                                                      })
+
+
+                <label for="appointmentMatch_@item.Id">@item.ScreenTitle</label><br />
+                <div class="divider"></div>
+        }
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">
+                    @Html.ValidationMessageFor(model => model.KioskInstance.AppointmentMatchId)
+                </div>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Staff Member</p>
+
+                @Html.DropDownListFor(model => model.SelectedSessionHolderIdList, Enumerable.Empty<SelectListItem>(), "Select Member",
+                               new
+                               {
+                                   @class = "ui fluid multiple search selection dropdown ui-dropdown-min-width  memberdiv",
+                                   @id = "memberDropdown",
+                                   @multiple = "multiple",
+                                   @placeHolder = "Select staff Members"
+                               })
+            </div>
+            <div class="control-float-left field-spacing">
+                <h3>Survey Configuration</h3>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Force Survey</p>
+                <label class="switch">
+                    <input type="checkbox" id="ForceSurvey" checked="@Model.KioskInstance.ForceSurvey">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Remove Skip Button</p>
+                <label class="switch">
+                    <input type="checkbox" id="removeSkip" checked="@Model.KioskInstance.SkipSurveyQuestion">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">File QOF </p>
+                <label class="switch">
+                    <input type="checkbox" id="fileQof" checked="@Model.KioskInstance.FileasKioskUser">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <h3>Arrival Configuration</h3>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Auto Confirm Arrival</p>
+                <label class="switch">
+                    <input type="checkbox" id="confirmArrival" checked="@Model.KioskInstance.AutoConfirmArrival">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Auto Confirm Multiple Arrival</p>
+                <label class="switch">
+                    <input type="checkbox" id="multipleArrival" checked="@Model.KioskInstance.AutoConfirmMultipleArrival">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Show Doctor Delay </p>
+                <label class="switch">
+                    <input type="checkbox" id="doctorDelay" checked="@Model.KioskInstance.ShowDoctorDelay">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Early Arrival</p>
+                <br />
+                @Html.TextBoxFor(model => model.KioskInstance.EarlyArrival, new { type = "number", Id = "EarlyArrival", min = 1, max = 150 })
+                <span>mins</span>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Late Arrival</p>
+                <br />
+                @Html.TextBoxFor(model => model.KioskInstance.LateArrival, new { type = "number", Id = "LateArrival", min = 1, max = 150 })
+                <span>mins</span>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Untimed Appointments </p>
+                <label class="switch">
+                    <input type="checkbox" id="allowUntimed" checked="@Model.KioskInstance.AllowUntimed">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <h3>Other Details</h3>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Screen Timeout</p>
+                @Html.TextBoxFor(model => model.KioskInstance.ScreenTimeOut, new { type = "number", Id = "screenTimeOut", min = 1, max = 150 })
+                <span>seconds</span>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Appointment  Reason</p>
+                <div class="radioContainer">
+                    @Html.RadioButtonFor(model => model.KioskInstance.AppointmentReason, "", new { @class = "radiobtn", @id = "reasonnull", @checked = (Model.KioskInstance.AppointmentReason == null) })
+                    <label for="reasonnull">Not Required </label>
+                    <div class="divider"></div>
+                    @Html.RadioButtonFor(model => model.KioskInstance.AppointmentReason, "false", new { @class = "radiobtn", @id = "reasonfalse" })
+                    <label for="reasonfalse">Optional</label>
+                    <div class="divider"></div>
+                    @Html.RadioButtonFor(model => model.KioskInstance.AppointmentReason, "true", new { @class = "radiobtn", @id = "reasontrue" })
+                    <label for="reasontrue">Mandatory</label>
+                </div>
+
+            </div>
+            <div class="control-float-left field-spacing DemographicDetails">
+                <p class="question-text">Demographic Details</p>
+                @Html.DropDownListFor(model => model.KioskInstance.SelectedDemographicDetails, Model.DemographicList, "Select Demographic Details", new
+            {
+                @class = "ui fluid multiple search selection dropdown ui-dropdown-min-width demographicList",
+                @id = "demographicDropdown",
+                @multiple = "multiple",
+                @placeHolder = "Select Demographic"
+            })
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Show Demographic Details</p>
+                <label class="switch">
+                    <input type="checkbox" id="showDemographicDetails" checked="@Model.KioskInstance.ShowDemographicDetails">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Mask Demographic Details</p>
+                <label class="switch">
+                    <input type="checkbox" id="maskDemographicDetails" checked="@Model.KioskInstance.ScrambleDemographicDetails">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text">Demographic Details Duration</p>
+                @Html.TextBoxFor(model => model.KioskInstance.DemographicDetailsDuration, new { type = "number", Id = "demographicDetailsDuration", min = 1, max = 180 })
+            </div>
+            <div class="control-float-left field-spacing">
+                <h3>Admin Details</h3>
+            </div>
+            <div class="control-float-left field-spacing">
+                <p class="question-text"> Admin Password  </p>
+                @Html.TextBoxFor(model => model.KioskInstance.AdminPassword, new { @class = "form-control control-float-left options-text", @placeHolder = "Admin Password" })
+
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">
+                    @Html.ValidationMessageFor(model => model.KioskInstance.AdminPassword)
+                </div>
+            </div>
+            <div class="control-float-left field-spacing" id="SiteMapImage">
+                <p class="question-text">SiteMap Image</p>
+                <div id="SiteMapImages">
+                    <table id="SiteMapTable" style="width:50%;border-spacing:10px;">
+                        <thead>
+                            <tr>
+                                <th>SiteMapImage</th>
+                                <th>SiteMapName</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div id="dropAreaSiteMap">
+                    <p class="container">
+                        <fieldset>
+                            <label>
+                                <span class="btn" id="dragAndDropTextSiteMap">To attach an image drag and drop here (or)</span>
+                                <span class="btn color-text" id="selectTxtSiteMap" style="margin-right:15%">select image from your computer</span>
+                                <span id="FileName"></span>
+                                <input id="siteMap" style="visibility:hidden" type="file" name="file" onchange="SiteMapImageChanged(this)" title="">
+                                <input id="SiteMapImageId" value="0" style="visibility:hidden" />
+                            </label>
+                        </fieldset>
+                    </p>
+                </div>
+                <button class="btn btn-primary btn-lg submit-button" id="AddSiteMap" type="button">Add SiteMap</button>
+            </div>
+
+        </div>
+
+        <div class="modal-footer control-float-left field-spacing-popup">
+            <button class="btn btn-default btn-lg cancel-button" type="button">
+                Cancel
+            </button>
+            <button class="btn btn-primary btn-lg submit-button" type="submit">Save Kiosk</button>
+        </div>
+       @*}*@
+    </div>
+</div>
+ 
+<div class="modal fade" id="CancelModal" role="dialog">
+    <div class="modal-dialog"  style="width:35%;margin-right:2%;margin-bottom:1%">
+        <div class="modal-content">
+            <div class="modal-header">
+              Add/Update Kiosk
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-cancel" style="margin-right:5px">No,Stay</button>
+                <button class="btn btn-default btn-ok" onclick='window.location.href = "@Url.Action("Index","Kiosk")"'>Yes,cancel</button>
+            </div>
+        </div>
+    </div>
+
+</div>

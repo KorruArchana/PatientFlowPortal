@@ -1,0 +1,213 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.RoleViewModel
+@Html.Partial("_GoogleAnalytics","ChangeRole")
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">
+            Users
+        </span>
+        <span><img src="~/images/arrow.png"></span>
+        <span class="rightBlockSubHeading">
+            Manage Roles
+        </span>
+    </div>
+    <div class="rightBlockTopButtonContainer">
+        <a href="#" onclick="Redirect()">
+            <img src="~/Images/back.png" />Back
+        </a>
+    </div>
+</div>
+<div id="grdRoles" class="rightBlockContent">
+    <div>
+        <p class="leftTxt">
+            Role Name :
+        </p>
+        <input type="text" class="rightTxtBox" data-bind="value: roleName, valueUpdate: ' afterkeydown'" />
+        <span class="field-validation-error" data-bind='visible: roleName.hasError, text: roleName.validationMessage'> </span>
+    </div>
+    <div class="editBtnContainer">
+        <button name="btnCreate" type="submit" class="saveEditBtn" data-bind="click:addRole"> Create</button>
+    </div>
+    <span class="field-validation-error" data-bind='visible: showMessage, text: errorMessage'></span>
+    <table class="TFtable">
+        <thead>
+            <tr>
+                <th>Roles</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: items">
+            <tr>
+                <td data-bind="text: Name"></td>
+                <td style="width:50px"><a href="#" class="deleteLinkBtn" title="Delete Role" data-bind="click: $parent.deleteRole, visible: $data.Name != 'Administrator' && $data.Name != 'EMIS Super User' && $data.Name != 'Standard User'"> </a></td>
+            </tr>
+        </tbody>
+        <tfoot>
+
+        </tfoot>
+    </table>
+</div>
+
+<div style="color: red; margin-left: 40px">
+
+</div>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+    var roleViewModel = function (userName) {
+        var self = this;
+        self.items = ko.observableArray();
+        self.roleName = ko.observable('').extend({ required: "Please enter a role name" });
+        self.errorMessage = ko.observable('');
+        self.showMessage = ko.observable(false);
+        self.userName = userName;
+        
+        self.addRole = function () {
+
+            self.showMessage(false);
+            self.errorMessage('');
+
+            if (!self.roleName.hasError()) {
+                $.ajax({
+                    url:  '@Url.Action("CreateRole", "Account")',// '/Account/CreateRole',
+                    type: "POST",
+                    data: { roleName: self.roleName() },
+                    success: function (data) {
+
+                        if (!data.Success) {
+                            self.showMessage(true);
+                            self.errorMessage(data.Message);
+                        }
+                        else {
+
+                            self.showMessage(false);
+                            self.errorMessage('');
+                            self.roleName('');
+                        }
+                        self.getData();
+                    },
+                    error: function (data) {
+                        self.showMessage(true);
+                        self.errorMessage('Request Failed.');
+                    }
+                });
+            }
+        }
+        self.goto = function () {
+            if (self.userName == '') {
+                LoadAddContent('AddUser');
+            }
+            else {
+                $('.leftBlock').removeClass('extendedLeftBlock');
+                $.ajax({
+                    url: '@Url.Action("LoadUserEditPageContent", "Account")',
+                    data: {
+                        userName: self.userName
+                    },
+                    type: "GET",
+                    success: function (d) {
+                        
+                        $("#ContentContainer").html(d);
+                        return false;
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        //alert("Error");
+                        
+                        return false;
+                    }
+                });
+                return false;
+            }
+        }
+        self.deleteRole = function (item) {
+            self.showMessage(false);
+            self.errorMessage('');
+
+            if (confirm("Are you sure you want to Delete ?")) {
+                $.ajax({
+                    url: '/Account/DeleteRole',
+                    type: "POST",
+                    data: { roleName: item.Name },
+                    success: function (data) {
+
+                        if (!data.Success) {
+                            self.showMessage(true);
+                            self.errorMessage(data.Message);
+                        }
+                        else {
+
+                            self.showMessage(false);
+                            self.errorMessage('');
+                            self.roleName('');
+                        }
+                        self.getData();
+                    },
+                    error: function (data) {
+                        self.showMessage(true);
+                        self.errorMessage('Request Failed.');
+                    }
+                });
+            }
+        }
+        self.getData = function () {
+            $.ajax({
+                url: '/Account/GetAllRoles',
+                type: "GET",
+                success: function (data) {
+                    self.items.removeAll();
+                    if (data.length > 0) {
+                        for (i = 0; i < data.length; i++) {
+                            self.items.push(data[i]);
+                        }
+                    }
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+
+        self.getData();
+    }
+
+    var vm = null;
+    $(document).ready(function () {
+        'use strict';
+        ko.extenders.required = function (target, overrideMessage) {
+            //add some sub-observables to our observable
+            target.hasError = ko.observable();
+            target.validationMessage = ko.observable();
+
+            //define a function to do validation
+            function validate(newValue) {
+                target.hasError(newValue ? false : true);
+                target.validationMessage(newValue ? "" : overrideMessage || "This field is required");
+            }
+
+            //initial validation
+            validate(target());
+
+            //validate whenever the value changes
+            target.subscribe(validate);
+
+            //return the original observable
+            return target;
+        };
+
+
+         vm = new roleViewModel('@Model.UserName');
+        var element = document.getElementById('grdRoles');
+        ko.cleanNode(element);
+        ko.applyBindings(vm, element);
+
+      
+    });
+
+    function Redirect() {
+        vm.goto();
+    }
+</script>
+

@@ -1,0 +1,13 @@
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\SyncService\EMIS.PatientFlow.SyncService.exe.config
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\SyncService\EMIS.PatientFlow.SyncService.exe
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\SyncService\EMIS.PatientFlow.SyncService.pdb
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\SyncService\EMIS.PatientFlow.SyncService.exe.CodeAnalysisLog.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\SyncService\EMIS.PatientFlow.SyncService.exe.lastcodeanalysissucceeded
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.csproj.App.config
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.csprojAssemblyReference.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.ProjectInstaller.resources
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.csproj.GenerateResource.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.csproj.CoreCompileInputs.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.csproj.CopyComplete
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.exe
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.SyncService\obj\Debug\EMIS.PatientFlow.SyncService.pdb

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="2ac892b7-67f0-46b6-b562-972c72d83176" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost/TopasTestService/TestKiosk.asmx" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="TestKiosk.disco" MetadataType="Disco" ID="5b91af7c-d318-45a4-a596-57812bee7100" SourceId="1" SourceUrl="http://localhost/TopasTestService/TestKiosk.asmx?disco" />
+    <MetadataFile FileName="schema1.xsd" MetadataType="Schema" ID="76d66c0e-e811-4f02-a714-5b8112b5997d" SourceId="1" SourceUrl="http://localhost/TopasTestService/TestKiosk.asmx?schema=schema1" />
+    <MetadataFile FileName="TestKiosk.wsdl" MetadataType="Wsdl" ID="c8404e1d-bcd3-4edd-a4cb-228269e28445" SourceId="1" SourceUrl="http://localhost/TopasTestService/TestKiosk.asmx?wsdl" />
+    <MetadataFile FileName="schema2.xsd" MetadataType="Schema" ID="7e789b4e-08ac-4da1-8378-ec064a77c417" SourceId="1" SourceUrl="http://localhost/TopasTestService/TestKiosk.asmx?schema=schema2" />
+    <MetadataFile FileName="TestKiosk1.wsdl" MetadataType="Wsdl" ID="b1983b7d-6472-45c6-a4a6-490c9179085c" SourceId="1" SourceUrl="http://localhost/TopasTestService/TestKiosk.asmx?wsdl=wsdl1" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

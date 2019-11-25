@@ -1,0 +1,50 @@
+﻿
+<script>
+    (function () {
+        var ga = null;
+        if ('@System.Configuration.ConfigurationManager.AppSettings.AllKeys.Contains("GAAccount")' == "True") {
+            ga = '@System.Configuration.ConfigurationManager.AppSettings["GAAccount"]';
+        }        
+
+        var script = document.createElement("script");
+        script.type = 'text/javascript';
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + ga;
+
+        if (!isMyScriptLoaded(script.src)) {
+            $("head").append(script);
+        }
+    })();
+
+    function isMyScriptLoaded(url) {
+        var scripts = document.getElementsByTagName('script');
+        for (var i = scripts.length; i--;) {
+            if (scripts[i].src == url) return true;
+        }
+        return false;
+    }
+
+</script>
+
+<script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', '@System.Configuration.ConfigurationManager.AppSettings["GAAccount"]');
+</script>
+
+<script type="text/javascript">
+
+    //User Actions
+    function LogEvent(eventCategory, GAMessage, LabelValue) {
+        if (GAMessage != null && GAMessage != '') {
+            gtag('event', GAMessage, {
+                'event_category': eventCategory,
+                'event_label': LabelValue,
+                'value': 1
+            });
+        }
+    }
+
+</script>
+

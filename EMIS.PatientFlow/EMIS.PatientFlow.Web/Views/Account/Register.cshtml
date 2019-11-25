@@ -1,0 +1,226 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.RegisterViewModel
+@using EMIS.PatientFlow.Common.Enums
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "__AjaxAntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
+<style type="text/css">
+    .select2-search__field {
+        width: 100% !important;
+    }
+</style>
+@Html.Partial("_GoogleAnalytics","NewUser")
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">
+            Register
+        </span>
+        <span><img src="~/images/arrow.png"></span>
+        <span class="rightBlockSubHeading">
+            Add User
+        </span>
+    </div>
+
+</div>
+
+<div class="rightBlockContent" id="grdUser">
+    <div>
+        <p class="leftTxt">
+            User Name :<span class="required-field"> *</span>
+        </p>
+        <input type="text" name="txtUserName" class="rightTxtBox" data-bind="value: viewModel.UserName" />
+    </div>
+    <div>
+        <p class="leftTxt">
+            Password :<span class="required-field"> *</span>
+        </p>
+        <input type="text" name="txtPassword" class="rightTxtBox" data-bind="value: viewModel.Password" />
+    </div>
+    <div>
+        <p class="leftTxt">
+            Confirm Password :
+        </p>
+        <input type="text" name="txtConfirmPassword" class="rightTxtBox" data-bind="value: viewModel.ConfirmPassword" />
+    </div>
+    <div>
+        <p class="leftTxt">
+            Email :<span class="required-field"> *</span>
+        </p>
+        <input type="text" name="txtEmail" class="rightTxtBox" data-bind="value: viewModel.Email" />
+    </div>
+    <div>
+        <p class="leftTxt">
+            User In Roles:<span class="required-field"> *</span>
+        </p>
+        <div class="chkBoxContainer">
+            <div style="float:left">
+                <!-- ko foreach: viewModel.Roles -->
+                <input type="radio" data-bind="checkedValue: $data.Name, checked: $root.viewModel.SelectedRoles" />
+                <span data-bind="text: DisplayText"></span><br />
+                <!-- /ko -->
+            </div>
+            <span data-bind="visible: $root.isRoleSelected" class="validationMessage" style="float:left">Role is required.</span>
+        </div>
+    </div>
+    <div data-bind="visible: $root.ShowOrganisation">
+        <p class="leftTxt">
+            Organisation :
+        </p>
+        <div class="rightSelect2 wider">
+            @Html.ListBoxFor(x => x.OrganisationIds, Model.OrganisationList, new { multiple = "multiple", @class = "ListBoxorg" })
+            <span data-bind="visible: $root.OrganisationRequired" class="validationMessage" style="float:left">Organisation is required.</span>
+        </div>
+    </div>
+    <div class="editBtnContainer">
+        <input type="button" value="Register" class="saveEditBtn" id="Formsubmit" data-bind="click : Save" />
+        <input type="button" value="Cancel" class="cancelEditBtn" onclick="return LoadContent(@Convert.ToInt32(NodeType.Users), '0')" />
+    </div>
+   
+    <div style="color: red; margin-left: 40px" data-bind="text:errorMessage">
+        @Html.ValidationMessage("CustomError")
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+
+<script type="text/javascript">
+    function RegisterModel(user) {
+        var regSelf=this;
+        this.viewModel = ko.mapping.fromJS(user);
+        this.isRoleSelected = ko.observable(false);
+        this.OrganisationRequired = ko.observable(false);
+        this.errorMessage = ko.observable('');
+        
+
+        this.initialize = function () {
+            this.viewModel.UserName.extend({
+                validation: {
+                    validator: function (val, other) {  return $.trim(val) === '' ? false : true; },
+                    message: 'User Name is required.'
+                } });
+            this.viewModel.Password.extend({
+                validation: {
+                    validator: function (val, other) {  return $.trim(val) === '' ? false : true; },
+                    message: 'Password is required.'
+                } }).extend({ minLength: 6 });
+            this.viewModel.ConfirmPassword.extend({
+                validation: {
+                    validator: function (val, other) { return val == other; },
+                    message: 'The password and confirmation password do not match.',
+                    params: this.viewModel.Password
+                }
+            });
+            this.viewModel.Email.extend({
+                validation: {
+                    validator: function (val, other) {  return $.trim(val) === '' ? false : true; },
+                    message: 'Email is required.'
+                } }).extend({ email: true });
+        }
+
+        this.ShowOrganisation = ko.computed(function() {
+            return (regSelf.viewModel.SelectedRoles().length > 0) &&regSelf.viewModel.SelectedRoles() =="Practice Admin";
+        });
+        
+        this.Save = function () {
+            this.errorMessage('');
+            this.isRoleSelected(!(this.viewModel.SelectedRoles().length > 0));
+            regSelf.viewModel.OrganisationIds($(".ListBoxorg").val());
+            regSelf.OrganisationRequired((regSelf.ShowOrganisation()) && (regSelf.viewModel.OrganisationIds()==null||regSelf.viewModel.OrganisationIds().length == 0));
+            
+            if (this.errors().length === 0 && this.viewModel.SelectedRoles().length > 0&& !regSelf.OrganisationRequired() ) {
+                this.PostData(ko.mapping.toJS(this.viewModel));
+            }
+            else {
+                this.errors.showAllMessages();
+            }
+        }
+        this.PostData = function (data) {
+            var form = $('#__AjaxAntiForgeryForm');
+            var token = $('input[name="__RequestVerificationToken"]', form).val();
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '@Url.Action("Register", "Account")',
+                data: {
+                    __RequestVerificationToken: token,
+                    model: data
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    if (data.Valid) {
+                        return LoadContent(@Convert.ToInt32(NodeType.Users), '0');;
+                    }
+                    var msg='';
+                    $.each(data.Errors, function (key, value) {
+                        if (value != null) {
+                            msg+=' '+ value[value.length - 1].ErrorMessage;
+                        }
+                    });
+                    regSelf.errorMessage(msg);
+                },
+                error: function (xhr) {
+                    regSelf.errorMessage('Failed to call the server ;'+xhr.responseText);
+                }
+            });
+        }
+
+        this.initialize();
+        this.errors = ko.validation.group(this.viewModel);
+
+      
+    }
+
+    function PageLoad(){
+      
+        var userModel = @Html.Raw(Json.Encode(Model));
+        var registerModel = new RegisterModel(userModel);
+        var element = document.getElementById('grdUser');
+        ko.cleanNode(element);
+        ko.applyBindings(registerModel, element);
+
+        var orglistData = [];
+
+        var options = {
+            selector: '.ListBoxorg',
+            responseArrayName: 'OrganisationList',
+            searchKeyField: 'organisationName',
+            textField: 'OrganisationName',
+            data: orglistData,
+            idField: 'Id',
+            multiple: true,
+            placeholder: 'Select Organisations'
+        }
+
+        $.ajax({
+            url: '@Url.Action("GetOrganisationsForDropDown", "Organisation")',
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                debugger;
+                for(var org in data.OrganisationList)
+                {
+                    var orgData = {
+                        id: data.OrganisationList[org].Id,
+                        text: data.OrganisationList[org].OrganisationName
+                    }
+                    orglistData.push(orgData);
+                }
+
+                select2AjaxSingle(options);
+            },
+            error: function (data) {
+                console.log("Get organisations for drop down error");
+            }
+        })
+
+      
+    }
+    PageLoad();
+</script>

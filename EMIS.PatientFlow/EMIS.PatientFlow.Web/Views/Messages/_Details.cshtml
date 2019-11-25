@@ -1,0 +1,166 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.AlertsViewModel
+@{
+    var nodeTypeId = Convert.ToString(EMIS.PatientFlow.Common.Enums.NodeType.EditAlerts);
+}
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $("#treeviewdialog").dialog({
+                autoOpen: false,
+                modal: true,
+                hide: "fade",
+
+                width: '400',
+                height: '400',
+                draggable: false,
+                zIndex: 10000
+            });
+        });
+
+        $("#Successmodal").dialog({
+            autoOpen: false,
+            modal: true,
+            show: "fade",
+            hide: "fade",
+            buttons: {
+                Ok: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
+    });
+
+
+
+</script>
+
+@Html.Partial("_GoogleAnalytics","Alert Details Page")
+
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">Alert Details
+        </span>
+
+        <span class="rightBlockSubHeading"></span>
+
+    </div>
+    <div class="rightBlockTopButtonContainer">
+
+        <a href="#" style="text-decoration: none" onclick="return LoadEditContent('@nodeTypeId', @Model.Id)">
+            <input class="AddOrEditText EditTextColor" type="text" value="Edit Alert" readonly="readonly" />
+            <img src="~/Images/edit-icon.png" />
+        </a>
+
+    </div>
+</div>
+<div class="rightBlockContent">
+    <div>
+        <p class="leftTxt">
+            Alert Text:
+        </p>
+        <p class="rightTxt">
+            @Model.AlertText
+        </p>
+    </div>
+    <div>
+        <p class="leftTxt">
+            Display Type:
+        </p>
+        <p class="rightTxt">
+            @Model.AlertsDisplayType
+        </p>
+    </div>
+
+    <div>
+        <p class="leftTxt">
+            Linked To:
+        </p>
+
+        <p class="rightTxt">
+            @if (Model.SelectedDepartmentMemberTree != null)
+            {
+                foreach (var item in Model.SelectedDepartmentMemberTree)
+                {
+                    <span>@item.Name</span><br />
+            <br />
+            }
+            }
+        </p>
+    </div>
+    <div>
+        <p class="leftTxt">
+            Kiosk Linked:
+        </p>
+
+        <p class="rightTxt">
+            @Model.KioskName
+        </p>
+    </div>
+    <div>
+        <p class="leftTxt">
+            Gender:
+        </p>
+        @if (Model.Gender == "F")
+        {
+            <p class="rightTxt">Female</p>
+        }
+        else if (Model.Gender == "None")
+        {
+            <p class="rightTxt">Not specified</p>
+        }
+        else
+        {
+            <p class="rightTxt">Male</p>
+        }
+
+
+    </div>
+    <div>
+        <p class="leftTxt">
+            Condition:
+        </p>
+        <p class="rightTxt">
+            @Model.Operation
+        </p>
+    </div>
+    <div>
+        <p class="leftTxt">
+            Age:
+        </p>
+
+        @if (Model.Age1 == 0)
+        {
+            <p class="rightTxt">
+                Not specified
+            </p>
+        }
+        else
+        {
+            <p class="rightTxt">@Model.Age1 </p>
+        }
+        @if (Model.Operation == "Between")
+        {
+            <p class="rightTxt">-</p>
+        <p class="rightTxt">@Model.Age2</p>
+        }
+    </div>
+    <div>
+        <p class="leftTxt">
+            Last ModifiedBy:
+        </p>
+        <p class="rightTxt">
+            @Model.ModifiedBy
+        </p>
+    </div>
+    <div>
+        <p class="leftTxt">
+            Last Modifed:
+        </p>
+        <p class="rightTxt">
+            @Model.Modifed
+        </p>
+    </div>
+    <br />
+    <br />
+</div>

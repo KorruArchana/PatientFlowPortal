@@ -1,0 +1,276 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.TranslationListViewModel
+@using EMIS.PatientFlow.Common.Enums;
+
+<style>
+    .dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate, .paging_simple_numbers {
+        display: none !important;
+    }
+    #ModuleDetailsTable td a:hover {
+        opacity: 1.0 !important;
+        box-shadow: none !important;
+    }
+    .AddTranslation {
+        float:right;
+    }
+    .AddTranslation select {
+        padding: 7px;
+        margin: 0;
+    }
+    #outerdiv {
+        margin-left: 17px !important;
+    }
+</style>
+
+@Html.Partial("_GoogleAnalytics")
+
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">
+            Translations
+        </span>
+    </div>
+</div>
+    <div id="grdtranslation" class="rightBlockContent">
+           <div style="text-align:Left;margin-top: 2%;margin-left:0%;">
+        <h3>&nbsp; &nbsp; &nbsp; This module has been disabled.</h3>
+    </div>
+
+        <div id="outerdiv">
+
+        </div>
+    </div>
+
+    @{
+        int pageSize = EMIS.PatientFlow.Web.Helper.Config.PageSize;
+    }
+    <script type="text/javascript">
+
+        var dt = null;
+        var currentitem = null;
+        ko.observableArray.fn.subscribeArrayChanged = function (addCallback) {
+
+            var previousValue = undefined;
+            this.subscribe(function (latestValue) {
+
+                var editScript = ko.utils.compareArrays(previousValue, latestValue);
+                for (var i = 0, j = editScript.length; i < j; i++) {
+                    switch (editScript[i].status) {
+                        case "retained":
+                            break;
+                        case "added":
+                            if (addCallback)
+                                addCallback(editScript[i].value);
+                            break;
+                    }
+                }
+                previousValue = undefined;
+            });
+        };
+
+        var TranslationObj = function (data, dt) {
+            this.ModuleName = ko.observable(data.ModuleName);
+            this.ID = ko.observable(data.Id);
+            this.TranslationTypeId = ko.observable(data.TranslationTypeId);
+            this.LinkButton = '<img src="/Images/details_open.png" rel=' + data.Id + ' alt="expand/collapse" onclick=\'ShowChild($(this))\'>';
+        };
+
+        var TranslationScreens = ko.mapping.fromJS([]);
+
+        function initiateDTable(list) {
+
+            if (dt == null) {
+                dt = $('#companies').DataTable({
+
+                    "bPaginate": false,
+                    "columns": [
+                         { data: 'LinkButton' },
+                         { data: 'ModuleName()' }
+                    ]
+                });
+            }
+            else {
+                dt.clear().draw();
+
+                TranslationScreens = ko.mapping.fromJS([]);
+
+            }
+
+
+            TranslationScreens.subscribeArrayChanged(
+
+                function (addedItem) {
+
+                    dt.row.add(addedItem).draw();
+                }
+
+            );
+            ko.mapping.fromJS(
+                list,
+                {
+                    key: function (data) {
+                        return ko.utils.unwrapObservable(data.Id);
+                    },
+                    create: function (options) {
+                        return new TranslationObj(options.data, dt);
+                    }
+                },
+                TranslationScreens
+            );
+
+        }
+
+        var translationViewModel = function (pageSize) {
+
+            var self = this;
+
+            self.items = ko.observableArray();
+
+            self.currentPage = ko.observable(1);
+
+            self.totalCount = ko.observable(1);
+
+            self.pageSize = pageSize;
+
+            self.pageCount = ko.computed(function () {
+                if ((self.totalCount() % self.pageSize) == 0)
+                    return parseInt((self.totalCount() / self.pageSize));
+                else
+                    return parseInt((self.totalCount() / self.pageSize)) + 1;
+            });
+
+            self.initialize = function () {
+                self.currentPage(1);
+                self.totalCount(0);
+                self.items.removeAll();
+                self.getData(self.currentPage());
+            }
+
+            self.getData = function (pageNumber) {
+                var translationTypeId = parseInt($(".SelectBoxModule option:selected").val());
+                $.ajax({
+
+                    url: '@Url.Action("GetModule", "Language")',
+                    data: { pageNumber: pageNumber, pageSize: self.pageSize },
+                    type: "GET",
+                    cache: false,
+                    success: function (data) {
+
+                        self.items.removeAll();
+                        self.currentPage(pageNumber);
+                        self.totalCount(data.TotalCount);
+                        if (data.TranslationList.length > 0) {
+                            for (i = 0; i < data.TranslationList.length; i++) {
+                                self.items.push(data.TranslationList[i]);
+
+                            }
+
+                            initiateDTable(data.TranslationList);
+                        }
+                        self.createPagination();
+
+                    },
+                    error: function (data) {
+                    }
+                });
+            }
+
+            self.createPagination = function () {
+
+                $("#paginationHolder").pagination({
+                    pages: self.pageCount(),
+                    itemsOnPage: self.pageSize,
+                    currentPage: self.currentPage(),
+                    cssStyle: 'light-theme',
+                    onPageClick: self.loadPage
+                });
+
+            };
+
+            self.loadPage = function (pageNo, event) {
+                self.getData(pageNo);
+            };
+
+            self.initialize();
+        };
+
+        function ShowChild(item) {
+
+            if (currentitem != null) {
+                if (currentitem.parent().parent().find('td:nth-child(2)').html() != item.parent().parent().find('td:nth-child(2)').html()) {
+
+                    var tr = currentitem.parent().parent();
+                    var row = dt.row(tr);
+                    var toLanguage = $(".selectBoxLanguage option:selected").val();
+                    var moduleId = parseInt(currentitem.attr("rel"));
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        currentitem.attr("src", "/Images/details_open.png");
+                    }
+                }
+
+            }
+
+            currentitem = item;
+            var tr = item.parent().parent();
+            var row = dt.row(tr);
+            var toLanguage = $(".selectBoxLanguage option:selected").val();
+            var moduleId = parseInt(item.attr("rel"));
+            if (row.child.isShown()) {
+                row.child.hide();
+                item.attr("src", "/Images/details_open.png");
+            }
+            else {
+
+                $.ajax({
+                    url: '@Url.Action("ViewModuleDetails", "Language")',
+                    data: { moduleId: moduleId, languageCode: toLanguage },
+                    type: "GET",
+                    success: function (data) {
+
+                        row.child(data).show();
+                        item.attr("src", "/Images/details_close.png");
+                    },
+                    error: function (data) {
+
+                    }
+                });
+            }
+        };
+        $(document).on('change', '.selectBoxLanguage', function () {
+            if (currentitem != null) {
+                item = currentitem;
+                var tr = currentitem.parent().parent();
+                var row = dt.row(tr);
+                var toLanguage = $(".selectBoxLanguage option:selected").val();
+                var moduleId = parseInt(currentitem.attr("rel"));
+                if (row.child.isShown()) {
+                    $.ajax({
+
+                        url: '@Url.Action("ViewModuleDetails", "Language")',
+                        data: { moduleId: moduleId, languageCode: toLanguage },
+                        type: "GET",
+                        success: function (data) {
+                            row.child(data).show();
+                        },
+                        error: function (data) {
+
+                        }
+
+                    });
+                }
+            }
+
+
+        });
+
+        function translationList() {
+            var vm = new translationViewModel(@pageSize);
+            var element = document.getElementById('grdtranslation');
+            ko.cleanNode(element);
+            ko.applyBindings(vm, element);
+        };
+        translationList();
+
+    </script>
+
+

@@ -1,0 +1,21 @@
+﻿@model List<EMIS.PatientFlow.Entities.Kiosk>
+@{
+    ViewBag.Title = "Kiosk";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+    <span class="rightBlockSubHeading">
+        <h2>Kiosk List </h2>
+    </span>
+
+    <nav id="navMenu">
+        <ul class="nav" id="nav">
+            @foreach (var i in Model)
+            {
+                <li>
+                    <a href="@i.Title"> @i.KioskName </a>
+                </li>
+            }
+
+        </ul>
+    </nav>

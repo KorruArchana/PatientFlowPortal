@@ -1,0 +1,427 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.OrganisationViewModel
+
+@{
+    ViewBag.Title = "AddEditOrganisation";
+}
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+<script src="~/Scripts/bootstrap.js"></script>
+
+<style>
+    .modal-header {
+        padding: 10px !important;
+        font-size: 23px;
+    }
+
+    .modal-footer {
+        margin: 0 20px 20px 20px;
+        float: right !important;
+    }
+
+    div {
+        padding: 2px;
+    }
+
+    .modal-body {
+        overflow-y: auto;
+    }
+</style>
+
+<script>
+     var OrgSystemType = 'EMIS - WEB';
+    if ('@System.Configuration.ConfigurationManager.AppSettings.AllKeys.Contains("SystemType")' == "True") {
+        OrgSystemType = '@System.Configuration.ConfigurationManager.AppSettings["SystemType"]';
+    }
+    $(document).ready(function () {
+        if ('@Model.Id' == 0)
+        {
+                 $('#ClinicSetDiv').hide();
+                if (OrgSystemType.toUpperCase() == 'EMIS -PCS') {
+                    $('#systemType').drop('set selected', OrgSystemType);
+                    $('#SystemTypeId').val(2);
+                    $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Database Name:");
+                    $('#InternalIPAddress').show();
+                }
+                else {
+                    $('#systemType').drop('set selected', "EMIS - Web");
+                    $('#SystemType').val(1);
+                    $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Organisation Key:");
+                    $('#InternalIPAddress').hide();
+                }
+        }
+        var formValid;
+        Intialize();
+        function Intialize() {
+            $('#systemType').drop();
+            $('#listIpAddress').drop();
+            $('#orgKeyText').text("Organisation Key");
+            ShowSubmitButton();
+            if (@Model.Id== 0) {
+               //This for username and password deleteing google auto complete
+                $('#txtPassword').attr('autocomplete', 'new-password');
+                $('#txtUserName').attr('autocomplete', 'nope');
+                SetSupplierID();
+            }
+            if (@Model.Id> 0) {
+                ShowHideInputs(@Model.SystemTypeId);
+            }
+        }
+        var form = $('#AddEditOrganisationForm');
+        var validator = form.validate();
+
+        function ShowHideInputs(sysTypeValue) {
+            $('#siteNumber').show();
+            if (@Model.Id> 0)
+            {
+                sysTypeValue=sysTypeValue.toString();
+                $('.SystemTypeClass').addClass("disabled");
+            }
+            switch (sysTypeValue) {
+                case '1'://EmisWeb
+                case '2'://EmisPCS
+                    $('#ipAddress').show();
+                    $('#userName').show();
+                    $('#password').show();
+                    $('#supplierId').show();
+                    $('#OrganisationKeyDiv').show();
+                    (sysTypeValue==2)? $('#InternalIPAddress').show():  $('#InternalIPAddress').hide();
+                    (sysTypeValue == 2) ?
+                        $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Database Name:"):
+                        $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Organisation Key:");
+                    break;
+                case '3'://Pas
+                case '4'://None
+                    $('#ipAddress').hide();
+                    $('#userName').hide();
+                    $('#password').hide();
+                    $('#supplierId').hide();
+                    $('#orgKey').show();
+                    $('#InternalIPAddress').hide();
+                    $('#OrganisationKeyDiv').show();
+                    $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Organisation Key:");
+                    break;
+            }
+        }
+        function ShowSubmitButton()
+        {
+            if (OrgSystemType != null) {
+                $("#SystemType").val($('#systemType option:selected').text());
+                var value = $('#SystemType').val();
+                if (value == "EMIS - Web" && OrgSystemType.toUpperCase() == "EMIS -PCS") {
+                    $('#submitBtn').hide();
+                    $('#SaveErrorText').show().text("You cannot add EMIS Web organisation here");
+                }
+                else if (value == "EMIS - PCS" && OrgSystemType.toUpperCase() == "EMIS - WEB") {
+                    $('#submitBtn').hide();
+                    $('#SaveErrorText').show().text("You cannot add an EMIS PCS Organisation here");
+                }
+                else {
+                    $('#submitBtn').show();
+                    $('#SaveErrorText').hide();
+                }
+            }
+
+        }
+        function SetSupplierID() {
+            var sysTypeValue = $('#systemType').val();
+            if (sysTypeValue == 1 || sysTypeValue == 2) {
+                if (sysTypeValue == 2)
+                    $('#txtSupplierId').val("3A8DE191-E75C-4F52-A7CD-27D23118AF82");
+                else
+                    $('#txtSupplierId').val("84e23aa3-68d6-461c-88e0-5fdb48a37c96");
+               // $('#txtSupplierId').prop("disabled", true);
+            }
+
+        }
+        $('#systemType').change(function () {
+            var sysTypeValue = $('#systemType').val();
+            ShowHideInputs(sysTypeValue);
+            ShowSubmitButton();
+            SetSupplierID();
+            ClearErrors();
+        });
+
+        function ClearErrors() {
+            $('#errorSiteNumber').html('');
+            $('#errorUserName').html('');
+            $('#errorPassword').html('');
+            $('#errorOrgKey').html('');
+            $('#errorIpAddress').html('');
+            $('#errorSupplierId').html('');
+        }
+
+        $('#AddEditOrganisationForm').submit(function (data) {
+            if (!form.valid()) {
+                alert("Requred fields are missing.Form is not valid");
+            }
+        })
+
+        function ValidateInput() {
+            $('#cover-spin').hide();
+             formValid = true;
+            var sysTypeValues = $('#systemType').val();
+
+            var orgName = $('#txtOrgName').val();
+            if (orgName == '') {
+                $('#txtOrgName').focus()
+                $('#errorOrgName').html("Organisation name is required");
+                formValid = false;
+            }
+            else {
+                $('#errorOrgName').html('');
+            }
+            if (sysTypeValues == 2 || sysTypeValues == 1 || sysTypeValues == 5) {
+                var siteNumber = $('#txtSiteNumber').val();
+                if (siteNumber == '') {
+                    $('#txtSiteNumber').focus();
+                    $('#errorSiteNumber').html("Site number is required");
+                    formValid = false;
+                }
+                else {
+                    $('#errorSiteNumber').html('');
+                }
+
+                var Username = $('#txtUserName').val();
+                if (Username == '') {
+                    $('#txtUserName').focus();
+                    $('#errorUserName').html("Username is required");
+                    formValid = false;
+                }
+                else {
+                    $('#errorUserName').html('');
+                }
+
+                var Password = $('#txtPassword').val();
+                if (Password == '') {
+                    $('#txtPassword').focus()
+                    $('#errorPassword').html("Password is required");
+                    formValid = false;
+                }
+                else {
+                    $('#errorPassword').html('');
+                }
+
+                var OrgKey = $('#txtOrgKey').val();
+                if (OrgKey == '') {
+                    $('#txtOrgKey').focus();
+                    $('#errorOrgKey').html("Organisation key is required");
+                    formValid = false;
+                }
+                else {
+                    $('#errorOrgKey').html('');
+                }
+                var IpAddress = $('#listIpAddress').val();
+                if (IpAddress == '') {
+                    $('#listIpAddress').focus();
+                    $('#errorIpAddress').html("IpAddress is required");
+                  formValid = false;
+                 }
+                else {
+                  $('#errorIpAddress').html('');
+                }
+                var SupplierId = $('#txtSupplierId').val();
+                if (SupplierId == '') {
+                    $('#txtSupplierId').focus();
+                 $('#errorSupplierId').html("SupplierId is required");
+                 formValid = false;
+                 }
+                else {
+                  $('#errorSupplierId').html('');
+                 }
+            }
+        }
+
+        $('#submitBtn').click(function (e) {
+            $('#cover-spin').show();
+            var valid = ValidateInput();
+            if (formValid) {
+                $('#cover-spin').show();
+                var OrganisatioName = $('#txtOrgName').val();
+                var OrganisationId = $('#orgId').val();
+                var OrganisationKey = $('#txtOrgKey').val();
+                var model = {
+                    "OrganisationName": $('#txtOrgName').val(),
+                    "SystemTypeId": $('#systemType').val(),
+                    "IpAddress": $('#listIpAddress').val(),
+                    "SiteNumber": $('#txtSiteNumber').val(),
+                    "Username": $('#txtUserName').val(),
+                    "Password": $('#txtPassword').val(),
+                    "SupplierId": $('#txtSupplierId').val(),
+                    "OrganisationKey": $('#txtOrgKey').val(),
+                    "WebServiceUrl": $('#txtWebserviceUrl').val(),
+                    "Id": $('#orgId').val(),
+                    "SystemType": $('#systemType option:selected').text(),
+                    "InternalIpAddress": $('#txtInternalIpAddress').val()
+
+                }
+                $.ajax({
+                    type: "GET",
+                    url: "../../Organisation/IsValidOrganisationName",
+                    dataType: "JSON",
+                    data: "organisationName=" + OrganisatioName + "&organisationId=" + OrganisationId + "&OrganisationKey=" + OrganisationKey,
+                    success: function (data) {
+                        if (!data.OrganisationKey) {
+                            $('#errorOrgKey').html(data.KeyMessage);
+                            e.preventDefault();
+                            $('#cover-spin').hide();
+                            return false;
+                        }
+                        else if (!data.Result) {
+                            $('#errorOrgName').html(data.Message);
+                            e.preventDefault();
+                            $('#cover-spin').hide();
+                            return false;
+                        }
+                        else {
+                            $('#cover-spin').show();
+                            $('#errorOrgName').html('');
+                            $.ajax({
+                                type: "POST",
+                                url: "../../Organisation/SaveOrganisation",
+                                dataType: "JSON",
+                                data: model,
+                                success: function (data) {
+                                    $('#cover-spin').hide();
+                                    if (data.success) {
+                                        $('#AddEditOrganisation').modal('hide');
+                                        location.reload();
+                                        return true;
+                                    } else {
+                                        var message = data.Message;
+                                        if (message.indexOf("Username or password is incorrect") != -1) {
+                                            $('#errorUserName').html("Username or password incorrect").css({'color':'red'});
+                                            $('#txtUserName').focus();
+                                        }
+                                        else if (message.indexOf("Invalid Ip address") != -1) {
+                                            $('#errorIpAddress').html("Invalid Ip address").css({ 'color': 'red' });
+                                            $('#listIpAddress').focus();
+                                        }
+                                        else {
+                                            $('#errorMessage').html("Invalid credentials").css({ 'color': 'red' });
+
+                                        }
+                                    }
+                                },
+                                error: function (ex) {
+                                    $('#cover-spin').hide();
+                                    return false;
+                                  }
+                            })
+                        }
+                    },
+                    error: function (ex) {
+                        $('#cover-spin').hide();
+                        return false;
+                    }
+                });
+            }
+
+        });
+        $('.cancel-button').click(function () {
+            if (confirm('Are you sure you want to cancel?'))
+                return window.location.href = '@Url.Action("Index", "Organisation")';
+            else
+                return false;
+        });
+    })
+
+</script>
+<div id="cover-spin"></div>
+<div class="modal-dialog">
+    <div class="modal-content" style="overflow-y:auto">
+        <div class="modal-header" style="overflow-y:auto">
+            <p class="modal-header">
+                @if (Model.Id > 0)
+                {
+                    <span>Edit Organisation</span>
+                }
+                else
+                {
+                    <span>Add Organisation</span>
+                }
+            </p>
+        </div>
+        @using (Ajax.BeginForm("SaveOrganisation", "Organisation", new AjaxOptions
+        {
+            UpdateTargetId = "ContentContainer",
+            InsertionMode = InsertionMode.Replace,
+            OnSuccess = "SuccessHandling"
+        }, new { @id = "AddEditOrganisationForm" }))
+        {
+            @Html.HiddenFor(x => x.Id, new { id = "orgId" })
+            <div class="modal-body">
+                <div class="control-float-left ">
+                    <p class="question-text ">Organisation name<span class="requiredfield">*</span></p>
+                    @Html.TextBoxFor(modelItem => Model.OrganisationName, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtOrgName", @maxLenth = "50" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.OrganisationName)</div>
+                    <div id="errorOrgName" class="control-float-left requiredfield-errortext"></div>
+                </div>
+
+                <div class="control-float-left ">
+                    <p class="question-text">System Type<span class="requiredfield">*</span></p>
+                    @Html.DropDownListFor(x => x.SystemTypeId, new SelectList(Model.SystemTypesList, "Value", "Text", Model.SystemTypeId),
+                             new { @class = "ui fluid search dropdown ui-dropdown-min-width SystemTypeClass", @id = "systemType" })
+                    <div id="errorOrg" class="control-float-left requiredfield-errortext"></div>
+                </div>
+
+                <div class="control-float-left " id="ipAddress">
+                    <p class="question-text">IP Address<span class="requiredfield">*</span></p>
+                    @Html.DataListInputFor(x => x.IpAddress, Model.IpAddresses, Model.IpAddress, new { @id = "listIpAddress", @class = " ui selection dropdown ui-dropdown-min-width" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.IpAddress)</div>
+                    <div id="errorIpAddress" class="control-float-left requiredfield-errortext"></div>
+                </div>
+
+                <div class="control-float-left" id="InternalIPAddress">
+                    <p class="question-text"> Internal Ip Address: </p>
+                    @Html.TextBoxFor(x => x.InternalIpAddress, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtInternalIpAddress" })
+                </div>
+
+            <div class="control-float-left " id="siteNumber">
+                <p class="question-text">EMIS CDB/Site Number<span class="requiredfield">*</span></p>
+                @Html.TextBoxFor(modelItem => Model.SiteNumber, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtSiteNumber", @maxLenth = "50" })
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.SiteNumber)</div>
+                <div id="errorSiteNumber" class="control-float-left requiredfield-errortext"></div>
+            </div>
+            <div class="control-float-left " id="userName">
+                <p class="question-text">Username<span class="requiredfield">*</span></p>
+                @Html.TextBoxFor(modelItem => Model.Username, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtUserName", @maxLenth = "50" })
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.Username)</div>
+                <div id="errorUserName" class="control-float-left requiredfield-errortext"></div>
+            </div>
+            <div class="control-float-left " id="password">
+                <p class="question-text">Password<span class="requiredfield">*</span></p>
+                @Html.PasswordFor(modelItem => Model.Password, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtPassword", @maxLenth = "50",value=Model.Password })
+                <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.Password)</div>
+                <div id="errorPassword" class="control-float-left requiredfield-errortext"></div>
+            </div>
+            <div class="control-float-left " id="supplierId">
+                <p class="question-text">Supplier ID<span class="requiredfield">*</span></p>
+                    @Html.TextBoxFor(modelItem => Model.SupplierId, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtSupplierId", @maxLenth = "50" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.SupplierId)</div>
+                    <div id="errorSupplierId" class="control-float-left requiredfield-errortext"></div>
+                </div>
+
+                <div id="OrganisationKey" class="control-float-left">
+                    <div id="OrganisationKeyDiv">
+                        <p class="question-text" id="OrgKeyOrDBNameText"><span id="OrgKeyOrDBNameSpan"></span><span class="requiredfield"> *</span></p>
+                    </div>
+                    @Html.TextBoxFor(modelItem => Model.OrganisationKey, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtOrgKey", @maxLenth = "50" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.OrganisationKey)</div>
+                    <div id="errorOrgKey" class="control-float-left requiredfield-errortext"></div>
+                </div>
+                <div class="control-float-left">
+                    <span id="errorMessage"></span>
+                </div>
+            </div>
+            <div class="modal-footer control-float-left field-spacing-popup">
+                <p id="SaveErrorText" hidden="hidden"></p>
+                <button class="btn btn-default btn-lg cancel-button" type="button" id="CancelBtn">
+                    Cancel
+                </button>
+
+                <button class="btn btn-primary btn-lg submit-button" type="button" id="submitBtn">Save Organisation</button>
+            </div>
+        }
+    </div>
+</div>

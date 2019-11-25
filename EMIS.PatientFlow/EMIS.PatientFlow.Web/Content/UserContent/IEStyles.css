@@ -1,0 +1,59 @@
+﻿@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .dataTables_info {
+        margin-left: 16px;
+    }
+
+    .dataTables_paginate {
+        margin-left: 16px;
+    }
+
+    #AddEditLayoutFooter {
+        position: fixed;
+        background: white;
+        z-index:1000;
+    }
+
+    .fieldset{
+        width:auto;
+    }
+
+    .ui.dropdown {
+        margin-right:-5px;
+    }
+
+    .ui.fluid.dropdown {
+        width: 102% !important;
+    }
+
+    .mdl-textfield__input {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .break {
+        float: none !important;
+    }
+
+    .CodeAndLogicQuestionStyle {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .CodeWithValue {
+        margin-left:-10px;
+    }
+    .mdl-card_table {
+        overflow: hidden !important;
+    }
+
+    .IEInlineBlock {
+        display: inline-block !important;
+        float: left !important;
+        margin-right: 3px !important;
+    }
+
+    .betweenValue {
+        margin-left: 30px !important;
+    } 
+
+}

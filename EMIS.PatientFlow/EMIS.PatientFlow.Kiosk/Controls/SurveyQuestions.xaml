@@ -1,0 +1,241 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SurveyQuestions"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:k="clr-namespace:EMIS.PatientFlow.Kiosk.KeyBoard"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras"
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.TemplateSelector"
+             xmlns:localControls="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding SurveyQuestions, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="SurveyQuestionsStyle.xaml"/>
+                <ResourceDictionary Source="../Converters/ActualWidthConverter.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="NumericTextBoxTemplate">
+                <StackPanel  Background="White" Visibility="{Binding IsQuestionVisible,Mode=TwoWay}" 
+                             Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <TextBlock TextAlignment="Left" HorizontalAlignment="Left" Margin="0,20" TextWrapping="Wrap"
+                               FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}" 
+                               Style="{DynamicResource HighLightMessageStyle}" Text="{Binding QuestionText}"
+                               Width="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"/>
+                    <TextBox TextWrapping="Wrap" k:NumericKeyboard.NumericKeyboard="true" x:Name="tbxNumeric" 
+                             Template="{StaticResource SurveyTextBoxBaseControlTemplate}" 
+                             Width="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"
+                             Height="150"
+                             BorderThickness="2" Foreground="#626262"
+                             VerticalContentAlignment="Top" HorizontalAlignment="Left"
+                             FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+                             Text="{Binding SelectedAnswer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="TextBoxTemplate">
+                <StackPanel  Background="White" Visibility="{Binding IsQuestionVisible,Mode=TwoWay}"  
+                             Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <TextBlock TextAlignment="Left" HorizontalAlignment="Left" Margin="0,20" TextWrapping="Wrap"
+                               FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+                               Style="{DynamicResource HighLightMessageStyle}" Text="{Binding QuestionText}"
+                               Width="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"/>
+                    <TextBox TextWrapping="Wrap" k:TouchScreenKeyboard.TouchScreenKeyboard="true" x:Name="tbkAnswerText" 
+                             Template="{StaticResource SurveyTextBoxBaseControlTemplate}" 
+                             Width="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"
+                             Height="150"
+                             BorderThickness="2" Foreground="#626262"
+                             VerticalContentAlignment="Top" HorizontalAlignment="Left"
+                             FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+                             Text="{Binding SelectedAnswer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="CheckBoxTemplate">
+                <StackPanel Background="White" Visibility="{Binding IsQuestionVisible,Mode=TwoWay}" 
+                            Orientation="Vertical"  HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <TextBlock TextAlignment="Left" HorizontalAlignment="Left" Margin="0,10" TextWrapping="Wrap"
+                               FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}" 
+                               Style="{DynamicResource HighLightMessageStyle}" Text="{Binding QuestionText}"
+                               Width="{Binding ActualWidth,ElementName=QuestionStkPnl}"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Style="{StaticResource FavsScrollViewer}"
+                                  MaxHeight="{Binding SizeHelperModel.ResolutionHelper.RadioButtonCheckBoxMaximumHeight, Source={StaticResource Locator}}">
+                        <ListView ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" Margin="0,10,0,0"  
+                                  Style="{StaticResource ListboxStyle}" HorizontalContentAlignment="Left" HorizontalAlignment="Left"  BorderThickness="0" 
+                                  ItemsSource="{Binding AnswerOptions}" SelectionMode="Single"
+                                  Width="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"
+                                  Grid.IsSharedSizeScope="True">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition SharedSizeGroup="B"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Button Grid.Column="0" x:Name="CheckBoxButton" Style="{DynamicResource DefaultButtonStyle}" 
+                                                    Margin="0,10,0,5" BorderThickness="0" 
+                                                    MinWidth="{Binding SizeHelperModel.ResolutionHelper.ButtonsMinimumWidth, Source={StaticResource Locator}}"
+                                                    MaxWidth="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"
+                                                    MinHeight="{Binding SizeHelperModel.ResolutionHelper.ButtonsMinimumHeight, Source={StaticResource Locator}}"
+                                                    HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Background="#04BCA6"
+                                                    Command="{Binding SurveyQuestions.CheckBoxCommand, Source={StaticResource Locator}}" CommandParameter="{Binding AnswerOptionId}">
+                                                <DockPanel>
+                                                    <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsChecked}" Margin="10,0,10,0">
+                                                        <CheckBox.LayoutTransform>
+                                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                        </CheckBox.LayoutTransform>
+                                                    </CheckBox>
+                                                    <TextBlock DockPanel.Dock="Left" Text ="{Binding AnswerOptionText}" 
+                                                               HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                                           Padding="20,2">
+                                                    </TextBlock>
+                                                </DockPanel>
+                                            </Button>
+
+                                        </Grid>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+
+                        </ListView>
+                        
+                    </ScrollViewer>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="RadioButtonTemplate">
+                <StackPanel Background="White" Visibility="{Binding IsQuestionVisible,Mode=TwoWay}" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top">
+                    <TextBlock TextAlignment="Center" HorizontalAlignment="Left" Margin="0,10" TextWrapping="Wrap"
+                               Width="{Binding ActualWidth,ElementName=QuestionStkPnl}"
+                               FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+                               Style="{DynamicResource HighLightMessageStyle}" Text="{Binding QuestionText}"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Style="{StaticResource FavsScrollViewer}"
+                                  MaxHeight="{Binding SizeHelperModel.ResolutionHelper.RadioButtonCheckBoxMaximumHeight, Source={StaticResource Locator}}">
+                        <ListView x:Name ="LayoutRoot" 
+                                  ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
+                                  Margin="0,10,0,10" BorderThickness="0"
+                                  Style="{StaticResource ListboxStyle}"
+                                  HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                                  MaxWidth="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"
+                                  ItemsSource="{Binding AnswerOptions}" SelectionMode="Single" Grid.IsSharedSizeScope="True">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="A" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Style="{DynamicResource DefaultButtonStyle}" 
+                                                VerticalAlignment="Center"
+                                                HorizontalContentAlignment="Left" 
+                                                Margin="0,10,0,5"
+                                                MinWidth="{Binding SizeHelperModel.ResolutionHelper.ButtonsMinimumWidth, Source={StaticResource Locator}}"
+                                                MaxWidth="{Binding ActualWidth,ElementName=QuestionStkPnl, Converter={StaticResource ActualWidthMinusMarginConverter}}"
+                                                MinHeight="{Binding SizeHelperModel.ResolutionHelper.ButtonsMinimumHeight, Source={StaticResource Locator}}"
+                                                Command="{Binding SurveyQuestions.RadioButtonCommand, Source={StaticResource Locator}}" >
+                                            <Button.CommandParameter>
+                                                <MultiBinding Converter="{StaticResource PassThroughConvert}">
+                                                    <Binding ElementName="QuestionsList"/>
+                                                    <Binding Path="AnswerOptionId"/>
+                                                </MultiBinding>
+                                            </Button.CommandParameter>
+                                            <TextBlock Text="{Binding AnswerOptionText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                       Padding="20,2">
+                                            </TextBlock>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
+                </StackPanel>
+            </DataTemplate>
+
+            <local:QuestionnaireDataTemplateSelector TextBoxTemplate="{StaticResource TextBoxTemplate}" NumericTextBoxTemplate="{StaticResource NumericTextBoxTemplate}"
+        CheckBoxTemplate="{StaticResource CheckBoxTemplate}" RadioButtonTemplate="{StaticResource RadioButtonTemplate}" x:Key="ListItemTemplateSelector" />
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.5*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="0.5*"/>
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Style="{DynamicResource HeadingButtonStyle}">
+            <TextBlock Text="{Binding SurgeryLikeToAsktext}" TextWrapping="Wrap"/>
+        </Button>
+
+        <StackPanel Grid.Row="1" Grid.Column="1">
+
+            <Viewbox Width="50" Height="50" 
+                     HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10"
+                     Visibility="{Binding IsProgressBarVisible, UpdateSourceTrigger=PropertyChanged, 
+                    Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+                <localControls:ProgressBarUc />
+            </Viewbox>
+
+            <StackPanel x:Name="QuestionStkPnl" Orientation="Vertical" Margin="0,10,0,0">
+                <ListView ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden"  
+                      Background="Transparent" Padding="0" BorderThickness="0"  Name="QuestionsList" 
+                      ItemsSource="{Binding Questions}" Style="{StaticResource ListboxStyle}"
+                      ItemContainerStyle="{StaticResource LvItemStyle}" ItemTemplateSelector="{StaticResource ListItemTemplateSelector}" Grid.IsSharedSizeScope="True">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Loaded">
+                            <cmd:EventToCommand Command="{Binding ListLoaded}" PassEventArgsToCommand="True" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <cmd:EventToCommand Command="{Binding ListSelectionChanged}"  PassEventArgsToCommand="True" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListView>
+
+                <StackPanel Orientation="Horizontal" Margin="0,18,0,5" 
+                            MaxWidth="{Binding ActualWidth,ElementName=LayoutRoot}"
+                            VerticalAlignment="{Binding VerticalAlignmentValue}" 
+                            HorizontalAlignment="{Binding HorizontalAlignmentValue}" >
+                    <Button Command="{Binding ContinueCommand}" 
+                            CommandParameter="{Binding ElementName=QuestionsList}"  
+                            VerticalAlignment="Top" HorizontalAlignment="Left"  
+                            MinHeight="{Binding SizeHelperModel.ResolutionHelper.SurveyQuestionnaireButtonHeight, Source={StaticResource Locator}}"
+                            MinWidth="200" Margin="0,10,40,0"
+                            Tag="Confirm" Style="{StaticResource NextButtonStyle}" 
+                            Visibility="{Binding IsContinueVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+                        <TextBlock Text="{Binding ContinueButtonText}" Padding="10" />
+                    </Button>
+
+                    <Button Command="{Binding SkipCommand}" 
+                            CommandParameter="{Binding ElementName=QuestionsList}"  
+                            VerticalAlignment="{Binding VerticalAlignmentValue}" HorizontalAlignment="{Binding HorizontalAlignmentValue}" 
+                                MinHeight="{Binding SizeHelperModel.ResolutionHelper.SurveyQuestionnaireButtonHeight, Source={StaticResource Locator}}" MinWidth="240" Margin="0,10,0,0"
+                            Tag="Skip" Style="{StaticResource BookAndSurveyButtonStyle}" 
+                            Visibility="{Binding IsSkipVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}" >
+                        <TextBlock Text="{Binding SkipButtonText}" Padding="10"/>
+                    </Button>
+                </StackPanel>
+
+            </StackPanel>
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

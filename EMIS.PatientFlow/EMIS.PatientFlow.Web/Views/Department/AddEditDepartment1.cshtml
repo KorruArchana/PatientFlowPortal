@@ -1,0 +1,200 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.DepartmentViewModel
+
+@{
+    ViewBag.Title = "AddEditDepartment";
+}
+@Html.Partial("_GoogleAnalytics", "AddEditDepartment")
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+<script src="~/Scripts/bootstrap.js"></script>
+
+<link rel="stylesheet" href="~/Content/jquery.dataTables.min.css" />
+<script type="text/javascript" src="~/Scripts/jquery.dataTables.min.js"></script>
+
+<script src="~/Scripts/UserScripts/multiple-select.js"></script>
+<link href="~/Content/multiple-select.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+        $("#successalert").hide();
+        $('#orgdropdown').drop();
+        var val=$('#orgdropdown').children('option').eq(1).val();
+        if (@Model.OrganisationsList.Count == 1) {
+            $('#orgdropdown').drop('set selected', val);
+        }
+
+        if (@Model.Id > 0) {
+            $('#orgdropdown').val(@Model.OrganisationId);
+        }
+
+        $('#orgid').val($('#orgdropdown').val());
+
+        $('#orgdropdown').change(function () {
+            $('#orgid').val($('#orgdropdown').val());
+            $('#txtDeptName').validate();
+        });
+
+        var form = $('#AddEditDepartmentForm');
+        var validator = form.validate();
+
+        $('#AddEditDepartmentForm').submit(function (e) {
+            $('#cover-spin').show();
+            if (!form.valid) {
+                $('#cover-spin').hide();
+                alert("Required fields are missing. Form is not valid. ")
+                return false;
+            }
+        });
+
+        $('.submit-button').click(function (e) {
+            $('#cover-spin').show();
+            var departmentname = $('#txtDeptName').val();
+            var departmentId = $('#deptId').val();
+            var orgId = $('#orgid').val();
+            if (departmentname == '') {
+                $('#cover-spin').hide();
+                e.preventDefault();
+                $('#error').html("Name cannot be empty.");
+                return false;
+            }
+            else {
+                $('#error').html('');
+            }
+            if (orgId == 0) {
+                $('#cover-spin').hide();
+                e.preventDefault();
+                $('#errorOrg').html("Please select an organisation.");
+                return false;
+            }
+            else {
+                $('#errorOrg').html('');
+            }
+            $.ajax({
+                type: "GET",
+                url: "/Department/IsValidDepartmentName",
+                datatype: "JSON",
+                data: "DepartmentName=" + $('#txtDeptName').val() + "&Id=" + $('#deptId').val() + "&OrganisationId=" + $('#orgid').val(),
+                success: function (data) {
+                    if (!data.Result) {
+                        $('#cover-spin').hide();
+                        $('#error').html(data.Message);
+                        e.preventDefault();
+                        return false;
+                    }
+                    else {
+                        $('#error').html('');
+                        $.ajax({
+                            type: "POST",
+                            url: "../../Department/SaveDepartment",
+                            datatype: "JSON",
+                            data: "DepartmentName=" + $('#txtDeptName').val() + "&Id=" + $('#deptId').val() + "&OrganisationId=" + $('#orgid').val(),
+                            success: function (result) {
+                                $('#cover-spin').hide();
+                                $('#AddEditDepartmentModal').modal('hide');
+
+                                var deptName = $('#txtDeptName').val();
+                                if (@Model.Id > 0) {
+                                    SendGoogleEventClick('event type', 'Departments', 'Edit', 'Department edited(' + deptName + ')');
+                                }
+                                else {
+                                    SendGoogleEventClick('event type', 'Departments', 'Add', 'New Department Added(' + deptName + ')');
+                                }
+
+                                location.reload();
+                                return true;
+                            }
+                        });
+                    }
+                },
+                error: function (ex) {
+                    $('#cover-spin').hide();
+                }
+            });
+        });
+
+        $('.btn-cancel').click(function () {
+            $('#CancelModal').modal('hide');
+        })
+        $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+
+    });
+
+    function SuccessHandling(data) {
+        $('#AddEditDepartmentModal').modal('hide');
+        return (window.location.href = '@Url.Action("Index","Department")');
+    }
+</script>
+
+<div id="cover-spin"></div>
+<div class="modal-dialog">
+    <div class="modal-content" style="overflow-y:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="modal-header" style="overflow:auto">
+                @if (Model.Id > 0)
+                {
+                    <span>Edit Department</span>
+                }
+                else
+                {
+                    <span>Add Department</span>
+                }
+            </p>
+        </div>
+        @using (Ajax.BeginForm("SaveDepartment", "Department", new AjaxOptions
+        {
+            UpdateTargetId = "ContentContainer",
+            InsertionMode = InsertionMode.Replace,
+            OnSuccess = "SuccessHandling"
+        }, new { @id = "AddEditDepartmentForm" }))
+        {
+            <div class="modal-body">
+                @Html.HiddenFor(x => x.Id, new { id = "deptId" })
+                @Html.HiddenFor(x => x.OrganisationId, new { id = "orgid" })
+
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">Department name<span class="requiredfield">*</span></p>
+                    @Html.TextBoxFor(modelItem => Model.DepartmentName, new { @class = "form-control control-float-left text options-text ui-dropdown-min-width", id = "txtDeptName", @maxLenth = "50" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.DepartmentName)</div>
+                    <div id="error" class="control-float-left requiredfield-errortext"></div>
+                </div>
+
+                <div id="divorganisations" class="control-float-left field-spacing nullify-field-spacing" style="display: @Model.OrganisationsList.Count == 1 ? " hidden":"block"">
+                    <p class="question-text">Organisation<span class="requiredfield">*</span></p>
+                    @Html.DropDownListFor(x => x.OrganisationId, new SelectList(Model.OrganisationsList, "Value", "Text"), "Select Organisation",
+                         new { @class = "ui fluid search dropdown ui-dropdown-min-width", @id = "orgdropdown" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.OrganisationId)</div>
+                    <div id="errorOrg" class="control-float-left requiredfield-errortext"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer control-float-left field-spacing-popup">
+                <button class="btn btn-default btn-lg cancel-button" type="button">
+                    Cancel
+                </button>
+
+                <button class="btn btn-primary btn-lg submit-button" type="button">Save Department</button>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="CancelModal" role="dialog" data-keyboard="true">
+    <div class="modal-dialog modal-sm" style="width:35%;margin-right:2%;overflow:hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add/Update Department
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" style="margin-right:5px">No, Stay</button>
+                <button class="btn btn-danger btn-ok" onclick='window.location.href = "@Url.Action("Index","Department")"'>Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

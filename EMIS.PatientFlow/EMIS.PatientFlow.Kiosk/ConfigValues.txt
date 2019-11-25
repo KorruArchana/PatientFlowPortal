@@ -1,0 +1,6 @@
+PatientFlowKioskConnectionString	data source=10.6.1.112;initial catalog=EMISPatientFlowKioskApril09;user id=emis;password=emis@1234;
+RegistrationKey	0b716ca7-1364-4ffc-8744-b7b17bcb2b51
+ServerURI	http://pfserver.cloudapp.net:1001/
+NewsletterAPIUrl	https://auth.patient.co.uk/api/newsletter/subscribe
+AppId	6aa1bec5-2ea9-4fc7-9d90-9decaa22f594
+FileRecordAPIPwd	PASS

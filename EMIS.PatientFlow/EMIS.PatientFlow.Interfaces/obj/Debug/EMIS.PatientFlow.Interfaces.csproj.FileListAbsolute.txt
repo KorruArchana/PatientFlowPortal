@@ -1,0 +1,9 @@
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Interfaces.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Interfaces.pdb
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Interfaces.dll.CodeAnalysisLog.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Interfaces.dll.lastcodeanalysissucceeded
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Interfaces\obj\Debug\EMIS.PatientFlow.Interfaces.csprojAssemblyReference.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Interfaces\obj\Debug\EMIS.PatientFlow.Interfaces.csproj.CoreCompileInputs.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Interfaces\obj\Debug\EMIS.PatientFlow.Interfaces.csproj.CopyComplete
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Interfaces\obj\Debug\EMIS.PatientFlow.Interfaces.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Interfaces\obj\Debug\EMIS.PatientFlow.Interfaces.pdb

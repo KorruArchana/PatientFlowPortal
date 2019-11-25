@@ -1,0 +1,328 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.QuestionnaireListingViewModel
+@{
+    ViewBag.Title = "EgtonQuestionnaire";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "QuestionnaireList")
+
+<script src="~/Scripts/UserScripts/UserDefinedFunctions.js"></script>
+<script src="~/Scripts/ViewCommonScripts/QuestionnaireCommonScript.js"></script>
+
+<script>
+    var dataTable;
+
+    $(document).ready(function () {
+        showLoading();
+        var columnindex = 0;
+        var i = 0;
+
+        DataTableIntialization($(window).width());
+
+        //$(window).resize(function () {
+        //    if ($.fn.dataTable.isDataTable('#questionnaire-portal-table')) {
+        //        $('.dataTables_paginate,.dataTables_length,.dataTables_info').remove();
+        //        $('#questionnaire-portal-table').DataTable().destroy();
+        //        DataTableIntialization($(window).width());
+        //    }
+        //})
+
+        function DataTableIntialization(width) {
+            dataTable = $('#questionnaire-portal-table').DataTable({
+                "dom": "rt<'bottom' lip><'clear'>",
+                bPaginate: true,
+                serverSide: true,
+                bFilter: true,
+                processing: true,
+                info: true,
+                pagingType: "simple",
+                bSortCellsTop: true,
+                searching: true,
+                language: {
+                    processing: '<div class="dataTables_wrapper" > Loading... </div>',
+                    paginate: {
+                        next: ' <i class="material-icons" id="prev">chevron_right</i>',
+                        previous: '<i class="material-icons" id="next">chevron_left</i>'
+                    },
+                    sLengthMenu: width < 380 ? "Rows : _MENU_" : "Rows per Page : _MENU_"
+                },
+                "order": [[1, "asc"]],
+                orderCellsTop: true,
+                columnDefs: [{
+                    "targets": '_all',
+                    "className": "mdl-data-table__cell--non-numeric datawraptext"
+                },
+                {
+                    "targets": [0, 'no-sort'],
+                    "orderable": false,
+                    bSortable: false
+                }],
+                createdRow: function (row, data, dataIndex) {
+                    if (data.IsActive) {
+                        $(row).find('input[type=checkbox][id="chk' + data.QuestionnaireId + '"]').prop("checked", true);
+                        $(row).find('input[type=checkbox][id="chk' + data.QuestionnaireId + '"]').parent().addClass("is-checked");
+                    }
+                    var a = $(row).find('td:eq(1)').html();
+                    $(row).find('td:eq(1)').attr('data-id', data.QuestionnaireId);
+                    $(row).find('td:eq(3)').attr('data-orgId', data.OrganisationId);
+                },
+                columns: [
+                    {
+                        data: null,
+                        className: "center",
+                        render: function (data, type, row) {
+                            var td = '<td>\
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="' + row.QuestionnaireId + '">\
+                                    <input type="checkbox" class="mdl-checkbox__input" name="QuestionnaireActionCheckbox"  id="'+ row.QuestionnaireId + '"/>\
+                                </label>\
+                            </td>'
+                            return td;
+                        },
+                    },
+                    { data: "Title" },
+                    { data: "Frequency" },
+                    { data: "OrganisationName" },
+                    {
+                        data: null,
+                        className: "center",
+                        render: function (data, type, row) {
+                            var title = row.Title;
+                            var td = '<td class="divertSwitch">\
+                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" id="divert_' + row.QuestionnaireId + '">\
+                                    <input type="checkbox" class="mdl-switch__input" id="chk'+ row.QuestionnaireId + '" onclick="Divert(this.checked,' + row.QuestionnaireId + ',' + row.OrganisationId + ',' + format('{0}', "'" + title + "'") + ')">' +
+                                '</label>\
+                                </td>'
+                            return td;
+                        },
+                    }
+                ],
+                ajax: function (data, callback, settings) {
+                    filterValues = {};
+                    filterValues.draw = data.draw;
+                    filterValues.start = data.start;
+                    filterValues.length = data.length;
+                    filterValues.search = data.search;
+                    filterValues.order = data.order;
+                    filterValues.columns = data.columns;
+                    $.ajax({
+                        url: '../EgtonQuestionnaire/GetQuestionnairesData',
+                        method: 'GET',
+                        data: filterValues
+                    }).done(callback);
+                },
+                "fnDrawCallback": function () {
+                    componentHandler.upgradeAllRegistered();
+                    $('.mdl-tooltip').toggle(function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    }, function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                        });
+                }
+            });
+        }
+
+         $('.questionnaire-search-row td').each(function (index, value) {
+            var row = "";
+            var td = $(this);
+            var usedText = [];
+            var itemlist = [];
+             var title = $(this).text();
+             if (title == "Organisation") {
+                 row += "<select class='ui multiple search dropdown table selectionDropdown column_search'\
+                    multiple='multiple' data-column='" + index + "'\
+                     id='"+ title.trim().replace(' ', '_') + "' >";
+                row += '<option value="">Search</option>';
+                var str = '#' + title.trim().replace(' ', '_');
+
+                var memberData = [];
+
+                memberData[3] = @Html.Raw(Json.Encode(Model.OrganisationNameList));
+
+                $.each(memberData[index].sort(), function (idx, v) {
+
+                    columnindex = i;
+                    i = i + 1;
+                    var newString = [];
+                    if (v.indexOf(",") > -1) {
+                        newString = v.split(/[ ,.]+/);
+                        columnindex = i + 1;
+                        $.each(newString, function (index, tabletext) {
+                            var tabletext1 = camalize(tabletext);
+                            if (usedText.indexOf(tabletext1) === -1) {
+                                itemlist.push(tabletext1);
+                            }
+                            columnindex++;
+                            usedText.push(tabletext1);
+                        });
+                        i = columnindex;
+                    }
+                    else {
+                        itemlist.push(v);
+                    }
+                    td.html(row);
+                    $(str).drop();
+
+                    $('.ui.dropdown.table').drop({ fullTextSearch: true });
+                });
+                itemlist = itemlist.sort(naturalCompare);
+                $.each(itemlist, function (index, tabletext) {
+                    row += '<option value="' + index + '">' + tabletext + '</option>';
+                });
+
+                td.html(row);
+                $(str).drop();
+
+                $('.ui.dropdown.table').drop({ fullTextSearch: true });
+
+                row += '</select>';
+
+             }
+             else if (title != 'Actions' && title != 'Divert' && title != 'Publish' && title != '') {
+                 $(this).html('<input type="text" data-column="' + index + '" placeholder="Search" class="column_search" style="height: 56px;"/>');
+             }
+            else { $(this).html(""); }
+        });
+
+        $('input[type="Text"]').on('keyup', function () {
+            var i = $(this).attr('data-column');
+            var v = $(this).val();
+            dataTable.column(i).search(v).draw();
+        });
+
+        $('.ui.dropdown.table').on("change", function () {
+            var textValue = [];
+            var textSingleValue = $(this).find('option:selected').text();
+            $(this).find('option:selected').each(function () {
+                textValue.push($(this).text());
+            });
+            var data = $.map(textValue, function (index, value) {
+                return index ? '^.*' + $.fn.dataTable.util.escapeRegex(index) + '.*$' : null;
+            });
+            if (data.length === 0) {
+                data = [""];
+            }
+            var val = data.join('|');
+            if (textValue.length > 1) {
+                dataTable.columns($(this).parent().index()).every(function () {
+                    var column = this;
+                    column
+                        .search(val ? val : '', true, false)
+                        .draw();
+                });
+            }
+            else {
+                dataTable
+                    .column($(this).parent().index())
+                    .search(textSingleValue)
+                    .draw();
+            }
+        });
+
+        $('.mdl-mini-footer-page .mdl-card__actions').append($(".dataTables_paginate,.dataTables_length,.dataTables_info"));
+        hideLoading();
+    });
+
+</script>
+
+@Html.Hidden("IndexQuestionnaireUrl", Url.Action("Index", "Questionnaire"))
+@Html.Hidden("AddQuestionnaireUrl", Url.Action("AddQuestionnaire", "Questionnaire"))
+@Html.Hidden("EditQuestionnaireUrl", Url.Action("EditQuestionnaire", "Questionnaire", new { questionnaireId = "__id__" }))
+
+<div style="width: 100%; justify-content: center;padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard"  style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Questionnaires</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                    ADD QUESTIONNAIRE
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="QuestionnaireActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect QuestionnaireAction"
+                    for="QuestionnaireActions">
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Delete</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%" id="questionnaire-portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="ques">Questionnaire</th>
+                        <th id="freq">Frequency(Days)</th>
+                        <th id="org">Organisation</th>
+                        <th id="Setpublish" class="no-sort" style="padding-left:30px">Publish</th>
+                    </tr>
+                    <tr class="questionnaire-search-row hidden">
+                        <td></td>
+                        <td>Questionnaire</td>
+                        <td>Frequency</td>
+                        <td>Organisation</td>
+                        <td>Publish</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <content class="mdl-tooltip mdl-tooltip--large" for="ques">Questionnaire Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="freq">Frequency(days)</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="org">Organisation name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="Setpublish">Publish</content>
+        </div>
+        <footer class="mdl-mini-footer-page">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+            var eventCategory = 'Questionnaires';
+            var successMessage = '@TempData["successMessage"]'
+            var errorMessage='@TempData["ErrorMessage"]'
+            if (successMessage != '') {
+                createSnackbar(successMessage);
+            }
+            if (errorMessage != '') {
+                createSnackbar(errorMessage);
+            }
+
+            var DeleteMessage = @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null)
+            {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+    </script>
+}
+

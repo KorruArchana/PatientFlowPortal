@@ -1,0 +1,67 @@
+﻿@using EMIS.PatientFlow.Common.Enums
+@model EMIS.PatientFlow.Web.ViewModel.DepartmentViewModel
+
+@Html.Partial("_GoogleAnalytics","AddEditDepartment")
+
+<script type="text/javascript">
+
+    $('#Formsubmit').click(function(e) {
+        var val = $("#DepartmentName").val();
+        var id1 = '@Model.Id';
+    if (val) {
+        if (id1 > 0) {
+            SendGoogleEventClick('event type', 'Department', 'Edit', 'Department Edited('+val+')');
+        }
+        else {
+            SendGoogleEventClick('event type', 'Department', 'Add', 'Department Added ('+val+')');
+        }
+    }
+        return true;
+
+    });
+</script>
+
+@using (Ajax.BeginForm("Save", "Department", new AjaxOptions { UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace, OnSuccess = "updateSiteSubmenu" }))
+{
+
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Department
+            </span>
+            <span><img src="~/images/arrow.png"></span>
+            <span class="rightBlockSubHeading">
+
+                Add/Edit Department
+
+            </span>
+        </div>
+    </div>
+
+    @Html.HiddenFor(model => model.OrganisationId)
+    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.NavigationId)
+    <div class="rightBlockContent">
+        <div>
+            <p class="leftTxt">
+                Department Name:<span class="required-field"> *</span>
+            </p>
+           @Html.TextBoxFor(model => model.DepartmentName, new { @class = "rightTxtBox" })
+            <div class="validation-summary-errors">@Html.ValidationMessageFor(model => model.DepartmentName)</div>
+            <div class="validation-summary-errors"><span class="field-validation-error">@TempData["DepartmentNameValidation"]</span></div>
+        </div>
+        <div class="editBtnContainer">
+            <input type="submit" value="Save" class="saveEditBtn" id="Formsubmit" />
+            @if (Model.Id == 0)
+            {
+                <input type="button" value="Cancel" class="cancelEditBtn" onclick="return LoadContent(@Model.NavigationId,'@Model.OrganisationId')" />
+            }
+            else
+            {
+                <input type="button" value="Cancel" class="cancelEditBtn" onclick="return LoadContent(@Convert.ToInt32(NodeType.DepartmentDetails),@Model.Id)" />
+            }
+
+        </div>
+    </div>
+
+}

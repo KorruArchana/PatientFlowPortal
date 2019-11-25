@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.MultiplePatientsExceptionPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding MultiplePatientsExceptionPage, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="7*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.5*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="0.5*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel x:Name="CannotFindAppTextWithLineStkPnl" Grid.Row="0" Grid.Column="1" 
+                    VerticalAlignment="Bottom" Orientation="Vertical">
+            <DockPanel>
+                <Image DockPanel.Dock="Left" Source="{DynamicResource ErrorCloseImageSource}" 
+                      Width="60" Margin="0,10,20,10"/>
+
+                <TextBlock DockPanel.Dock="Left" Margin="5,10,0,10" Text="{Binding CantFindText}" 
+                           Style="{StaticResource HighLightMessageStyle}" TextWrapping="Wrap"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}">
+                </TextBlock>
+            </DockPanel>
+
+            <Line Stroke="#DEDEDE" StrokeThickness="2" Margin="0,30,0,0"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                  X2="{Binding ActualWidth,ElementName=CannotFindAppTextWithLineStkPnl}"/>
+
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Grid.Row="1" Margin="0,30" HorizontalAlignment="Stretch">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Grid.ColumnSpan="{Binding ColumnSpan}" Padding="0,0,15,0"
+                           TextAlignment="Left" Text="{Binding CheckInInfoText}" Foreground="Gray"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"/>
+
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right"
+                            Visibility="{Binding IsPatientEnteredDetailsVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+                    <ListView Margin="5" Background="#F1F1F1" MinHeight="100" MinWidth="400" 
+                              ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                              BorderThickness="0" HorizontalAlignment="Left" ItemsSource="{Binding PatientMatchList,Mode=TwoWay}">
+
+                        <ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ListView.ItemsPanel>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+
+                                <TextBlock Margin="20,10,20,10" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}"
+                                           Foreground="Gray" FontWeight="DemiBold">
+                                    <Run Text="{Binding Path=Key, Mode=OneWay}"/>
+                                    <Run Text="{Binding Path=Value, Mode=OneWay}" Foreground="#087A6F"/>
+                                </TextBlock>
+
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Margin="0,20" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Button MinHeight="50" MinWidth="350" Margin="0,20" 
+                        Content="{Binding Close}" 
+                        Style="{DynamicResource DefaultButtonStyle}"  
+                        Command="{Binding MultiplePatientsExceptionPage.CloseCommand, Source={StaticResource Locator}}"/>
+
+                <Button MinHeight="50" MinWidth="350"  Margin="30,20,0,20"  
+                        Content="{Binding TryAgain}" 
+                        Style="{DynamicResource DefaultButtonStyle}"  
+                        Command="{Binding MultiplePatientsExceptionPage.TryAgainCommand, Source={StaticResource Locator}}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+
+</UserControl>

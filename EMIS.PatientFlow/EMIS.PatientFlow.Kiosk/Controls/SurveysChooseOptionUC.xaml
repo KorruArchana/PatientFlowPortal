@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SurveysChooseOptionUc"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+       xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+       mc:Ignorable="d" 
+       d:DesignHeight="300" d:DesignWidth="300"       
+       DataContext="{Binding SurveysChooseOption, Source={StaticResource Locator}}">
+
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.25*"/>
+            <ColumnDefinition Width="0.25*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="0.25*"/>
+            <ColumnDefinition Width="0.25*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="9*"/>
+        </Grid.RowDefinitions>
+        <StackPanel x:Name="QuestionnaireStkPnl" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"/>
+
+        <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Left" VerticalAlignment="Bottom" TextWrapping="Wrap" Text="{Binding ChooseOptionText,Mode=TwoWay}" 
+                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}" 
+                   Style="{DynamicResource HighLightMessageStyle }"/>
+
+
+        <Grid x:Name="QuestionnaireGrid"  Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,30" IsHitTestVisible="{Binding EnableScreenTap}" VerticalAlignment="Top">
+            <ScrollViewer MaxHeight="{Binding RelativeSource={RelativeSource FindAncestor,
+                          AncestorType={x:Type Grid}},
+                          Path=RowDefinitions[1].ActualHeight}"
+                          VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" 
+                          HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Left"
+                           Style="{StaticResource FavsScrollViewer}" IsHitTestVisible="{Binding EnableScreenTap}" >
+
+                <ItemsControl Width="{Binding ActualWidth,ElementName=QuestionnaireGrid}" HorizontalAlignment="Left" ItemsSource="{Binding Questionnaire}" >
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button  Margin="0,10" Width="{Binding ActualWidth,ElementName=QuestionnaireStkPnl}" Padding="10"
+                                     Style="{DynamicResource DefaultButtonStyle}"
+                                     MinHeight="{Binding SizeHelperModel.ResolutionHelper.SurveyQuestionnaireButtonHeight,Source={StaticResource Locator}}"
+                                     Command="{Binding SurveysChooseOption.SelectOptionCommand, Source={StaticResource Locator}}" 
+                                     CommandParameter="{Binding Id}" HorizontalContentAlignment="Left">
+                                <TextBlock Text="{Binding Title}"  TextWrapping="Wrap"/>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+        </Grid>
+    </Grid>
+</UserControl>

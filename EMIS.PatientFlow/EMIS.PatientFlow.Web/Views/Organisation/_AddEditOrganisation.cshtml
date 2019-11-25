@@ -1,0 +1,305 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.OrganisationViewModel
+@using EMIS.PatientFlow.Common.Enums;
+@using EMIS.PatientFlow.Entities.Enums;
+
+<script type="text/javascript">
+    var OrgSystemType = 'EMIS - WEB';
+    if ('@System.Configuration.ConfigurationManager.AppSettings.AllKeys.Contains("SystemType")' == "True") {
+        OrgSystemType = '@System.Configuration.ConfigurationManager.AppSettings["SystemType"]';
+    }
+    
+    $(document).ready(function () {
+        if ('@Model.Id' == 0) {
+            if (OrgSystemType == 'EMIS - PCS') {
+                $("#SystemType").val(OrgSystemType);
+                $("#SystemTypeId").val(2);
+                $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Database Name:");
+                $("#InternalIPAddress").show();
+            }
+            else{
+                $("#SystemType").val(OrgSystemType);
+                $("#SystemTypeId").val(1);
+                $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Organisation Key:");
+                $("#InternalIPAddress").hide();
+            }
+            $("#SystemTypeId").on('change', function () {
+                if (this.value == 1 || this.value == 2) {
+                    $("#Username").show();
+                    $("#Password").show();
+                    $("#SupplierId").show();
+                    $("#IPAddress").show();
+                    $("#InternalIPAddress").hide();
+                    $("#OrganisationKeyDiv").show();
+                    $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Organisation Key:");
+                    $("#ClinicSetDiv").hide();
+                    if (this.value == 2) {
+                        $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Database Name:");
+                        $("#InternalIPAddress").show();
+                    }
+                    $("#WebServiceUrlDiv").hide();
+                }
+                else if (this.value == 5) {
+                    $("#Username").show();
+                    $("#Password").show();
+                    $("#SupplierId").hide();
+                    $("#IPAddress").hide();
+                    $("#InternalIPAddress").hide();
+                    $("#OrganisationKeyDiv").hide();
+                    $("#ClinicSetDiv").show();
+                    $("#WebServiceUrlDiv").show();
+                }
+                else {
+                    $("#Username").hide();
+                    $("#Password").hide();
+                    $("#SupplierId").hide();
+                    $("#IPAddress").hide();
+                    $("#InternalIPAddress").hide();
+                    $("#OrganisationKeyDiv").hide();
+                    $("#ClinicSetDiv").hide();
+                    $("#WebServiceUrlDiv").hide();
+                }
+                $("#SystemType").val($("#SystemTypeId :selected").text());
+                if (this.value == 1 && OrgSystemType == "EMIS - PCS") {
+                    $('#Formsubmit').hide();
+                    $('#cancelbtn').hide();
+                    $('#SaveErrorText').show();
+                    $('#SaveErrorText').text("You cannot add an EMIS Web organisation here");
+                }
+                else if (this.value == 2 && OrgSystemType == "EMIS - WEB") {
+                    $('#Formsubmit').hide();
+                    $('#cancelbtn').hide();
+                    $('#SaveErrorText').show();
+                    $('#SaveErrorText').text("You cannot add an EMIS PCS organisation here");
+                }
+                else {
+                    $('#Formsubmit').show();
+                    $('#cancelbtn').show();
+                    $('#SaveErrorText').hide();
+                }
+            });
+        }
+        if (('@Model.SystemTypeId' == '@Convert.ToInt32(OrganisationSystemType.EmisWeb)') ||
+            ('@Model.SystemTypeId' == '@Convert.ToInt32(OrganisationSystemType.EmisPcs)') ||
+            ('@Model.SystemTypeId' == 0)) {
+            $("#Username").show();
+            $("#Password").show();
+            $("#SupplierId").show();
+            $("#IPAddress").show();
+            $("#InternalIPAddress").hide();
+            $("#OrganisationKeyDiv").show();
+            $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Organisation Key:");
+            $("#ClinicSetDiv").hide();
+            $("#WebServiceUrlDiv").hide();
+            if (('@Model.SystemTypeId' == '@Convert.ToInt32(OrganisationSystemType.EmisPcs)') || $("#SystemTypeId").val() == 2) {
+                $("#InternalIPAddress").show();
+                $('#OrgKeyOrDBNameText #OrgKeyOrDBNameSpan').text("Database Name:");
+            }
+        }
+        else if (('@Model.SystemTypeId' == '@Convert.ToInt32(OrganisationSystemType.Topas)')) {
+            $("#Username").show();
+            $("#Password").show();
+            $("#SupplierId").hide();
+            $("#IPAddress").hide();
+            $("#InternalIPAddress").hide();
+            $("#OrganisationKeyDiv").hide();
+            $("#ClinicSetDiv").show();
+            $("#WebServiceUrlDiv").show();
+        }
+        else {
+            $("#Username").hide();
+            $("#Password").hide();
+            $("#SupplierId").hide();
+            $("#IPAddress").hide();
+            $("#InternalIPAddress").hide();
+            $("#OrganisationKeyDiv").hide();
+            $("#ClinicSetDiv").hide();
+            $("#WebServiceUrlDiv").hide();
+        }
+    });
+    $(document).on('click', '#refresh', function (e) {
+        $("#IsRefresh").val("true");
+        $('#Org').submit();
+    });
+</script>
+
+@Html.Partial("_GoogleAnalytics","AddEditOrg")
+
+@if (Model.Id > 0)
+{
+    @Html.HiddenFor(model => model.OrganisationKey)
+
+}
+@using (Ajax.BeginForm("SaveOrganisation", "Organisation", new AjaxOptions { UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace }, new { @id = "Org" }))
+{
+
+    <input type="hidden" id="IsChanged" name="IsChanged" value="@Model.IsChanged" />
+    <input type="hidden" id="IsRefresh" name="IsRefresh" value="@Model.IsRefresh" />
+    <input type="hidden" name="groupName" value="@Model.OrganisationName" />
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Organisation
+            </span>
+            <span><img src="~/images/arrow.png"></span>
+            <span class="rightBlockSubHeading">
+                Add/Edit Organisation
+            </span>
+        </div>
+    </div>
+    @Html.HiddenFor(model => model.SystemType, new { id = "SystemType" })
+    @Html.HiddenFor(model => model.Id)
+
+    <div class="rightBlockContent">
+        <div>
+            <p class="leftTxt"></p>
+            <div class="validation-summary-errors"><span class="field-validation-error"> &nbsp; &nbsp;@ViewBag.Credential</span></div>
+        </div>
+        <div>
+            <p class="leftTxt">
+                Organisation Name:<span class="required-field"> *</span>
+            </p>
+            @Html.TextBoxFor(model => model.OrganisationName,
+                               new
+                               {
+                                   @class = "rightTxtBox"
+                               })
+            <div class="validation-summary-errors">@Html.ValidationMessageFor(model => model.OrganisationName)</div>
+            <div class="validation-summary-errors"><span class="field-validation-error">@TempData["OrganisationNameValidation"]</span></div>
+        </div>
+        @if (Model.Id == 0)
+        {
+            <div>
+                <p class="leftTxt">
+                    System Type:
+                </p>
+                @Html.DropDownListFor(model => model.SystemTypeId, (IEnumerable<SelectListItem>)ViewBag.SystemTypeList, new { @class = "selectBoxLarge", id = "SystemTypeId" })
+
+            </div>
+        }
+        else
+        {
+            @Html.HiddenFor(model => model.SystemTypeId)
+        }
+        <div id="IPAddress">
+            <p class="leftTxt">
+                IP Address:<span class="required-field"> *</span>
+            </p>
+            @Html.TextBoxFor(model => model.IpAddress, new { @class = "rightTxtBox" })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.IpAddress)</div>
+        </div>
+        <div id="InternalIPAddress">
+            <p class="leftTxt">
+                Internal IP Address:
+            </p>
+            @Html.TextBoxFor(model => model.InternalIpAddress, new { @class = "rightTxtBox" })
+        </div>
+        <div id="SiteNumber">
+            <p class="leftTxt">
+                EMIS CDB/Site Number:<span class="required-field"> *</span>
+            </p>
+            @Html.TextBoxFor(model => model.SiteNumber, new { @class = "rightTxtBox" })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.SiteNumber)</div>
+        </div>
+        <div id="Username">
+            <p class="leftTxt">
+                Username:<span class="required-field"> *</span>
+            </p>
+            @Html.TextBoxFor(model => model.Username, new { @class = "rightTxtBox" })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.Username)</div>
+        </div>
+        <div id="Password">
+            <p class="leftTxt">
+                Password:<span class="required-field"> *</span>
+            </p>
+            @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "rightTxtBox" } })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.Password)</div>
+        </div>
+        <div id="SupplierId">
+            <p class="leftTxt">
+                Supplier ID:<span class="required-field"> *</span>
+            </p>
+            @Html.TextBoxFor(model => model.SupplierId, new { @class = "rightTxtBox" })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.SupplierId)</div>
+        </div>
+        <div id="OrganisationKey">
+            <div id="OrganisationKeyDiv">
+                <p class="leftTxt" id="OrgKeyOrDBNameText"><span id="OrgKeyOrDBNameSpan"></span><span class="required-field"> *</span></p>
+            </div>
+
+            <div id="ClinicSetDiv">
+                <p class="leftTxt">
+                    Clinic set:<span class="required-field"> *</span>
+                </p>
+            </div>
+
+            @Html.TextBoxFor(model => model.OrganisationKey, new { @class = "rightTxtBox" })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.OrganisationKey)</div>
+            <div class="validation-summary-errors"><span class="field-validation-error">@TempData["OrganisationKeyValidation"]</span></div>
+
+        </div>
+        <div id="WebServiceUrlDiv">
+            <p class="leftTxt">
+                Webservice Url:<span class="required-field"> *</span>
+            </p>
+            @Html.TextBoxFor(model => model.WebServiceUrl, new { @class = "rightTxtBox" })
+            <div id="divVal" class="validation-summary-errors">@Html.ValidationMessageFor(model => model.WebServiceUrl)</div>
+            <div class="validation-summary-errors"><span class="field-validation-error">@TempData["WebServiceUrlValidation"]</span></div>
+        </div>
+
+
+        <div>
+
+            @if ((Model.SystemTypeId == 1 || Model.SystemTypeId == 2) && Model.Id > 0)
+            {
+                <p class="leftTxt">
+                    Branch List:  <input type="button"  id="refresh" class="refreshbtn"></p>
+            }
+            @if (Model.SiteList != null)
+            {
+                if (Model.SiteList.Count > 0)
+                {
+                    @:<table class="rightTxtBox TFtable">
+
+                        for (int i = 0; i < Model.SiteList.Count; i++)
+                        {
+
+                            if (i % 3 == 0)
+                            {
+                                @:<tr>
+
+
+                                    }
+                                    @:<td>@Model.SiteList[i].SiteDbId - @Model.SiteList[i].SiteName</td>
+                                    if (i % 3 == 2)
+                                    {
+                                    @:</tr>
+
+
+                            }
+
+                        }
+                        @: </table>
+                }
+
+            }
+
+        </div>
+        <div class="editBtnContainer">
+            <input type="submit" value="Save" class="saveEditBtn" id="Formsubmit" />
+            <p id="SaveErrorText" hidden="hidden"></p>
+
+            @if (Model.Id == 0)
+            {
+                <input id="cancelbtn" type="button" value="Cancel" class="cancelEditBtn" onclick="return LoadContent(@Convert.ToInt32(NodeType.Organisation),'0')" />
+            }
+            else
+            {
+                <input id="cancelbtn" type="button" value="Cancel" class="cancelEditBtn" onclick="return LoadContent(@Convert.ToInt32(NodeType.OrganisationDetails), @Model.Id)" />
+            }
+        </div>
+    </div>
+
+}
+
+
+

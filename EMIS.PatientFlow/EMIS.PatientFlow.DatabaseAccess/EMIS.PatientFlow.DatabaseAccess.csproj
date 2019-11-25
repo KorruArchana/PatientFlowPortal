@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{58A6A85A-4DA0-4417-9CFC-B72AA4D5FBEA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EMIS.PatientFlow.DatabaseAccess</RootNamespace>
+    <AssemblyName>EMIS.PatientFlow.DatabaseAccess</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Common\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\DatabaseAccess\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DBAccess.Alerts.cs" />
+    <Compile Include="DBAccess.cs" />
+    <Compile Include="DBAccess.Department.cs" />
+    <Compile Include="DBAccess.Kiosk.cs" />
+    <Compile Include="DBAccess.Language.cs" />
+    <Compile Include="DBAccess.Logger.cs" />
+    <Compile Include="DBAccess.Member.cs" />
+    <Compile Include="DBAccess.Organisation.cs" />
+    <Compile Include="DBAccess.Patient.cs" />
+    <Compile Include="DBAccess.Questionnaire.cs" />
+    <Compile Include="DBAccess.Report.cs" />
+    <Compile Include="DBAccess.SiteMenu.cs" />
+    <Compile Include="DBAccess.Survey.cs" />
+    <Compile Include="DBAccess.SyncService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EMIS.PatientFlow.Common\EMIS.PatientFlow.Common.csproj">
+      <Project>{768a1fc4-f28a-4fed-bf39-d62cb6e6682e}</Project>
+      <Name>EMIS.PatientFlow.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EMIS.PatientFlow.Entities\EMIS.PatientFlow.Entities.csproj">
+      <Project>{c185ba3a-6849-4d1b-bd8f-7cbbeb279337}</Project>
+      <Name>EMIS.PatientFlow.Entities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Settings.StyleCop" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

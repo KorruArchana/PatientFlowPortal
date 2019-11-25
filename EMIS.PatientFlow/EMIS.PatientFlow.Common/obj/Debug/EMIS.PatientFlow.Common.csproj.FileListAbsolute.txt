@@ -1,0 +1,9 @@
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Common.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Common.pdb
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Common.dll.CodeAnalysisLog.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.Common.dll.lastcodeanalysissucceeded
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Common\obj\Debug\EMIS.PatientFlow.Common.csproj.CoreCompileInputs.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Common\obj\Debug\EMIS.PatientFlow.Common.csproj.CopyComplete
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Common\obj\Debug\EMIS.PatientFlow.Common.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Common\obj\Debug\EMIS.PatientFlow.Common.pdb
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.Common\obj\Debug\EMIS.PatientFlow.Common.csprojAssemblyReference.cache

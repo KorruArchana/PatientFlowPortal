@@ -1,0 +1,95 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.ResetPasswordViewModel
+
+@{
+    ViewBag.Title = "ResetPwd";
+}
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script src="~/Scripts/bootstrap.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var form = $('#ResetPassworForm');
+        var validator = form.validate();
+
+        $('#ResetPassworForm').submit(function () {
+            $('#cover-spin').show();
+            if (!form.valid()) {
+                alert("Required fields are missing. Form is not valid. ");
+            }
+        });
+             $('.btn-cancel').click(function () {
+            $('#CancelModal').modal('hide');
+        })
+        $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+    })
+     function SuccessHandling(data) {
+            $('#ResetPasswordForm').modal('hide');
+            return (window.location.href = "@Url.Action("Index","Account")");
+    }
+
+</script>
+
+<div id="cover-spin"></div>
+<div class="modal-dialog modal-md">
+    <div class="modal-content" style="overflow-x:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="page-header-text-popup">
+                <span>Reset Password</span>
+            </p>
+        </div>
+        @using (Ajax.BeginForm("ResetPassword", "Account", new AjaxOptions
+        {
+            UpdateTargetId = "ContentContainer",
+            InsertionMode = InsertionMode.Replace,
+            OnSuccess = "SuccessHandling"
+        }, new { @id = "ResetPasswordForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="modal-body">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">User Name</p>
+                    @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                    @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                </div>
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">New Password</p>
+                    @Html.EditorFor(model => model.NewPassword, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.NewPassword, "", new { @class = "text-danger" })
+                </div>
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">Confirm Password</p>
+                    @Html.EditorFor(model => model.ConfirmPassword, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="modal-footer control-float-left field-spacing-popup">
+                <button class="btn btn-default btn-lg cancel-button" type="button">
+                    Cancel
+                </button>
+                <button class="btn btn-primary btn-lg submit-button" type="submit">Save User</button>
+            </div>
+        }
+    </div>
+</div>
+<div class="modal fade" id="CancelModal" role="dialog" data-keyboard="true">
+    <div class="modal-dialog" style="width:35%;margin-right:2%;overflow:hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                Reset Password
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" style="margin-right:5px">No, Stay</button>
+                <button class="btn btn-danger btn-ok" onclick='window.location.href = "@Url.Action("Index","Account")"'>Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

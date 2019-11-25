@@ -1,0 +1,208 @@
+<DatabaseConfiguration>
+  <ConnectionStringProviderTypes>
+    <add name="SDSConfigConnectionStringProvider" type="SDS.Client.DatabasePatcher.SDSConfigConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+    <add name="IndexLookupConnectionStringProvider" type="SDS.Client.DatabasePatcher.IndexLookupConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+    <add name="OnePerServerConnectionStringProvider" type="SDS.Client.DatabasePatcher.OnePerServerConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+    <add name="AvailabilityGroupConnectionStringProvider" type="SDS.Client.DatabasePatcher.AvailabilityGroupConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+    <add name="SDSConfigListConnectionStringProvider" type="SDS.Client.DatabasePatcher.SDSConfigListConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+    <add name="EmisSpokeConnectionStringProvider" type="SDS.Client.DatabasePatcher.EmisSpokeConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+    <add name="SpokeIndexLookupConnectionStringProvider" type="SDS.Client.DatabasePatcher.SpokeIndexLookupConnectionStringProvider, SDS.Client.DatabasePatcher"/>
+  </ConnectionStringProviderTypes>
+  <NamedConnectionStringProviders>
+    <ConnectionStringProvider name="indexRead">
+      <SDSConfigConnectionStringProvider>
+        <Format>server={0};database={1};trusted_connection=true;</Format>
+        <Parameters>
+          <SDSConfigLookup index="0" key="IndexReadServerAddress"/>
+          <SDSConfigLookup index="1" key="IndexReadDatabaseName"/>
+        </Parameters>
+      </SDSConfigConnectionStringProvider>
+    </ConnectionStringProvider>
+    <ConnectionStringProvider name="emisSpokeIndex">
+      <EmisSpokeConnectionStringProvider>
+        <Parameters>
+          <TargetDatabase name="EMISSpokeIndex"/>
+        </Parameters>
+      </EmisSpokeConnectionStringProvider>
+    </ConnectionStringProvider>
+  </NamedConnectionStringProviders>
+  <DatabaseDefinitions>
+    <DatabaseDefinition name="EMISWeb" isPatchable="true">
+      <ConnectionStringProvider>
+        <IndexLookupConnectionStringProvider>
+          <DatabaseType>3</DatabaseType>
+          <IndexConnectionStringProvider name="indexRead" />
+        </IndexLookupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+	<DatabaseDefinition name="EMISWebDoc" isPatchable="true">
+      <ConnectionStringProvider>
+        <IndexLookupConnectionStringProvider>
+          <DatabaseType>17</DatabaseType>
+          <IndexConnectionStringProvider name="indexRead" />
+        </IndexLookupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISEmail" isPatchable="true">
+      <ConnectionStringProvider>
+        <IndexLookupConnectionStringProvider>
+          <DatabaseType>21</DatabaseType>
+          <IndexConnectionStringProvider name="indexRead" />
+        </IndexLookupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="MKBRuntime" isPatchable="false">
+      <ConnectionStringProvider>
+        <AvailabilityGroupConnectionStringProvider>
+          <DatabaseName>MKBRuntime</DatabaseName>
+          <DatabaseType>3</DatabaseType>
+          <IndexConnectionStringProvider name="indexRead" />
+        </AvailabilityGroupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="ServerAgentJobs" isPatchable="false">
+      <ConnectionStringProvider>
+        <AvailabilityGroupConnectionStringProvider>
+          <DatabaseName>msdb</DatabaseName>
+          <DatabaseType>3</DatabaseType>
+          <IndexConnectionStringProvider name="indexRead" />
+        </AvailabilityGroupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISIndex" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigConnectionStringProvider>
+          <Format>{0}</Format>
+          <Parameters>
+            <SDSConfigLookup index="0" key="IndexConnectionString"/>
+          </Parameters>
+        </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISState" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigConnectionStringProvider>
+          <Format>server={0};database={1};trusted_connection=true;</Format>
+          <Parameters>
+            <SDSConfigLookup index="0" key="StateServerAddress"/>
+            <SDSConfigLookup index="1" key="StateDatabaseName"/>
+          </Parameters>
+        </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISMonitoring" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigConnectionStringProvider>
+          <Format>server={0};database={1};trusted_connection=true;</Format>
+          <Parameters>
+            <SDSConfigLookup index="0" key="MonitoringServerAddress"/>
+            <SDSConfigLookup index="1" key="MonitoringDatabaseName"/>
+          </Parameters>
+        </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISScheduler" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigConnectionStringProvider>
+          <Format>server={0};database={1};trusted_connection=true;</Format>
+          <Parameters>
+            <SDSConfigLookup index="0" key="EMISSchedulerServerAddress"/>
+            <SDSConfigLookup index="1" key="EMISSchedulerDatabaseName"/>
+          </Parameters>
+        </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISSpokeIndex" isPatchable="true" createOnDemand="true" size="10" growth="1" requiresPatchMaster="false">
+      <ConnectionStringProvider>
+        <EmisSpokeConnectionStringProvider>
+          <Parameters>
+            <TargetDatabase name="EMISSpokeIndex"/>
+          </Parameters>
+        </EmisSpokeConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISSpokeMonitoring" isPatchable="true" createOnDemand="true" size="10" growth="1" requiresPatchMaster="false">
+      <ConnectionStringProvider>
+        <EmisSpokeConnectionStringProvider>
+          <Parameters>
+            <TargetDatabase name="EMISSpokeMonitoring"/>
+          </Parameters>
+        </EmisSpokeConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISSpokeTemplate" isPatchable="true" createOnDemand="true" size="10" growth="1" requiresPatchMaster="false">
+      <ConnectionStringProvider>
+        <SpokeIndexLookupConnectionStringProvider>
+          <IndexConnectionStringProvider name="emisSpokeIndex" />
+          <Procedure Name="Idx.GetSpokeOrganisationDatabaseNames"/>
+        </SpokeIndexLookupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISSpokeDocumentCacheTemplate" isPatchable="true" createOnDemand="true" size="10" growth="1" requiresPatchMaster="false">
+      <ConnectionStringProvider>
+        <SpokeIndexLookupConnectionStringProvider>
+          <IndexConnectionStringProvider name="emisSpokeIndex" />
+          <Procedure Name="Idx.GetSpokeDocumentCacheDatabaseNames"/>
+        </SpokeIndexLookupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISExternalMessaging" isPatchable="true">
+      <ConnectionStringProvider>
+        <IndexLookupConnectionStringProvider>
+          <DatabaseType>15</DatabaseType>
+          <IndexConnectionStringProvider name="indexRead" />
+        </IndexLookupConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISConnectCatalogue" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigConnectionStringProvider>
+          <Format>server={0};database={1};trusted_connection=true;</Format>
+          <Parameters>
+            <SDSConfigLookup index="0" key="ECCatalogueServerAddress"/>
+            <SDSConfigLookup index="1" key="ECCatalogueDatabaseName"/>
+          </Parameters>
+        </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISConnectDistributed" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigListConnectionStringProvider>
+          <Format>server={0};database={1};trusted_connection=true;</Format>
+          <ConfigKey>DistributedDatabases</ConfigKey>
+          <PrimarySeparator>^</PrimarySeparator>
+          <SecondarySeparator>,</SecondarySeparator>
+        </SDSConfigListConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="QUTE" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigConnectionStringProvider>
+          <Format>server={0};database={1};trusted_connection=true;</Format>
+          <Parameters>
+            <SDSConfigLookup index="0" key="QUTEServerAddress"/>
+            <SDSConfigLookup index="1" key="QUTEDatabaseName"/>
+          </Parameters>
+        </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="GPES" isPatchable="true">
+    <ConnectionStringProvider>
+      <IndexLookupConnectionStringProvider>
+        <DatabaseType>23</DatabaseType>
+        <IndexConnectionStringProvider name="indexRead" />
+      </IndexLookupConnectionStringProvider>
+    </ConnectionStringProvider>
+    </DatabaseDefinition>
+    <DatabaseDefinition name="EMISPatientFlowConfiguration" isPatchable="true">
+      <ConnectionStringProvider>
+        <SDSConfigConnectionStringProvider>
+          <Format>{0}</Format>
+          <Parameters>
+            <SDSConfigLookup index="0" key="PatientFlow"/>
+          </Parameters>
+        </SDSConfigConnectionStringProvider>
+      </ConnectionStringProvider>
+    </DatabaseDefinition>
+  </DatabaseDefinitions>
+</DatabaseConfiguration>

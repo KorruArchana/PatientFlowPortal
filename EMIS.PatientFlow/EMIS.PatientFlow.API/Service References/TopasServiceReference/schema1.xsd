@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://www.cambric.co.uk/" elementFormDefault="qualified" targetNamespace="http://www.cambric.co.uk/" id="schema1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="GetClinicSessions">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="username" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="clinicset" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="1" name="startDateTime" type="xs:dateTime" />
+        <xs:element minOccurs="1" maxOccurs="1" name="endDateTime" type="xs:dateTime" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetClinicSessionsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="GetClinicSessionsResult" type="tns:ArrayOfClinicDetail" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfClinicDetail">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ClinicDetail" nillable="true" type="tns:ClinicDetail" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ClinicDetail">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="ClinicID" type="xs:int" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ClinicStatus" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Reception" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ClinicName" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ClinicDescriptionPatient" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ClinicDescriptionHospital" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ResponsibleClinicianList" type="tns:ArrayOfClinicianInfo" />
+      <xs:element minOccurs="0" maxOccurs="1" name="AttendingClinicianList" type="tns:ArrayOfClinicianInfo" />
+      <xs:element minOccurs="1" maxOccurs="1" name="ClinicDateTime" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfClinicianInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ClinicianInfo" nillable="true" type="tns:ClinicianInfo" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ClinicianInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="Code" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Surname" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Forename" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Title" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="GetClinicAppointments">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="username" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="clinicset" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="1" name="startDateTime" type="xs:dateTime" />
+        <xs:element minOccurs="1" maxOccurs="1" name="endDateTime" type="xs:dateTime" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetClinicAppointmentsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="GetClinicAppointmentsResult" type="tns:ArrayOfAppointmentDetail" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfAppointmentDetail">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="AppointmentDetail" nillable="true" type="tns:AppointmentDetail" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="AppointmentDetail">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="SlotID" type="xs:int" />
+      <xs:element minOccurs="1" maxOccurs="1" name="ClinicID" type="xs:int" />
+      <xs:element minOccurs="0" maxOccurs="1" name="SlotStatus" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ClinicInfo" type="tns:ClinicDetail" />
+      <xs:element minOccurs="1" maxOccurs="1" name="AppointmentDateTime" type="xs:dateTime" />
+      <xs:element minOccurs="1" maxOccurs="1" name="CheckInDateTime" type="xs:dateTime" />
+      <xs:element minOccurs="1" maxOccurs="1" name="CheckOutDateTime" type="xs:dateTime" />
+      <xs:element minOccurs="0" maxOccurs="1" name="HospitalNumber" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="CHI" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="DoB" type="xs:dateTime" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Sex" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Surname" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Forename" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Title" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Address1" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Address2" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Address3" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Address4" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="PostCode" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="EMail" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Telephone" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Mobile" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CheckIn">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" name="username" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="1" name="slotID" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CheckInResponse">
+    <xs:complexType />
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,9 @@
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.DatabaseAccess.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.DatabaseAccess.pdb
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.DatabaseAccess.dll.CodeAnalysisLog.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\bin\Common\EMIS.PatientFlow.DatabaseAccess.dll.lastcodeanalysissucceeded
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.DatabaseAccess\obj\Debug\EMIS.PatientFlow.DatabaseAccess.csprojAssemblyReference.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.DatabaseAccess\obj\Debug\EMIS.PatientFlow.DatabaseAccess.csproj.CoreCompileInputs.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.DatabaseAccess\obj\Debug\EMIS.PatientFlow.DatabaseAccess.csproj.CopyComplete
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.DatabaseAccess\obj\Debug\EMIS.PatientFlow.DatabaseAccess.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\EMIS.PatientFlow.DatabaseAccess\obj\Debug\EMIS.PatientFlow.DatabaseAccess.pdb

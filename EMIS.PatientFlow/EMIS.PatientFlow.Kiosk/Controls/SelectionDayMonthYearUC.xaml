@@ -1,0 +1,209 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SelectionDayMonthYearUc"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+       xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+       xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+       mc:Ignorable="d" 
+       d:DesignHeight="300" d:DesignWidth="300"               
+       DataContext="{Binding SelectDayMonthYear, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0" Style="{DynamicResource HeadingButtonStyle}">
+            <TextBlock Text="{Binding SelectDOBYearWelcomeText}" TextWrapping="Wrap"/>
+        </Button>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical">
+            <TextBlock Margin="5,15,5,25" TextAlignment="Center"  TextWrapping="Wrap"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}">
+		               <Run Text="{Binding DateOfBirthTitleText}" Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold" />
+		               <Run Text="{Binding ExampleDOBText}" Foreground="Gray"/>
+            </TextBlock>
+
+            <Viewbox Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Top"
+                     Visibility="{Binding ProgressBarVisibility, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+                <local:ProgressBarUc />
+            </Viewbox>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="1">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="6*"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel DockPanel.Dock="Top" IsHitTestVisible="{Binding EnableScreenTap}" Orientation="Horizontal" 
+                                VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,5,0,10">
+
+                            <Border BorderBrush="{Binding DateTextHighlightBorderColor, Mode=TwoWay}" BorderThickness="0,0,0,4" 
+                                    Width="{Binding SizeHelperModel.ResolutionHelper.DayOfBirthWidth, Source={StaticResource Locator}}">
+                                <TextBlock Foreground="{Binding DayForeGround}" FontWeight="Bold" TextAlignment="Center"
+                                       FontSize = "{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}">
+                                <Run Text="{Binding Day1text, Mode=TwoWay}"/>
+                                <Run Text="{Binding Day2text, Mode=TwoWay}"/>
+                                </TextBlock>
+                            </Border>
+
+                            <TextBlock Text="/" Margin="4,0" Foreground="#087A6F"
+                                   FontSize = "{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}" />
+
+                            <Border BorderBrush="{Binding MonthTextHighlightBorderColor, Mode=TwoWay}" BorderThickness="0,0,0,4"
+                                    Width="{Binding SizeHelperModel.ResolutionHelper.MonthOfBirthWidth, Source={StaticResource Locator}}">
+                                <TextBlock Foreground="{Binding MonthForeGround}" FontWeight="Bold" TextAlignment="Center"
+                                       FontSize = "{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}">
+                                <Run Text="{Binding Month1text, Mode=TwoWay}"/>
+                                <Run Text="{Binding Month2text, Mode=TwoWay}"/>
+                                </TextBlock>
+                            </Border>
+
+                            <TextBlock Text="/" Margin="4,0" Foreground="#087A6F"
+                                   FontSize = "{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}" />
+
+                            <Border BorderBrush="{Binding YearTextHighlightBorderColor, Mode=TwoWay}" BorderThickness="0,0,0,4"
+                                    Width="{Binding SizeHelperModel.ResolutionHelper.YearOfBirthWidth, Source={StaticResource Locator}}">
+                                <TextBlock Foreground="{Binding YearForeGround}" FontWeight="Bold" TextAlignment="Center"
+                                       FontSize = "{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}">
+                                <Run Text="{Binding Year1text, Mode=TwoWay}"/>
+                                <Run Text="{Binding Year2text, Mode=TwoWay}"/>
+                                <Run Text="{Binding Year3text, Mode=TwoWay}"/>
+                                <Run Text="{Binding Year4text, Mode=TwoWay}"/>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+
+                        <Label DockPanel.Dock="Bottom" Content="{Binding InvalidDate}" Foreground="Red"  
+                               FontSize = "{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}"
+                               Visibility="{Binding IsErrorTextVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"/>
+
+                    </DockPanel>
+
+                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                IsHitTestVisible="{Binding EnableScreenTap}" Margin="0,10,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="1" Content="1" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="2" Content="2" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="3" Content="3" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="4" Content="4" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}"
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="5" Content="5" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="6" Content="6" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="7" Content="7" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}"
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="8" Content="8" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="9" Content="9" Margin="10"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DefaultButtonStyle}">
+                                </Button>
+                            </StackPanel>
+                            <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="0" Content="0" 
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}"
+                                        Style="{DynamicResource DefaultButtonStyle}" 
+                                        Margin="{Binding  SizeHelperModel.ResolutionHelper.MarginThickness, Source={StaticResource Locator}}">
+                                </Button>
+
+                                <Button Command="{Binding SelectDayMonthYear.ClickCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="X" Content="Delete"
+                                        Width="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonWidth, Source={StaticResource Locator}}" 
+                                        Height="{Binding  SizeHelperModel.ResolutionHelper.DOBButtonHeight, Source={StaticResource Locator}}" 
+                                        Style="{DynamicResource DeleteButtonStyle}" Margin="10" IsEnabled="{Binding IsDeleteEnabled}">
+                                </Button>
+
+                            </StackPanel>
+
+                            <Button Grid.Row="4" Grid.Column="1" Margin="10,10,0,0"
+                                    IsEnabled="{Binding IsNextEnabled}" HorizontalAlignment="Stretch" VerticalAlignment="Top" 
+                                    Content="{Binding NextBtnText}" MinHeight="70" 
+                                    Style="{DynamicResource NextButtonStyle}"    
+                                    Command="{Binding SelectDayMonthYear.NextCommand, Source={StaticResource Locator}}" CommandParameter="Next" >
+                            </Button>
+
+                        </Grid>
+                    </StackPanel>
+
+                </Grid>
+            </Grid>
+        </StackPanel>
+
+    </Grid>
+
+</UserControl>

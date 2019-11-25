@@ -1,0 +1,11 @@
+alter table PatientFlow.OrganisationAccessMapping drop constraint FK_PatientFlow_OrganisationAccessMapping_UserId
+alter table PatientFlow.AccessTypeMapping drop constraint FK_PatientFlow_AccessTypeMapping_UserId
+
+drop table PatientFlow.AspNetUserRoles
+drop table PatientFlow.AspNetUserLogins
+drop table PatientFlow.AspNetUserClaims
+drop table PatientFlow.AspNetRoles
+drop table PatientFlow.AspNetUsers
+drop table PatientFlow.__MigrationHistory
+drop table PatientFlow.OrganisationAccessMapping
+drop table PatientFlow.AccessTypeMapping

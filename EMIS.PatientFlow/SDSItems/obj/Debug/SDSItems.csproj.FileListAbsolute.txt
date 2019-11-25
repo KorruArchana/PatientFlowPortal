@@ -1,0 +1,11 @@
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\bin\Debug\DatabaseDefinitions\Patient Flow Portal_DBDefinition.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\bin\Debug\DatabaseDefinitions\Patient Flow Sync Service_DBDefinition.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\bin\Debug\PatchTemplates\Patient Flow Kiosk.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\bin\Debug\PatchTemplates\Patient Flow Portal.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\bin\Debug\PatchTemplates\Patient Flow Sync Service.xml
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\bin\Debug\SDSItems.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\bin\Debug\SDSItems.pdb
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\obj\Debug\SDSItems.csprojAssemblyReference.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\obj\Debug\SDSItems.csproj.CoreCompileInputs.cache
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\obj\Debug\SDSItems.dll
+C:\Code\NewPortal(UIWithUX)\NewPortal\EMIS.PatientFlow\SDSItems\obj\Debug\SDSItems.pdb

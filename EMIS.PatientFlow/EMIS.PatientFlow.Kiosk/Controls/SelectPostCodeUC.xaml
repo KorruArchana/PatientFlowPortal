@@ -1,0 +1,140 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SelectPostCodeUC"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+       xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+       mc:Ignorable="d" 
+       xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+       d:DesignHeight="300" d:DesignWidth="300"
+       DataContext="{Binding SelectPostCode, Source={StaticResource Locator}}">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="../Converters/Converters.xaml" />
+            <ResourceDictionary Source="../Converters/ActualWidthConverter.xaml" />
+        </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.415*"/>
+            <RowDefinition Height="4.3*"/>
+            <RowDefinition Height="0.9*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0" Style="{DynamicResource HeadingButtonStyle}">
+            <TextBlock Text="{Binding PostcodeWelcomeText}" TextWrapping="Wrap"/>
+        </Button>
+
+        <Viewbox Grid.Row="1" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,5"
+                 Visibility="{Binding IsProgressBarVisible, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+            <local:ProgressBarUc/>
+        </Viewbox>
+
+        <StackPanel Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+            <TextBlock Margin="5,5,5,10" TextAlignment="Center" TextWrapping="Wrap"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+		               Text="{Binding SelectPostCodeText}" Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding  SizeHelperModel.ResolutionHelper.PostcodeGridLength,Source={StaticResource Locator}}"/>
+                    <ColumnDefinition Width="{Binding  SizeHelperModel.ResolutionHelper.PostcodeGridLength,Source={StaticResource Locator}}"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="{Binding  SizeHelperModel.ResolutionHelper.PostcodeGridLength,Source={StaticResource Locator}}"/>
+                      <ColumnDefinition Width="{Binding  SizeHelperModel.ResolutionHelper.PostcodeGridLength,Source={StaticResource Locator}}"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel x:Name="PostCodeStkPnl" Grid.Column="1" Grid.ColumnSpan="2"/>
+                
+                <Grid x:Name="PostcodeGrid" Grid.Column="1" Grid.ColumnSpan="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="6*"/>
+                        <RowDefinition Height="2*"/>
+                    </Grid.RowDefinitions>
+                        
+                    <Grid Grid.Row="0" Margin="0,15" IsHitTestVisible="{Binding EnableScreenTap}" VerticalAlignment="Top">
+                        <ScrollViewer MaxHeight="320" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto" 
+                              HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Center"
+                              Style="{StaticResource FavsScrollViewer}" IsHitTestVisible="{Binding EnableScreenTap}" 
+                              PreviewMouseRightButtonDown="UIElement_OnPreviewMouseRightButtonDown" 
+                              PreviewMouseRightButtonUp="UIElement_OnPreviewMouseRightButtonDown">
+
+                            <ListView  ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                                       BorderThickness="0" HorizontalAlignment="Center" ItemsSource="{Binding PostcodeList,Mode=TwoWay}">
+
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel MaxWidth="{Binding ActualWidth,ElementName=PostCodeStkPnl}" FlowDirection="LeftToRight" IsItemsHost="true"/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+                                
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Button Margin="10" Content="{Binding}" 
+                                        Style="{DynamicResource DefaultButtonStyle}"
+                                        Command="{Binding SelectPostCode.PostCodeSelectionCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="{Binding}">
+                                                <Button.Width>
+                                                    <Binding Source="{StaticResource Locator}" Path="SizeHelperModel.ResolutionHelper.ButtonsMinimumWidth" Converter="{StaticResource ActualWidthMinusParameterConverter}">
+                                                        <Binding.ConverterParameter>
+                                                            <sys:Int32>20</sys:Int32>
+                                                        </Binding.ConverterParameter>
+                                                    </Binding>
+                                                </Button.Width>
+                                                <Button.Height>
+                                                    <Binding Source="{StaticResource Locator}" Path="SizeHelperModel.ResolutionHelper.DOBButtonHeight" Converter="{StaticResource ActualWidthMinusParameterConverter}">
+                                                        <Binding.ConverterParameter>
+                                                            <sys:Int32>-10</sys:Int32>
+                                                        </Binding.ConverterParameter>
+                                                    </Binding>
+                                                </Button.Height>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                        </ScrollViewer>
+                    </Grid>
+
+                    <StackPanel Grid.Row="1" Width="1000" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                        <Button Style="{DynamicResource NoneButtonStyle}"
+                                HorizontalAlignment="Center" 
+                                Command="{Binding SelectPostCode.NoneOfTheAboveCommand, Source={StaticResource Locator}}" CommandParameter="{Binding NoneButtonText}" >
+                            <Button.MinHeight>
+                                <Binding Source="{StaticResource Locator}" Path="SizeHelperModel.ResolutionHelper.DOBButtonHeight" Converter="{StaticResource ActualWidthMinusParameterConverter}">
+                                    <Binding.ConverterParameter>
+                                        <sys:Int32>-20</sys:Int32>
+                                    </Binding.ConverterParameter>
+                                </Binding>
+                            </Button.MinHeight>
+                            <Button.Width>
+                                <Binding Source="{StaticResource Locator}" Path="SizeHelperModel.ResolutionHelper.ButtonsMinimumWidth" Converter="{StaticResource ActualWidthMinusParameterConverter}">
+                                    <Binding.ConverterParameter>
+                                        <sys:Int32>-40</sys:Int32>
+                                    </Binding.ConverterParameter>
+                                </Binding>
+                            </Button.Width>
+                            <Button.Content>
+                                <TextBlock Text="{Binding NoneButtonText}" TextWrapping="Wrap"/>
+                            </Button.Content>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </StackPanel>
+    </Grid>
+
+</UserControl>

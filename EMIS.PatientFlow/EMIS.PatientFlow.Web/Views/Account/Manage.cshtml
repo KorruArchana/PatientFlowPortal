@@ -1,0 +1,199 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.UserListViewModel
+@Html.Partial("_GoogleAnalytics","UserList")
+
+ @using (Ajax.BeginForm("Manage", "Account", new AjaxOptions { UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace }))
+ {    
+      <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Users
+            </span>
+        </div>
+        <div class="rightBlockTopButtonContainer">
+            <a href="#" style="text-decoration:none" onclick="LoadAddContent('AddUser')">
+                <input type="text" class="AddOrEditText AddTextColor" value="Register User" readonly="readonly"/>
+                <img src="~/Images/plus.png" />
+            </a>
+        </div>
+    </div>
+    <div id="grdUsers" class="rightBlockContent">
+        <div>
+            <input type="text" placeholder="User Name..." class="rightTxtBox" data-bind='value: userName' />
+            <button name="btnSearch" type="submit" class="icon searchBox" data-bind="click:initialize"><i class="fa fa-search"></i> Search</button>
+        </div>
+        <table class="TFtable">
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Email Address</th>
+                    <th>Roles</th>
+                    <th>Password</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: items">
+                <tr>
+                    <td><a href="#" data-bind="text: Name, click: $parent.update"> </a></td>
+                    <td data-bind="text: Email"></td>
+                    <td data-bind="text: RolesAsCommaSeparatedString"></td>
+                    <td style="text-align:center" > <a href="#" data-bind="click: $parent.resetPassword">Reset</a> </td>
+                    <td style="text-align:center" ><a href="#" class="deleteLinkBtn" title="Delete user" data-bind="click: $parent.deleteAccount, visible :$data.Name!='Administrator'"> </a></td>
+                </tr>
+            </tbody>
+            <tbody data-bind="ifnot: items().length">
+                <tr>
+                    <td colspan="5" style="text-align:center">No records found.</td>
+                </tr>
+            </tbody>
+            <tfoot data-bind="if: items().length">
+                <tr style="background-color:white;">
+                    <td colspan="5"><div id="paginationHolder"></div></td>
+                </tr>
+            </tfoot>
+        </table>
+        <div style="color: red; margin-left: 40px" data-bind="text:errorMessage">
+          </div>
+    </div>
+      <div style="color: red; margin-left: 40px">
+         @Html.ValidationMessage("CustomError")
+  </div>    
+}
+@{
+    int pageSize = EMIS.PatientFlow.Web.Helper.Config.PageSize;
+
+}
+<script type="text/javascript">
+    var pagedViewModel = function (pageSize) {
+        var self = this;
+        self.errorMessage = ko.observable('');
+        self.items = ko.observableArray();
+        self.userName = ko.observable('');
+        self.currentPage = ko.observable(1);
+        self.totalCount = ko.observable(1);
+        self.pageSize = pageSize;
+        self.pageCount = ko.computed(function () {
+            if ((self.totalCount() % self.pageSize) == 0)
+                return parseInt((self.totalCount() / self.pageSize));
+            else
+                return parseInt((self.totalCount() / self.pageSize)) + 1;
+        });
+        self.update = function(item) {
+            $('.leftBlock').removeClass('extendedLeftBlock');
+            $.ajax({
+                url: '@Url.Action("LoadUserEditPageContent", "Account")',
+                data: {
+                    userName: item.Name
+                },
+                type: "GET",
+                success: function(d) {
+                    $("#ContentContainer").html(d);
+                    return false;
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    return false;
+                }
+            });
+            return false;
+        };
+        self.resetPassword = function(item) {
+            $('.leftBlock').removeClass('extendedLeftBlock');
+            $.ajax({
+                url: '@Url.Action("LoadResetPasswordPageContent", "Account")',
+                data: {
+                    userName: item.Name
+                },
+                type: "GET",
+                success: function(d) {
+                    $("#ContentContainer").html(d);
+                    return false;
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    return false;
+                }
+            });
+            return false;
+        };
+        self.deleteAccount = function (item) {
+            if (confirm("Are you sure you want to Delete ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteUser", "Account")',
+                    data: { userName: item.Name },
+                    type: "GET",
+                    success: function (data) {                       
+                        if (data.Valid) {
+                           self.initialize();
+                        }
+                        var msg='';
+                        $.each(data.Errors, function (key, value) {
+                            if (value != null) {
+                                msg+=' '+ value[value.length - 1].ErrorMessage;
+                            }
+                        });
+                        self.errorMessage(msg);
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        self.errorMessage(xhr);
+                    }
+                });
+            }
+        }
+
+        self.initialize = function () {
+
+            self.currentPage(1);
+            self.totalCount(0);
+            self.items.removeAll();
+            self.getData(self.currentPage());
+        }
+        self.getData = function (pageNumber) {
+            $.ajax({
+                url: '@Url.Action("GetAuthUsers", "Account")',// '/Account/GetAuthUsers',
+                data: { pageNumber: pageNumber, pageSize: self.pageSize, userName: self.userName() },
+                type: "GET",
+                success: function (data) {
+                    self.items.removeAll();
+                    self.currentPage(pageNumber);
+                    self.totalCount(data.TotalCount);
+
+                    if (data.Users.length > 0) {
+                        for (i = 0; i < data.Users.length; i++) {
+                            self.items.push(data.Users[i]);
+                        }
+                    }
+
+                    self.createPagination();
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+
+        self.createPagination = function () {
+
+            $("#paginationHolder").pagination({
+                pages: self.pageCount(),
+                itemsOnPage: self.pageSize,
+                currentPage: self.currentPage(),
+                cssStyle: 'light-theme',
+                onPageClick: self.loadPage // fires when a page is clicked
+            });
+
+        };
+        self.loadPage = function (pageNo, event) {
+            self.getData(pageNo);
+        };
+
+        self.initialize();
+    };
+
+    $(document).ready(function () {
+        'use strict';
+
+        var vm = new pagedViewModel(@pageSize);
+        var element = document.getElementById('grdUsers');
+        ko.cleanNode(element);
+        ko.applyBindings(vm, element);
+
+    });
+</script>

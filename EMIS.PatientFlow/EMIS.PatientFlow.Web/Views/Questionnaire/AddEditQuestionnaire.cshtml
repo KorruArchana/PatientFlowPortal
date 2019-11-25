@@ -1,0 +1,1843 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.QuestionnaireViewModel
+
+@{
+    ViewBag.Title = "AddQuestionnaire";
+    if (Model.QuestionnaireId > 0)
+    {
+        ViewBag.Module = "Edit Questionnaire";
+
+    }
+    else
+    {
+        ViewBag.Module = "Add Questionnaire";
+    }
+    ViewBag.Savebutton = "Save";
+    ViewBag.SaveAction = null;
+    ViewBag.Controller = "Questionnaire";
+    ViewBag.FormId = "AddQuestionnaire";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "Questionnaires")
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="~/Content/UserContent/QuestionnaireStyles.css" />
+<script src="~/Scripts/ViewCommonScripts/QuestionnaireScript.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var ua = window.navigator.userAgent;
+        var msie = ua.indexOf("MSIE ");
+
+        Intialize();
+        function Intialize() {
+            if ($('#organisationDropdown').children().length <= 2) {
+                if (@Model.QuestionnaireId== 0) {
+                   $('#organisationDropdown').prop('selectedIndex', 1);
+                }
+                $('#OrganisationField').hide();
+                var orgid = $('#organisationDropdown').val();
+                getkiosks(orgid);
+                checkifEmiswebOrg(orgid);
+            }
+            $('#QuestionsContent').show();
+            $('#SettingsContent').hide();
+            TargetDemographicIntialize();
+            $("#everyMonths,#everyWeek").drop();
+            $("#everyWeek, #everyMonths").drop("set selected", [6]);
+            $("#everyWeek, #everyMonths").prop("selectedIndex", 6);
+
+            $('#everyDays').addClass('disableddiv');
+            $('#organisationDropdown').drop({ match: 'text', sortSelect : true});
+            $('#kioskDropdown').drop({ sortSelect : true});
+            $('#MenuDrop').drop("set selected", 4);
+            $('.rangedrop').css({ 'width': '120%' });
+            if (@Model.QuestionnaireId==0)
+            {
+                $('#questionnaireName').focus();
+                $('#questionSupportingText').css({ 'border-left': '4px solid #d3772b' });
+            }
+            $('#AnonymousResponse').prop("checked", false);
+            $('#PatientSpecificResponse').prop("checked", false);
+            $('#txt_IntializeCode').attr('placeholder', 'Read Code');
+            $('#CodeText').css({ 'display': 'none' });
+            $('#NestedQuestionValues').drop("set selected", 1);
+            $('#TargetDemographicsMenu,#MaptoClinicalCodesMenu,#GotoSectionMenu').addClass('QuestionActionMenuAction');
+        }
+
+        setTimeout(function () {
+            $('#Age2Menu,#Age1Menu').css({ 'max-height': '600%' })
+        }, 1000);
+
+        $(this).find('.mdl-layout__header').append(tab);
+
+        $("input[type='text']").keydown(function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+            }
+        })
+
+        $('#QuestionAction').drop({
+            onChange: function (val) {
+                if (val == 1) {
+                    if ($('#checkIconforTarget').is(':visible')) {
+                        $('#TargetDemographic').css({ 'display': 'none' });
+                        $('#checkIconforTarget').css({ 'display': 'none' });
+                        $('#TargetDemographicsMenu').addClass('QuestionActionMenuAction');
+                        TargetQuestionVisibility = false;
+                    }
+                    else {
+                        $('#TargetDemographic').css({ 'display': 'block' });
+
+                        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+                        {
+                            $('#checkIconforTarget').css({ 'display': '-ms-inline-grid' });
+                        }
+                        else {
+                            $('#checkIconforTarget').css({ 'display': '-webkit-inline-box' });
+                        }
+
+                        $('#TargetDemographicsMenu').removeClass('QuestionActionMenuAction');
+                        TargetQuestionVisibility = true;
+
+                    }
+                }
+                else if (val == 2) {
+                    if ($('#checkIconforCode').is(':visible')) {
+                        $('#CodeText').css({ 'display': 'none' })
+                        $('#OptionTextDiv').css({'width':'80%'})
+                        $('#checkIconforCode').css({ 'display': 'none' });
+                        $('#MaptoClinicalCodesMenu').addClass('QuestionActionMenuAction');
+                        codeVisibility = $('#checkIconforCode').is(':visible')
+                        if ($('#optionListTable tbody tr').length >= 1) {
+                            $('#optionListTable tbody tr').each(function () {
+                                $(this).closest('tr').css({'height': 'auto' });
+                                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+                                {
+                                    $(this).find('.CodeWithValue').closest('td').css({ 'visibility': 'hidden', 'position':'-ms-device-fixed' });
+                                }
+                                else {
+                                    $(this).find('.CodeWithValue').closest('td').hide();
+                                }
+                                if (nestedQuestionVisibility) {
+                                    ResetOptionTableStyle($(this));
+                                }
+                                else{
+                                    $(this).children().eq(0).css({ 'width': '100%' });
+                                }
+                            })
+                        }
+                    }
+                    else {
+                        SetOptionsWidth();
+                        var row = "";
+
+                        $('#CodeText').css({ 'display': 'block' });
+
+                        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+                        {
+                            $('#checkIconforCode').css({ 'display': '-ms-inline-grid' });
+                            $('#CodeText').css({ 'margin-bottom': '30px', 'margin-left': '-10px' })
+                        }
+                        else {
+                            $('#checkIconforCode').css({ 'display': '-webkit-inline-box' });
+                        }
+
+                        $('#MaptoClinicalCodesMenu').removeClass('QuestionActionMenuAction');
+                        codeVisibility = $('#checkIconforCode').is(':visible')
+                        if ($('#optionListTable tbody tr').length >= 1) {
+                            var codeType = $('input[type=radio][name="Code"]:checked').val();
+
+                            row = DefaultReadOrSnomedText(codeType);
+                            $('#optionListTable tbody tr').each(function (i, v) {
+                                var id = $(this).children().eq(0).attr('id');
+                                var hasCodeClass = false;
+                                $(this).find('td').each(function () {
+                                    if ($(this).hasClass('CodeWithValue')) {
+                                        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+                                        {
+                                            $(this).css({ 'visibility': 'visible','position':'relative' });
+                                        }
+                                        else {
+                                            $(this).show();
+                                        }
+                                        hasCodeClass = true;
+                                    }
+                                });
+
+                                if (!hasCodeClass) {
+                                    var option = $(optionsList).filter(function (i, v) {
+                                        return parseInt(v.OptionId) == parseInt(id);
+                                    }).map(function (idx, value) {
+                                        if (codeType == "readCode") {
+                                            return value.QuestionOptionCode
+                                        }
+                                        else {
+                                            return value.QuestionSnomedOptionCode
+                                        }
+                                        });
+                                    if (option[0] != undefined && option[0] !="") {
+                                        row = '<td class="CodeWithValue CodeAndLogicQuestionStyle"><div class="mdl-textfield-questionnaire mdl-js-textfield"><input class= "mdl-textfield__input body2" type="text" id="txt_Code" value="' + option[0] + '"></div ></td>';
+                                    }
+                                    else {
+                                        row = DefaultReadOrSnomedText(codeType, id);
+                                    }
+
+                                    $(this).children().eq(1).after(row);
+                                    $(this).children().attr('data-counter', id);
+                                }
+
+                                if (nestedQuestionVisibility) {
+                                    SetNestedQuestionInNextLine($(this));
+                                }
+                            });
+                        }
+                    }
+                }
+                else if (val == 3) {
+                    if ($('#checkIconforNestedQuestion').is(':visible')) {
+                        $('#checkIconforNestedQuestion,#NestedQuestionValues').css({ 'display': 'none' });
+                        $('#GotoSectionMenu').addClass('QuestionActionMenuAction');
+                        nestedQuestionVisibility = false;
+                        if ($('#optionListTable tbody tr').length >= 1) {
+                            $('#optionListTable tbody tr').each(function () {
+                                $(this).closest('tr').css({ 'height': 'auto' });
+                                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+                                {
+                                    $(this).find('.NestedQuestionDiv').css({ 'visibility': 'hidden', 'position': '-ms-device-fixed' });
+                                }
+                                else {
+                                    $(this).find('.NestedQuestionDiv').hide();
+                                }
+
+                                if (codeVisibility) {
+                                    ResetOptionTableStyle($(this));
+                                }
+                                else {
+                                    $(this).children().eq(0).css({ 'width': '100%' });
+                                }
+                            })
+                        }
+                    }
+                    else {
+                        SetOptionsWidth();
+                        $('#NestedQuestionValues').css({ 'display': 'inherit' });
+
+                        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+                        {
+                            $('#checkIconforNestedQuestion').css({ 'display': '-ms-inline-grid' });
+                        }
+                        else {
+                            $('#checkIconforNestedQuestion').css({ 'display': '-webkit-inline-box' });
+                        }
+
+                        $('#GotoSectionMenu').removeClass('QuestionActionMenuAction');
+                        nestedQuestionVisibility = true;
+                        if ($('#optionListTable tbody tr').length >= 1) {
+                            $('#optionListTable tbody tr').each(function (i, v) {
+                                if ($(this).find('.NestedQuestionDiv').hasClass('NestedQuestionDiv')) {
+                                    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
+                                    {
+                                        $(this).find('.NestedQuestionDiv').css({ 'visibility': 'visible', 'position': 'relative' });
+                                    }
+                                    else {
+                                        $(this).find('.NestedQuestionDiv').show();
+                                    }
+
+                                } else {
+                                    var id = $(this).children().eq(0).attr('id');
+                                    var row = '<td id="' + id + '" data-counter="' + id + '" class="NestedQuestionDiv CodeAndLogicQuestionStyle"><div class="ui selection dropdown search" id="NestedQuestionEditValue' + id
+                                        + '"><input type="hidden" name="continuetonextSection"><i class="material-icons targetDemographicsDropdown" style="float: right">arrow_drop_down</i><div class="default text"></div>' +
+                                        '<div class="menu"><div class="item" data-value="1">Continue to next section</div> ' +
+                                        '<div class="item" data-value="2">Exit questionnaire</div></td>';
+
+                                    if (codeVisibility) {
+                                        $(this).children().eq(2).after(row);
+                                    }
+                                    else {
+                                        $(this).children().eq(1).after(row);
+                                    }
+
+                                    $(this).children().attr('data-counter', id);
+
+                                    $('#NestedQuestionEditValue' + id + '').drop("set selected", 1);
+                                }
+
+                                if (codeVisibility) {
+                                    SetNestedQuestionInNextLine($(this));
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
+
+        $('#MenuDrop').drop({
+            onChange: function (val, text, element) {
+                if (val == "1") {
+                    $('#MultipleChoiceOptions,#optionFields,#NumericTextAnswerdiv').css({ 'display': 'none' });
+                    $('#TextAnswerDiv').css({ 'display': 'block' });
+                    $('#optionCharLimit').val(100);
+                }
+                if (val == "2") {
+                    $('#TextAnswerDiv,#MultipleChoiceOptions,#optionFields').css({ 'display': 'none' });
+                    $('#optionCharLimit').val(0);
+                    $('#NumericTextAnswerdiv').css({'display':'block'})
+                }
+                if (val == "4") {
+                    $('#TextAnswerDiv,#NumericTextAnswerdiv').css({ 'display': 'none' });
+                    $('#MultipleChoiceOptions,#optionFields').css({ 'display': 'block' });
+                    $('#optionCharLimit').val(0);
+                }
+            }
+        })
+
+        $('#TargetAge').drop({
+            onChange: function (val, text, element) {
+                $('#TargetAge1,#TargetAge2').drop("set selected", 50);
+                $('#TargetAge1,#TargetAge2').prop("selectedIndex", 50);
+                $('#TargetAge1,#TargetAge2').css({ 'display': 'none' })
+                if (val == "4") {
+                    $('#TargetAgeTable tr').find('#TargetAgetd').insertAfter('#TargetAgeTable td:eq(0)');
+                    $('#TargetAge1,#TargetAge2,#btwnAnd').css({ 'display': 'block' })
+                }
+                else if (val == "2" || val == "3") {
+                    $('#TargetAgeTable tr').find('#TargetAgetd').appendTo('#TargetAgeTable tr')
+                    $('#TargetAge1,#btwnAnd').css({ 'display': 'block' })
+                }
+                else {
+                    $('#TargetAge1,#TargetAge2,#btwnAnd').css({ 'display': 'none' })
+
+                }
+            }
+        })
+
+         $('#optionCharLimit').keyup(function (e) {
+             $('#characterNegaviteError,#characterGreaterError').css({ 'display': 'none' })
+            if ($(this).val() < 1) {
+                $('#characterNegaviteError').css({ 'display': 'block' })
+            }
+            else if ($(this).val()>150) {
+                $('#characterGreaterError').css({ 'display': 'block' })
+            }
+        })
+
+        $('#questionnaireName').on('focusin focusout', function (e) {
+            e.type == "focusin" ? $('#questionSupportingText').css({ 'border-left': '4px solid #d3772b' }) : $('#questionSupportingText').css({ 'border-left': '' })
+        })
+
+        $('#QuestionCard').on('focusin', function (e) {
+            $('#QuestionCard').css({ 'border-left': '4px solid #d3772b' })
+        })
+
+        $('#AddOption').click(function () {
+            var codeType = $('input[type=radio][name="Code"]:checked').val();
+            CodeValidation(codeType, $('#txt_IntializeCode').val())
+
+            if (codeValid) {
+                $('#txt_IntializeCode').val('');
+                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))  // If Internet Explorer, return version number
+                {
+                    $('#txtOption').css({ 'display': '-ms-inline-flexbox' });
+                }
+                else {
+                    $('#txtOption').css({ 'display': '-webkit-inline-box' });
+                }
+            }
+            else {
+                $('#CodeErrroMessage').css({ 'display': 'block' });
+            }
+        })
+
+        $('#questionnaireName').keydown(function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+            }
+        })
+
+        $('#txt_question,#questionnaireName').keyup(function (e) {
+            $('#questionnaireName').css({ 'background - color': 'none', 'background': 'none' })
+            var id = $(this).attr("id").toString();
+            if (id == "questionnaireName") {
+                if ($(this).val().length >= 50) {
+                    e.preventDefault();
+                }
+                ($(this).val() != "" ? $('#questionnaireNameError').css({ 'display': 'none' }) : $('#questionnaireNameError').css({ 'display': 'block' }));
+            }
+            if (id == "txt_question") {
+                ($(this).val() != "" ? $('#questionErrorMessage').css({ 'display': 'none' }) : $('#questionErrorMessage').css({ 'display': 'block' }));
+            }
+        })
+
+        $('.AddQuestions').click(function () {
+            var ids = [];
+            var flag = false;
+            codeVisibility = false;
+            nestedQuestionVisibility = false;
+            $('#txtOption').css({ 'display': '-webkit-inline-box' });
+            $('#checkIconforNestedQuestion,#NestedQuestionValues').css({ 'display': 'none' });
+            $('#questionOptionErrorMessage,#questionErrorMessage').css({ 'display': 'none' })
+            $('#checkIconforTarget,#checkIconforCode').css({ 'display': 'none' });
+            $('#TargetDemographic').css({ 'display': 'none' });
+            $('#TargetDemographicsMenu,#MaptoClinicalCodesMenu,#GotoSectionMenu').addClass('QuestionActionMenuAction');
+            $('#CodeErrroMessage').css({ 'display': 'none' });
+            $('#CodeErrroMessage').text('');
+            var Anonymous = $('input[type=radio][name="Isanonymous"]:checked').val();
+            if (Anonymous == "true") {
+                $('#QuestionAction').find("#TargetDemo").addClass("disabled");
+            }
+            $('#txt_options').val('');
+            $('#txt_IntializeCode').val('');
+            $('#CodeText').css({ 'display': 'none' })
+            TargetDemographicIntialize();
+            $('#MenuDrop').drop("set selected", 4);
+            ShowingMultiplchoicequestion();
+            $('#QuestionCard').trigger('focusin');
+            var dropdownValue = $('#MenuDrop').drop('get value');
+            var questionValue = $('#txt_question').val();
+            if (dropdownValue == 4 && questionValue != "" && optionsList.length <= 0) {
+                $('#questionOptionErrorMessage').css({ 'display': 'block' })
+            }
+            else if (dropdownValue == 4 && questionValue == "" && optionsList.length > 0) {
+                $('#questionErrorMessage').css({ 'display': 'block' })
+            }
+            else {
+                $('#questionOptionErrorMessage,#questionErrorMessage').css({ 'display': 'none' })
+            }
+            $('#QuestionCard').css({ 'display': 'flex' });
+            if ($('#QuestionCard').parent().attr("id") == "EditQuestion" || $('#QuestionCard').parent().attr("id").match("^question")) {
+                if ($('#QuestionCard').is(":visible")) {
+                    $('#QuestionCard').css({ 'display': 'none' });
+                }
+                next = $('#QuestionCard').parent().next().attr("data-order");
+                previous = $('#QuestionCard').parent().prev().attr("data-order");
+                $("#QuestionCard").css({ 'display': 'block' });
+                $('#QuestionCard').parent().siblings().each(function (idx, el) {
+                    ids.push("#" + el.id);
+                });
+            }
+            $(ids).each(function (i, v) {
+                if (i <= 1) {
+                    if (v.match("^#question")) {
+                        flag = true;
+                    }
+                }
+            })
+            if (flag) {
+                questionClonedDiv = questionDivId;
+            }
+            $('#txt_question').focus();
+            $('.AddQuestions').css({ 'bottom': 'calc(100% - 288px)' });
+            AdjustWidthOfTabContentOnScrollBar();
+        })
+
+        $('#AddOption').on('mouseup', function () {
+            $('#optionFields').css({ 'display': 'block' })
+            $('#questionOptionErrorMessage').css({ 'display': 'none' })
+            $('#CodeErrroMessage').css({ 'display': 'block' });
+            $('#CodeErrroMessage').text('');
+            var optionValue = $('#txt_options').val();
+            var codeValue = $('#txt_IntializeCode').val();
+            var codeType = $('input[type=radio][name="Code"]:checked').val();
+            CodeValidation(codeType, $('#txt_IntializeCode').val())
+            var isAnonymous = $('input[type=radio][name="Isanonymous"]:checked').val();
+            if (isAnonymous == undefined) {
+                isAnonymous = "false";
+            }
+            var nestedQuestion = $('#NestedQuestionValues').drop('get value');
+            if (optionValue != "" && codeValid) {
+                $('#questionOptionErrorMessage').css({ 'display': 'none' })
+                var row = FormQuestionOptionTable(optionValue, codeVisibility, codeType, codeValue, 0, false, nestedQuestionVisibility, 0);
+                if ((isAnonymous == "true" || !codeVisibility) || (isAnonymous == "false" && codeValid) || (nestedQuestionVisibility == true)) {
+                    $('#optionListTable >tbody').append(row);
+                    CommonData();
+                    if (isAnonymous == "false") {
+                        SetOptionsWidth();
+                    }
+                }
+            }
+            else if (optionValue == "") {
+                    $('#questionOptionErrorMessage').css({ 'display': 'block' })
+            }
+            function CommonData() {
+                Question.OptionId = counter;
+                Question.QuestionOption = optionValue;
+                Question.NestedQuestionId = 0;
+                $('#NestedQuestionEditValue' + counter + '').drop("set selected", nestedQuestion);
+                $('#NestedQuestionValues').drop("set selected", 1);
+                optionsList.push(Question);
+                var rowcount = ($('#optionListTable tr').length) + 1;
+                $('#txt_options').val("");
+                $('#txt_options').attr('placeholder', 'Option ' + rowcount)
+                $('#txt_options').focus();
+                $('#txt_IntializeCode').val("");
+                Question = {};
+            }
+            SetOptionsPosition();
+            AdjustWidthOfTabContentOnScrollBar();
+        })
+
+        $(document).on('focusout', '#txt_Code', function (i, v) {
+            var CodeData = $(this).val();
+            var dataId = parseInt( $(this).closest('td').attr('data-counter'));
+            var codevalue = $('input[type=radio][name="Code"]:checked').val();
+            CodeValidation(codevalue, CodeData)
+            if (codeValid) {
+                $(optionsList).each(function (i, v) {
+                    if (v.OptionId == dataId) {
+                        if (codevalue == "readCode") {
+                            v.QuestionOptionCode = CodeData;
+                        }
+                        else if (codevalue == "snomedCode") {
+                            v.QuestionSnomedOptionCode = parseInt(CodeData);
+                        }
+                    }
+                });
+                $('#CodeErrroMessage').css({ 'display': 'block' });
+                $('#CodeErrroMessage').text('');
+            }
+            else if (CodeData!="") {
+                $(this).focus();
+            }
+        })
+
+        $(document).on('change', '[id^=NestedQuestionEditValue]', function () {
+            var value = $(this).drop('get value');
+            if (value === "1") {
+                value = 0;
+                Question.NestedQuestionId = 0
+            }
+            else if (value === "2") {
+                value=-1
+                Question.NestedQuestionId = -1;
+            }
+            var dataId = parseInt($(this).closest('td').attr('data-counter'));
+            $(optionsList).each(function (i, v) {
+                if (v.OptionId == dataId) {
+                    v.NestedQuestionId = value
+                }
+            })
+        });
+
+        $('input[type=radio][name="Code"]').change(function() {
+            $('.AddedQuestionDiv').children().each(function (i, v) {
+                if ($(this).attr("id").match("^question")) {
+                    var options = $(this).attr("data-optionList");
+                    var questionoptionslist = JSON.parse(decodeURIComponent(options));
+                    for (var i = 0; i < questionoptionslist.length; i++) {
+                        questionoptionslist[i].QuestionOptionCode = '';
+                        questionoptionslist[i].QuestionSnomedOptionCode = 0;
+                    }
+                    var options = encodeURIComponent(JSON.stringify(questionoptionslist));
+                    $(this).attr("data-optionList", options);
+                }
+            })
+            for (var i = 0; i < listOfQuestions.length; i++) {
+                var StringifiedListofQuestion = jQuery.parseJSON(listOfQuestions[i].QuestionOptionsList);
+                for (var j = 0; j < StringifiedListofQuestion.length; j++) {
+                    StringifiedListofQuestion[j].QuestionOptionCode = '';
+                    StringifiedListofQuestion[j].QuestionSnomedOptionCode = 0;
+                }
+                listOfQuestions[i].QuestionOptionsList = JSON.stringify(StringifiedListofQuestion);
+            }
+
+            if ($(this).val() == "readCode") {
+                $('#txt_IntializeCode').attr('placeholder', 'Read Code');
+                $('#IsSnomedCode').val(false);
+            }
+            else if ($(this).val() == "snomedCode") {
+                $('#txt_IntializeCode').attr('placeholder', 'SNOMED Code');
+                $('#IsSnomedCode').val(true);
+            }
+        });
+
+        $(document).on('focusout', '#txt_Editoption', function (i, v) {
+            var optionValue = $(this).val();
+            var dataId = parseInt($(this).attr("data-counter"));
+            $(optionsList).each(function (i, v) {
+                if (v.OptionId == dataId) {
+                    v.QuestionOption = optionValue;
+                }
+            })
+            $('#txt_options').focus();
+        })
+
+        $(document).on('click', '#Delete', function () {
+            var removedElements = 0;
+            var id = $(this).parent().siblings(":first").attr('id');
+            if ($('#optionListTable tr').length == 1) {
+                optionsList = [];
+            }
+            else {
+                $.each(optionsList, function (i, v) {
+                    if (id == v.OptionId) {
+                        removedElements = i;
+                    }
+                })
+                optionsList.splice(removedElements, 1);
+            }
+            $(this).closest("tr").remove();
+            var rowcount = ($('#optionListTable tr').length) + 1;
+            $('#txt_options').attr('placeholder', 'Option ' + rowcount)
+        })
+
+        $(document).on('click', '#settingsTab,#questionsTab', function () {
+            var id = $(this).attr("id").toString();
+            if (id == "settingsTab") {
+                $('#questionsTab,#settingsTab').removeClass('is-active')
+                $(this).addClass('is-active');
+                $(this).css({ "border-bottom": "2px solid #006eb6", "color": "#006eb6" });
+                $('#questionsTab').css({ "border-bottom": "0px", "color": "#212121"});
+                $('#QuestionsContent').hide();
+                $('#SettingsContent').show();
+                $('#AddQuestion1').hide();
+                $('#AddQuestion2').hide();
+                AdjustWidthOfTabContentOnScrollBar();
+            }
+            if (id == "questionsTab") {
+                $('#settingsTab').removeClass('is-active')
+                $(this).addClass('is-active');
+                $(this).css({ "border-bottom": "2px solid #006eb6", "color": "#006eb6" });
+                $('#settingsTab').css({ "border-bottom": "0px", "color": "#212121" });
+                $('#SettingsContent').hide();
+                $('#QuestionsContent').show();
+                if ($('.mdl-layout:not(.is-small-screen)').length > 0) {
+                    $('#AddQuestion1').show();
+                }
+                else {
+                    $('#AddQuestion2').show();
+                }
+                AdjustWidthOfTabContentOnScrollBar();
+            }
+        })
+
+        $(document).on('click', '#deleteCard', function () {
+            $('#QuestionCard').css({ 'display': 'none' })
+            setDefaultforQuestions();
+            optionsList = [];
+            deleteCardId = $(this).attr("data-id");
+            deleteOrderId = $(this).attr("data-order");
+            for (var i = 0; i < listOfQuestions.length; i++) {
+                if (listOfQuestions[i].QuestionId <= 0) {
+                    if (listOfQuestions[i].quesId == deleteCardId) {
+                        listOfQuestions.splice(i, 1)
+                    }
+                }
+            }
+            if (@Model.QuestionnaireId> 0) {
+                $.each(listOfQuestions, function (i, v) {
+                    if (v.QuestionId > 0 && v.quesId == deleteCardId) {
+                        var DeleteQuestionId = v.QuestionId.toString();
+                        deletedQuestion.push(DeleteQuestionId);
+                    }
+                });
+                nestedQuestionList= $(nestedQuestionList).filter(function (i, v) {
+                    return v.QuestionId != parseInt(deletedQuestion[0]);
+                })
+            }
+            $('#question' + deleteCardId).remove();
+            ChangeListofQuestionforDelete(deleteOrderId, deleteCardId);
+            $('#QuestionId').val("");
+            $('.AddedQuestionDiv').trigger('newQuestionAdded');
+        })
+
+        $(document).on('keydown', '#txt_Editoption', function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+            }
+        })
+
+        $(document).on('click', '.questionDiv', function (e) {
+            var dropdpwnvalue = $('#MenuDrop').drop('get value');
+            if ($('#txt_question').val() != "" && dropdpwnvalue == 4 && optionsList <= 0) {
+                e.preventDefault();
+                $('#QuestionCard').css({ 'display': 'block', 'border-left': '4px solid #d3772b' })
+            }
+            else {
+                EditCardIntialize($(this));
+            }
+        })
+
+        $('#addupdatebtn').click(function (e) {
+            showLoading();
+            var isAnonymous;
+            var orgValue = $('#organisationDropdown').val();
+            var Anonymous = $('input[type=radio][name="Isanonymous"]:checked').val();
+            var frequency = $('input[type=radio][name="Frequency"]:checked').val();
+            var questionnaireName = $('#questionnaireName').val();
+
+            if ($('input[name=Isanonymous]:checked').length <= 0 && $('input[name=Frequency]:checked').length <= 0) {
+                Anonymous = false;
+                frequency = false;
+            }
+            if ($('input[name=Isanonymous]:checked').length > 0) {
+                if (Anonymous == "true") {
+                    isAnonymous = true;
+                    frequency = true;
+                    $(listOfQuestions).each(function (i, v) {
+                        v.Gender = "None";
+                        v.Operation = "None";
+                        v.Age1 = 0;
+                        v.Age2 = 0;
+                    })
+                    for (var i = 0; i < listOfQuestions.length; i++) {
+                        var StringifiedListofQuestion = jQuery.parseJSON(listOfQuestions[i].QuestionOptionsList);
+                        for (var j = 0; j < StringifiedListofQuestion.length; j++) {
+                            StringifiedListofQuestion[j].QuestionOptionCode = '';
+                            StringifiedListofQuestion[j].QuestionSnomedOptionCode = 0;
+                        }
+                        listOfQuestions[i].QuestionOptionsList = JSON.stringify(StringifiedListofQuestion);
+                    }
+                }
+                else if ($('input[name=Frequency]:checked').length <= 0 && Anonymous == "false") {
+                    frequency = false;
+                    isAnonymous = true;
+                }
+                else if ($('input[name=Frequency]:checked').length > 0 && Anonymous == "false") {
+                    frequency = true;
+                    isAnonymous = true;
+                }
+            }
+
+            if (orgValue == "" || !isAnonymous || !frequency || questionnaireName == "")
+            {
+                if (orgValue == "") {
+                    SetTabVisibility($('#SettingsContent'));
+                    $('#orgErrorMessage').css({ 'display': 'block' });
+                    e.preventDefault();
+                }
+                if (!isAnonymous) {
+                    SetTabVisibility($('#SettingsContent'));
+                    $('#RespErrorMessage').css({ 'display': 'block' });
+                    e.preventDefault();
+                }
+                if ($('input[type=radio][name="Isanonymous"]:checked').val() != "true") {
+                    if (!frequency) {
+                        SetTabVisibility($('#SettingsContent'));
+                        $('#FreqErrorMessage').css({ 'display': 'block' });
+                        e.preventDefault();
+                    }
+                }
+                if (questionnaireName == "") {
+                    SetTabVisibility($('#QuestionsContent'));
+                    $('#questionnaireName').focus();
+                    $('#questionnaireNameError').css({ 'display': 'block' });
+                    e.preventDefault();
+                }
+            }
+            else {
+                saveQuestionnaire();
+            }
+         })
+
+        function saveQuestionnaire() {
+            if (orderArray.length > 0) {
+                $(listOfQuestions).each(function (i, v) {
+                    v.order = orderArray[i];
+
+                })
+            }
+
+            var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+            $('#QuestionsListData').val(stringifiedlistOfQuestions);
+
+            if ($('input[type=radio][name="Isanonymous"]:checked').val() != "true") {
+                if ($('input[type=radio][name="Frequency"]:checked').val() == "Annually") {
+                    $('#FrequencyDays').val(365);
+                }
+                else if ($('input[type=radio][name="Frequency"]:checked').val() == "Monthly") {
+                    var value1 = $("#everyMonths").drop('get value') * 30;
+                    if ($("#everyMonths").drop('get value') == 7) {
+                        $('#FrequencyDays').val(value1 + 1);
+                    }
+                    else {
+                        $('#FrequencyDays').val(value1);
+                    }
+                }
+                else if ($('input[type=radio][name="Frequency"]:checked').val() == "Weekly") {
+                    var value2 = $("#everyWeek").drop('get value') * 7;
+                    $('#FrequencyDays').val(value2);
+                }
+                else if ($('input[type=radio][name="Frequency"]:checked').val() == "Days") {
+                    $('#FrequencyDays').val($('#everyDays').val());
+                }
+
+            }
+
+            var stringifiedlistOfdeletedQuestions = JSON.stringify($.unique(deletedQuestion));
+            var eventCategory = 'Questionnaires';
+            if (@Model.QuestionnaireId> 0) {
+                $('#StringifiedDeletedQuestions').val(stringifiedlistOfdeletedQuestions);
+                LogEvent(eventCategory, 'Edited', eventCategory);
+            }
+            else {
+                LogEvent(eventCategory, 'Added', eventCategory);
+            }
+                $.ajax({
+                    url: "../Questionnaire/SaveQuestionnaire",
+                    type: "POST",
+                    data: $("#AddQuestionnaire").serialize(),
+                    dataType: 'json',
+                    success: function () {
+                        hideLoading();
+                        window.location.href = '@Url.Action("Index","Questionnaire")';
+                    },
+                    error: function () {
+                        hideLoading();
+                        window.location.href = '@Url.Action("Index","Questionnaire")';
+                    }
+                });
+        }
+
+        $(document).mouseup(function (e) {
+            var container = $("#QuestionCard");
+            if (!container.is(e.target) && container.has(e.target).length === 0 && $('#QuestionCard').is(":visible")) {
+                var lastAddedQuestionDiv;
+                var isValid = true;
+                $('#QuestionCard').css({ 'border-left': '' })
+                noVisit++;
+                var qId = $('#QuestionId').val();
+                var questionValue = $('#txt_question').val();
+                var dropdpwnValue = $('#MenuDrop').drop('get value');
+                if ($('#txt_options').val() != "") {
+                    QuestionData = {};
+                    QuestionData.OptionId = ++counter;
+                    QuestionData.QuestionOption = $('#txt_options').val();
+                    QuestionData.QuestionSnomedOptionCode = 0;
+                    QuestionData.QuestionOptionCode = '';
+                    if ($('#txt_IntializeCode').val() != "") {
+                        var codeType = $('input[type=radio][name="Code"]:checked').val();
+                        CodeValidation(codeType, $('#txt_IntializeCode').val());
+                        if (codeType == "readCode") {
+                            QuestionData.QuestionSnomedOptionCode = 0;
+                            QuestionData.QuestionOptionCode = $('#txt_IntializeCode').val();
+                        }
+                        else {
+                            QuestionData.QuestionSnomedOptionCode = $('#txt_IntializeCode').val();
+                            QuestionData.QuestionOptionCode ='';
+                        }
+                    }
+                    QuestionData.NestedQuestionId = 0;
+                    if ($('#NestedQuestionValues').drop('get value')=="2") {
+                        QuestionData.NestedQuestionId = -1;
+                    }
+                    if (codeValid) {
+                        optionsList.push(QuestionData);
+                    }
+                }
+                var stringifiedlistOfQuestionOptions = JSON.stringify(optionsList);
+                $('#QuestionOptionsList').val(stringifiedlistOfQuestionOptions);
+
+                if (questionValue == "" && optionsList.length <= 0) {
+                    container.hide();
+                    $('#questionOptionErrorMessage,#questionErrorMessage').css({ 'display': 'none' })
+                  }
+                else if (questionValue != "") {
+                    ++quesId
+                        var questionsrow = "";
+                        var QuestionData = {};
+                        //QuestionData.order = ++questionOrder;
+                        QuestionData.QuestionText = questionValue;
+                        QuestionData.QuestionnaireId = questionnnaireId;
+                        QuestionData.QuestionOptionsList = stringifiedlistOfQuestionOptions;
+                        QuestionData.QuestionId = questionId;
+                        QuestionData.OptionCharLimit = $('#optionCharLimit').val() == "" ? 0 : $('#optionCharLimit').val();
+                        QuestionData.QuestionType = dropdpwnValue;
+                        QuestionData.QuestionDisplayType = dropdpwnValue;
+                        //QuestionData.quesId = quesId
+                    if ($("#TargetGender").drop('get value') != "1") {
+                        QuestionData.Gender = $("#TargetGender").drop('get value') == "2" ? "M" : "F";
+                    }
+                    else {
+                        QuestionData.Gender = "None"
+                    }
+                    if ($("#TargetAge").drop('get value') != "1") {
+                        if ($("#TargetAge").drop('get value') == "2") {
+                            QuestionData.Operation = "GreaterThan";
+                            QuestionData.Age1 = parseInt($("#TargetAge1").drop('get value'));
+                            QuestionData.Age2 = 0;
+                        }
+                        else if ($("#TargetAge").drop('get value') == "3") {
+                            QuestionData.Operation = "LessThan";
+                            QuestionData.Age1 = parseInt($("#TargetAge1").drop('get value'));
+                            QuestionData.Age2 = 0;
+                        }
+                        else if ($("#TargetAge").drop('get value') == "4") {
+                            QuestionData.Operation = "Between";
+                            QuestionData.Age1 = parseInt($("#TargetAge1").drop('get value'));
+                            QuestionData.Age2 = parseInt($("#TargetAge2").drop('get value'));
+                        }
+                    }
+                    else {
+                        QuestionData.Operation = "None";
+                        QuestionData.Age1 = 0;
+                        QuestionData.Age2 = 0;
+                    }
+                    container.hide();
+                    if (dropdpwnValue == 4 && optionsList.length > 0) {
+                        var options = encodeURIComponent(JSON.stringify(optionsList));
+                        if (codeValid) {
+                            if (questionClonedDiv != "" && questionClonedDiv != undefined) {
+
+                                var previousId = ++previous;
+                                QuestionData.order = previousId;
+                                QuestionData.quesId = previousId;
+                                questionsrow += '<div id="question' + previousId + '" data-order="' + previousId + '"  data-questionText="' + questionValue +
+                                    '" data-optionList="' + options + '" data-action="' + dropdpwnValue + '" data-id="' + previousId +
+                                    '" data-operation="' + $("#TargetAge").drop('get value') + '"data-gender="' + $("#TargetGender").drop('get value') + '" data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '"' +
+                                    '" class="questionDiv" style="display:block;margin-bottom:30px"><label style="font-size:18px;color:black">' + $('#txt_question').val() + '</label><br/><br/>'
+                                $(optionsList).each(function (i, v) {
+                                    questionsrow += '<span class="option" style="vertical-align: text-bottom">' +
+                                        '<i class="material-icons uncheckedRadioBtn"> radio_button_unchecked</i>' + v.QuestionOption + '</span><br/><br/>'
+                                })
+                                $('#QuestionId').attr("data-order", previousId);
+                                questionsrow += '</div><div id="EditQuestion" style="display:none"></div>'
+                                ChangeListofQuestion(previousId);
+                                previous = 0;
+                            }
+                            else {
+                                QuestionData.order = ++questionOrder;
+                                QuestionData.quesId = quesId;
+                                questionsrow += '<div id="question' + quesId + '" data-order="' + questionOrder + '"  data-questionText="' + questionValue + '" data-optionList="' + options + '" data-action="' + dropdpwnValue + '" data-id="' + quesId + '" data-operation="' + $("#TargetAge").drop('get value') + '"data-gender="' + $("#TargetGender").drop('get value') + '" data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '"' + '" class="questionDiv" style="display:block;margin-bottom:30px"><label style="font-size:18px;color:black">' + $('#txt_question').val() + '</label><br/><br/>'
+                                $(optionsList).each(function (i, v) {
+                                    questionsrow += '<span class="option" style="vertical-align: text-bottom">' +
+                                        '<i class="material-icons uncheckedRadioBtn"> radio_button_unchecked</i>' + v.QuestionOption + '</span><br/><br/>'
+                                })
+                                $('#QuestionId').attr("data-order", questionOrder);
+                                questionsrow += '</div><div id="EditQuestion" style="display:none"></div>'
+                            }
+
+                            listOfQuestions.push(QuestionData);
+                            var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                            $('#QuestionsListData').val(stringifiedlistOfQuestions);
+                            setDefaultforQuestions();
+                            optionsList = [];
+                        }
+                        else {
+                            isValid = false
+                            container.show();
+                        }
+                    }
+                    else if (dropdpwnValue == 1 && $('#optionCharLimit').val() != "") {
+                        if ($('#optionCharLimit').val() >= 1 && $('#optionCharLimit').val() <= 150) {
+                            if (questionClonedDiv != "" && questionClonedDiv != undefined) {
+                                var previousId = ++previous
+                                QuestionData.order = previousId;
+                                QuestionData.quesId = previousId;
+                                questionsrow += '<div id="question' + previousId + '" data-order="' + previousId + '"  data-questionText="' + questionValue + '" data-textBoxValue="' + $('#optionCharLimit').val() + '"   data-action="' + dropdpwnValue + '" data-id="' + previousId + '" data-operation="' + $("#TargetAge").drop('get value') + '"data-gender="' + $("#TargetGender").drop('get value') + '" data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '"' + '" class="questionDiv" style="display:block;margin-bottom:30px">' +
+                                    '<label class="body1 highEmphasisBlack">' + $('#txt_question').val() + '</label><br/>';
+
+                                questionsrow += '</div><div id="EditQuestion" style="display:none"></div>';
+                                ChangeListofQuestion(previousId);
+                                previous = 0;
+                            }
+                            else {
+                                QuestionData.order = ++questionOrder;
+                                QuestionData.quesId = quesId;
+
+                                questionsrow += '<div id="question' + quesId + '" data-order="' + questionOrder + '"  data-questionText="' + questionValue + '" data-textBoxValue="' + $('#optionCharLimit').val() + '"   data-action="' + dropdpwnValue + '" data-id="' + quesId + '" data-operation="' + $("#TargetAge").drop('get value') + '"data-gender="' + $("#TargetGender").drop('get value') + '" data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '"' + '" class="questionDiv" style="display:block;margin-bottom:30px">' +
+                                    '<label class="body1 highEmphasisBlack">' + $('#txt_question').val() + '</label><br/>';
+                                questionsrow += '</div><div id="EditQuestion" style="display:none"></div>'
+                            }
+
+                            listOfQuestions.push(QuestionData);
+                            $('#txt_question').val('');
+                            var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                            $('#QuestionsListData').val(stringifiedlistOfQuestions);
+                        }
+                        else {
+                            container.show();
+                            --questionOrder;
+                            --quesId;
+                            isValid = false
+                        }
+                    }
+                    else if (dropdpwnValue == 2) {
+                        if (questionClonedDiv != "" && questionClonedDiv != undefined) {
+                            var previousId = ++previous
+                            QuestionData.order = previousId;
+                            QuestionData.quesId = previousId;
+
+                            questionsrow += '<div id="question' + previousId + '" data-order="' + previousId + '"  data-questionText="' + questionValue + '" data-action="' + dropdpwnValue + '" data-id="' + previousId + '" data-operation="' + $("#TargetAge").drop('get value') + '"data-gender="' + $("#TargetGender").drop('get value') + '" data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '"' + '" class="questionDiv" style="display:block;margin-bottom:30px">' +
+                                '<label class="body1 highEmphasisBlack">' + $('#txt_question').val() + '</label><br/>';
+
+                            questionsrow += '</div><div id="EditQuestion" style="display:none"></div>';
+                            ChangeListofQuestion(previousId);
+                            previous = 0;
+                        }
+                        else {
+                            QuestionData.order = ++questionOrder;
+                            QuestionData.quesId = quesId;
+
+                            questionsrow += '<div id="question' + quesId + '" data-order="' + questionOrder + '"  data-questionText="' + questionValue + '" data-action="' + dropdpwnValue + '" data-id="' + quesId + '" data-operation="' + $("#TargetAge").drop('get value') + '"data-gender="' + $("#TargetGender").drop('get value') + '" data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '"' + '" class="questionDiv" style="display:block;margin-bottom:30px">' +
+                                '<label class="body1 highEmphasisBlack">' + $('#txt_question').val() + '</label><br/>';
+                            questionsrow += '</div><div id="EditQuestion" style="display:none"></div>'
+                        }
+
+
+                        listOfQuestions.push(QuestionData);
+
+                        var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                        $('#QuestionsListData').val(stringifiedlistOfQuestions);
+                        setDefaultforQuestions();
+                    }
+                      else if (dropdpwnValue == 4 && optionsList.length <= 0) {
+                       container.show();
+                        isValid = false;
+                        if ($('#txt_options').val().length > 0) {
+                            $('#questionOptionErrorMessage').css({ 'display': 'none' })
+                        }
+                        else {
+                            $('#questionOptionErrorMessage').css({ 'display': 'block' })
+                        }
+                        --questionOrder;
+                        --quesId;
+                    }
+
+                    if (questionClonedDiv != "" && questionClonedDiv != undefined) {
+                        var nextDiv = $("#" + questionClonedDiv).next();
+                        $(questionsrow).insertAfter(nextDiv);
+                        questionClonedDiv = "";
+
+                    }
+                    else {
+                        $(document).find('.AddedQuestionDiv').append(questionsrow);
+                    }
+                }
+                else if (noVisit >= 2 && $('#QuestionCard').is(":visible")) {
+                    $('#questionErrorMessage').css({ 'display': 'block' })
+                    isValid = false
+                    optionsList = [];
+                    container.show();
+                }
+                lastAddedQuestionDiv = quesId
+                if (qId > 0 && isValid) {
+
+                    for (var i = 0; i <= listOfQuestions.length; i++) {
+                        //test what's wrong here
+                        if (listOfQuestions[i].quesId == qId) {
+                                listOfQuestions[i].QuestionText = questionValue;
+                                listOfQuestions[i].QuestionDisplayType = dropdpwnValue;
+                                listOfQuestions[i].OptionCharLimit = $('#optionCharLimit').val() == "" ? 0 :
+                                                                     $('#optionCharLimit').val();
+                                listOfQuestions[i].Gender = QuestionData.Gender;
+                                listOfQuestions[i].Operation = QuestionData.Operation;
+                                listOfQuestions[i].Age1 = QuestionData.Age1;
+                                listOfQuestions[i].Age2 = QuestionData.Age2;
+                                listOfQuestions[i].QuestionType = dropdpwnValue;
+                                listOfQuestions[i].QuestionDisplayType = dropdpwnValue;
+                                listOfQuestions[i].QuestionOptionsList = stringifiedlistOfQuestionOptions;
+                            }
+                        if (listOfQuestions[i].quesId == lastAddedQuestionDiv) {
+                                listOfQuestions.splice(i, 1)
+                            }
+                        }
+                    var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                        $('#QuestionsListData').val(stringifiedlistOfQuestions);
+
+                    ($('#question' + qId + '')).html($('#question' + lastAddedQuestionDiv + '').html())
+                    $('#question' + qId + '').css({ 'display': 'block' });
+                    $('#question' + qId + '').attr("data-action", dropdpwnValue);
+                    $('#question' + qId + '').attr("data-id", qId);
+                    $('#question' + qId + '').attr("data-questionText", questionValue);
+                    $('#question' + qId + '').attr("data-operation", $("#TargetAge").drop('get value'));
+                    $('#question' + qId + '').attr("data-gender", $("#TargetGender").drop('get value'));
+                    $('#question' + qId + '').attr("data-Age1", QuestionData.Age1);
+                    $('#question' + qId + '').attr("data-Age2", QuestionData.Age2);
+
+                    if (dropdpwnValue == 1) {
+                        $('#question' + qId + '').attr("data-textBoxValue", $('#optionCharLimit').val());
+                    }
+                    if (dropdpwnValue == 4) {
+                        $('#question' + qId + '').attr("data-optionList", options);
+                    }
+
+                    $('#question' + lastAddedQuestionDiv + '').next().remove();
+                    $('#question' + lastAddedQuestionDiv + '').remove();
+                    $('#QuestionId').val("");
+                    setDefaultforQuestions();
+                    --questionOrder;
+                    --quesId;
+                    optionsList = [];
+                }
+                $('.AddedQuestionDiv').trigger('newQuestionAdded');
+                //TargetDemographicIntialize();
+            }
+            AdjustWidthOfTabContentOnScrollBar();
+        })
+
+        $('.AddedQuestionDiv').bind('newQuestionAdded', function () {
+            var idx = 1;
+            ($(this).children()).each(function (i,v) {
+                if ($(this).attr("id").match("^question")){
+                    $(this).attr("id", "question" + idx);
+                    $(this).attr("data-id", idx);
+                    $(this).attr("data-order", idx);
+                    ++idx;
+                }
+            })
+
+        })
+
+        $('input[type="radio"][name="Isanonymous"]').change(function () {
+            var isAnonymous = $('input[type=radio][name="Isanonymous"]:checked').val();
+            var Anonymous = isAnonymous == "true" ? 1 : 0;
+            if (Anonymous) {
+                $('#AnonymousResponse').prop('checked', true);
+                if (!TargetQuestionVisibility) {
+                    AnonymousChange();
+                }
+                 else {
+                        showDialog({
+                            liElement: "Delete",
+                            text: "By making responses anonymous, this will remove any demographic targeting by age or gender from the questionnaire",
+                            negative: {
+                                title: 'Decline',
+                                onClick: function () {
+                                    $('input[type=radio][id="AnonymousResponse"]').prop('checked', false);
+                                    $('input[type=radio][id="AnonymousResponse"]').parent().removeClass("is-checked");
+                                    $('input[type=radio][id="PatientSpecificResponse"]').prop('checked', true);
+                                    $('input[type=radio][id="PatientSpecificResponse"]').parent().addClass("is-checked");
+                                    $('#QuestionAction').find("#TargetDemo").removeClass("disabled");
+                                    codeVisibility = true;
+                                    $('#CodesDiv,#CodeText').css({ 'display': 'block' });
+                                }
+
+                            },
+                            positive: {
+                                title: 'Accept',
+                                onClick: function () {
+                                    AnonymousChange();
+                                }
+                            }
+                        })
+                 }
+
+            }
+            else {
+                $('#FrequencyDiv').show();
+                $("#everyMonths,#everyWeek").drop();
+                $("#everyDays").val(6);
+                $('#everyDays').addClass('disableddiv');
+                //$('input[type=radio][name="Frequency"]').prop('checked', true);
+                $('#QuestionAction').find("#MapClinicalCodes, #TargetDemo").removeClass("disabled");
+                codeVisibility = true;
+                $('#CodesDiv,#CodeText').css({ 'display': 'block' });
+            }
+
+            $('#RespErrorMessage').css({ 'display': 'none' });
+            AdjustWidthOfTabContentOnScrollBar();
+        })
+
+        $('input[type=radio][name="Frequency"]').change(function () {
+            $('#FreqErrorMessage').css({ 'display': 'none' });
+            $('#everyMonths,#everyWeek').addClass('disabled');
+            $('#everyDays').addClass('disableddiv');
+            $('#everyDays').val(6);
+            var radioId = $(this).attr('id').toString();
+            if (radioId == "rd_EveryMonths") {
+                $('#everyMonths').removeClass('disabled');
+            }
+            else if (radioId == "rd_Everyweek") {
+                $('#everyWeek').removeClass('disabled');
+            }
+            else if (radioId == "rd_EveryDays") {
+                $('#everyDays').removeClass('disableddiv');
+            }
+        })
+
+        $('#organisationDropdown').change(function () {
+            $('#orgErrorMessage').css({ 'display': 'none' });
+            showLoading();
+            $('#organisationDropdown').val().length > 0 ? new onfocusEvent($(this)) : new outFocusEvent($(this));
+            if ($('#organisationDropdown').val() != '') {
+                var orgid = $('#organisationDropdown').val();
+                getkiosks(orgid);
+                checkifEmiswebOrg(orgid);
+            }
+            hideLoading();
+        })
+        window.startPos = window.endPos = {};
+        makeDraggable();
+
+        $("body").on("DOMNodeInserted", ".questionDiv", makeDraggable);
+        $("body").on("DOMNodeInserted", ".questionDiv", makeDropable);
+
+        $('.kDropdown').click(function () {
+            $(this).addClass('upward')
+        })
+
+        $("#everyDays").on('keyup keydown', function (e) {
+            if ($(this).val() > 365) {
+                e.preventDefault();
+                //$("#everyDays").val(6);
+                $('#DaysErrorMessage').css({ 'display': 'block' })
+            }
+            else {
+                $('#DaysErrorMessage').css({ 'display': 'none' })
+            }
+        })
+
+        function IsReadCodeHasValue(currentValue) {
+            return currentValue.QuestionOptionCode == "";
+        }
+
+        function IsSnomedCodeHasValue(currentValue) {
+            return currentValue.QuestionSnomedOptionCode == 0;
+        }
+
+        function IsNestedQuestionHasValue(currentValue) {
+            return currentValue.NestedQuestionId == 0;
+        }
+
+         //Edit Questionnaire Initialization
+        if (@Model.QuestionnaireId> 0) {
+            var codeVisible = true;
+            var nestedQuestionVisible = true;
+            TargetQuestionVisibility = true;
+            $("#OrganisationField").addClass("disableddiv");
+            var isAnonymous = @Html.Raw(Json.Encode(Model.Isanonymous));
+
+            var isSnomedCode =@Html.Raw(Json.Encode(Model.IsSnomedCode));
+            nestedQuestionVisibility = true;
+            if (isSnomedCode) {
+                $('#ReadCode,#SnomedCode').parent().toggleClass("is-checked");
+                $('#ReadCode').removeAttr("checked");
+                $('#SnomedCode').attr('checked', 'checked');
+                $('#txt_IntializeCode').attr('placeholder', 'SNOMED Code');
+                $('#CodeText').css({ 'display': 'block' })
+            }
+            else {
+                $('#txt_IntializeCode').attr('placeholder', 'Read Code');
+                $('#CodeText').css({ 'display': 'block' })
+            }
+            if (isAnonymous) {
+                $('#AnonymousResponse').prop('checked', true);
+                $('#FrequencyDiv').hide();
+                $('#FrequencyDays').val(0);
+                $('#QuestionAction').find("#TargetDemo").addClass("disabled");
+                $('#CodeText,#CodesDiv').css({ 'display': 'none' })
+            }
+            else {
+                $('#PatientSpecificResponse').prop('checked', true);
+            }
+
+            var frequency = @Html.Raw(Json.Encode(Model.Frequency));
+            if (frequency == 365) {
+                $('#lbl_Annually').addClass("is-checked");
+                $('#rd_Anually').prop('checked', true);
+            } else if (frequency % 30 == 0 || frequency == 211) {
+                $('#lbl_EveryMonths').addClass("is-checked");
+                var frequencyInMonths = Math.floor(frequency / 30);
+                $('#rd_EveryMonths').prop('checked', true);
+                $("#everyMonths").removeClass("disabled")
+                $("#everyMonths").drop("set selected", [frequencyInMonths]);
+                $("#everyMonths").prop("selectedIndex", frequencyInMonths);
+            }
+            else if (frequency % 7 == 0) {
+                $('#lbl_EveryWeek').addClass("is-checked");
+                var frequencyInWeeks = frequency / 7;
+                $('#rd_Everyweek').prop('checked', true);
+                $("#everyWeek").removeClass("disabled")
+                $("#everyWeek").drop("set selected", [frequencyInWeeks]);
+                $("#everyWeek").prop("selectedIndex", frequencyInWeeks);
+            }
+            else {
+                $('#lbl_EveryDays').addClass("is-checked");
+                $('#rd_EveryDays').prop('checked', true);
+                $("#everyDays").val(frequency);
+                $('#everyDays').removeClass('disableddiv');
+            }
+            var linkedKiosks = @Html.Raw(Json.Encode(Model.LinkedKiosk));
+            setTimeout(function () {
+                $('#kioskDropdown').drop("set selected", GetstringList(linkedKiosks));
+            }, 1000);
+            questionList =@Html.Raw(Json.Encode(Model.Questions));
+            for (var i = 0; i < questionList.length; i++) {
+                ++EditQuesId;
+                var stringifiedlistOfQuestionOptions = JSON.stringify(questionList[i].QuestionOptions);
+                var gender, operation;
+                var QuestionData = {};
+                QuestionData.order = questionList[i].Order;
+                QuestionData.QuestionText = questionList[i].QuestionText;
+                QuestionData.QuestionnaireId = questionList[i].QuestionnaireId;
+                QuestionData.QuestionOptionsList = stringifiedlistOfQuestionOptions;
+                QuestionData.QuestionId = questionList[i].Id;
+                QuestionData.OptionCharLimit = $('#optionCharLimit').val() == "" ? 0 : questionList[i].OptionCharLimit;
+                QuestionData.Gender = questionList[i].Gender;
+                QuestionData.Operation = questionList[i].Operation;
+                QuestionData.Age1 = questionList[i].Age1;
+                QuestionData.Age2 = questionList[i].Age2;
+                QuestionData.QuestionType = questionList[i].QuestionType;
+                QuestionData.QuestionDisplayType = questionList[i].QuestionType;
+                QuestionData.quesId = EditQuesId;
+                var row = "";
+                //Gender
+                if (QuestionData.Gender == "None") {
+                    gender="1"
+                }
+                else if (QuestionData.Gender == "M") {
+                    gender="2"
+                }
+                else if (QuestionData.Gender == "F") {
+                    gender="3"
+                }
+                //Operation
+                if (QuestionData.Operation == "None") {
+                    operation = "1"
+                }
+                else if (QuestionData.Operation == "LessThan") {
+                    operation = "3"
+                }
+                else if (QuestionData.Operation == "GreaterThan") {
+                    operation = "2"
+                }
+                else if (QuestionData.Operation == "Between") {
+                    operation = "4"
+                }
+
+                if (questionList[i].QuestionType == 4) {
+                    var EditoptionsList = questionList[i].QuestionOptions;
+                    var Editoptions = encodeURIComponent(JSON.stringify(EditoptionsList));
+
+                    var ReadCodeValues = $(EditoptionsList).toArray().every(IsReadCodeHasValue);
+                    var SnomedCodeValues = $(EditoptionsList).toArray().every(IsSnomedCodeHasValue)
+                    var nestedQuestion = $(EditoptionsList).toArray().every(IsNestedQuestionHasValue);
+
+                    if (codeVisible) {
+                        if (!ReadCodeValues || !SnomedCodeValues) {
+                            codeVisibility = true;
+                            $('#CodeText').css({ 'display': 'block' });
+
+                            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))  // If Internet Explorer, return version number
+                            {
+                                $('#checkIconforCode').css({ 'display': '-ms-inline-flexbox' });
+                            }
+                            else {
+                                $('#checkIconforCode').css({ 'display': '-webkit-inline-box' });
+                            }
+
+                            $('#MaptoClinicalCodesMenu').removeClass('QuestionActionMenuAction');
+                            codeVisible = false;
+                        }
+                        else {
+                            codeVisibility = false;
+                        }
+                    }
+
+                    if (nestedQuestionVisible) {
+                    if (nestedQuestion) {
+                        nestedQuestionVisibility = false;
+                    }
+                    else {
+                        $('#NestedQuestionValues').css({ 'display': 'block' });
+                        nestedQuestionVisibility = true;
+
+                        if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))  // If Internet Explorer, return version number
+                        {
+                            $('#checkIconforNestedQuestion').css({ 'display': '-ms-inline-flexbox' });
+                        }
+                        else {
+                            $('#checkIconforNestedQuestion').css({ 'display': '-webkit-inline-box' });
+                        }
+
+                        $('#GotoSectionMenu').removeClass('QuestionActionMenuAction');
+                            nestedQuestionVisible = false;
+                        }
+                    }
+
+                    row += '<div id="question' + EditQuesId + '"data-order="' + questionList[i].Order + '"data-questionText="' + questionList[i].QuestionText + '"data-questionId="' + questionList[i].Id +
+                        '" data-optionList="' + Editoptions + '" data-action="' + questionList[i].QuestionType +
+                        '"data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '" data-gender="' + gender + '" data-operation="' + operation + '"' +
+                        '" data-id="' + EditQuesId + '" class="questionDiv" style="display:block;margin-bottom:30px"><label style="font-size:18px;color:black">' + questionList[i].QuestionText + '</label><br/><br/>'
+
+                    $(EditoptionsList).each(function (i, v) {
+                        row += '<span class="option" style="vertical-align: text-bottom">' +
+                            '<i class="material-icons uncheckedRadioBtn"> radio_button_unchecked</i>' + v.QuestionOption + '</span><br/><br/>'
+                    })
+                    row += '</div><div id="EditQuestion" style="display:none"></div>'
+                    listOfQuestions.push(QuestionData);
+
+                    var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                    $('#QuestionsListData').val(stringifiedlistOfQuestions);
+                }
+                else if (questionList[i].QuestionType == 1) {
+                    row += '<div id="question' + EditQuesId + '"data-order="' + questionList[i].Order + '"  data-questionText="' + questionList[i].QuestionText
+                        + '" data-textBoxValue="' + questionList[i].OptionCharLimit + '"   data-action="' + questionList[i].QuestionType +
+                        '"data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '" data-gender="' + gender + '" data-operation="' + operation + '"' +
+                        '" data-id="' + EditQuesId+ '" class="questionDiv" style="display:block;margin-bottom:30px">' +
+                        '<label class="body1 highEmphasisBlack">' + questionList[i].QuestionText + '</label><br/>';
+
+                    row += '</div><div id="EditQuestion" style="display:none"></div>'
+                    listOfQuestions.push(QuestionData);
+
+                    var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                    $('#QuestionsListData').val(stringifiedlistOfQuestions);
+                }
+                else if (questionList[i].QuestionType == 2) {
+                    row += '<div id="question' + EditQuesId + '"data-order="' + questionList[i].Order +
+                        '" data-questionText="' + questionList[i].QuestionText + '" data-action="' + questionList[i].QuestionType +
+                        '"data-Age1="' + QuestionData.Age1 + '" data-Age2="' + QuestionData.Age2 + '" data-gender="' + gender + '" data-operation="' + operation + '"' + '" data-id="' + EditQuesId +
+                        '" class="questionDiv" style="display:block;margin-bottom:30px">' +
+                        '<label class="body1 highEmphasisBlack">' + questionList[i].QuestionText + '</label><br/>';
+
+                    row += '</div><div id="EditQuestion" style="display:none"></div>'
+                    listOfQuestions.push(QuestionData);
+
+                    var stringifiedlistOfQuestions = JSON.stringify(listOfQuestions);
+                    $('#QuestionsListData').val(stringifiedlistOfQuestions);
+                }
+                $(document).find('.AddedQuestionDiv').append(row);
+                questionOrder = questionList[i].Order;
+                questionnnaireId = questionList[i].QuestionnaireId;
+                quesId = EditQuesId;
+
+                nestedQuestions.QuestionId =questionList[i].Id;
+                nestedQuestions.QuestionText=questionList[i].QuestionText;
+                nestedQuestionList.push(nestedQuestions);
+                nestedQuestions = {};
+            }
+
+            //Legend text on page loads in jquery
+            $('form input[type="text"],[type="number"],select').each(function () {
+                const event = new onfocusEditEvent($(this));
+            });
+        }
+        AdjustWidthOfTabContentOnScrollBar();
+    })
+</script>
+
+<div class="addEditDivStyle">
+    @Html.HiddenFor(m => m.Frequency, new { @id = "FrequencyDays" })
+    @Html.HiddenFor(m => m.QuestionsListData)
+    @Html.HiddenFor(m => m.QuestionnaireId)
+    @Html.HiddenFor(m => m.StringifiedDeletedQuestions)
+    @Html.HiddenFor(m => m.IsSnomedCode)
+
+    <main class="mdl-layout__content">
+        <section class="mdl-layout__tab-panel" id="SettingsContent">
+            <div class="page-content">
+                <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%; padding: 40px 0px 0px 24px">
+                    <div id="ResponsesDiv" style="margin-bottom: 32px;">
+                        <div class="marginBottom4px height28px">
+                            <label>Responses</label>
+                        </div>
+                        <div class="marginBottom4px height28px">
+                            <label for="AnonymousResponse" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                                @Html.RadioButtonFor(model => model.Isanonymous, "true", new { @class = "mdl-radio__button", @id = "AnonymousResponse" })
+                                <span class="mdl-radio__label">Anonymous</span>
+                            </label>
+                        </div>
+                        <div class="marginBottom4px height28px">
+                            <label for="PatientSpecificResponse" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                                @Html.RadioButtonFor(model => model.Isanonymous, "false", new { @class = "mdl-radio__button", @id = "PatientSpecificResponse" })
+                                <span class="mdl-radio__label">Add to patient's file</span>
+                            </label>
+                        </div>
+                        <div class="validation-summary-errors validationMessage" style="width: 100%">
+                            <span id="RespErrorMessage" style="display:none">Please select how responses from patients should be stored</span>
+                        </div>
+                    </div>
+
+                    <div id="FrequencyDiv" style="margin-bottom: 32px">
+                        <div class="marginBottom4px height28px">
+                            <label>Frequency</label>
+                        </div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <label for="rd_Anually" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" id="lbl_Annually">
+                                        <input type="radio" id="rd_Anually" name="Frequency" value="Annually"
+                                               class="mdl-radio__button">
+                                        <span class="mdl-radio__label">Annually</span>
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="rd_EveryMonths" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" id="lbl_EveryMonths">
+                                        <input type="radio" id="rd_EveryMonths" name="Frequency" value="Monthly"
+                                               class="mdl-radio__button">
+                                        <span class="mdl-radio__label">Every</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="ui selection dropdown search everyMonths disabled" id="everyMonths"
+                                         style="width: 60px; min-width: 0px; padding: 12px;">
+                                        <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                        <div class="default text body2 highEmphasisBlack">6</div>
+                                        <div class="menu">
+                                            @for (int i = 1; i <= 18; i++)
+                                            {
+                                                <div class="item" data-value="@i">@i</div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </td>
+                                <td>
+                                    <label>month(s)</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="rd_Everyweek" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" id="lbl_EveryWeek">
+                                        <input type="radio" id="rd_Everyweek" name="Frequency" value="Weekly"
+                                               class="mdl-radio__button">
+                                        <span class="mdl-radio__label">Every</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="ui selection dropdown search everyweek disabled" id="everyWeek"
+                                         style="width: 60px; min-width: 0px; padding: 12px;">
+                                        <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                        <div class="default text body2 highEmphasisBlack">6</div>
+                                        <div class="menu">
+                                            @for (int i = 1; i <= 52; i++)
+                                            {
+                                                <div class="item" data-value="@i">@i</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <label>week(s)</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label for="rd_EveryDays" class="mdl-radio mdl-js-radio mdl-js-ripple-effect" id="lbl_EveryDays">
+                                        <input type="radio" id="rd_EveryDays" name="Frequency" value="Days"
+                                               class="mdl-radio__button">
+                                        <span class="mdl-radio__label">Every</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <input type="number" class="disablediv" id="everyDays" min="1" max="365" style="width:90%" value="6" />
+                                </td>
+                                <td>
+                                    <label>day(s)</label>
+                                </td>
+                                <td style="width: 100%">
+                                    <div class="validation-summary-errors validationMessage">
+                                        <span id="DaysErrorMessage" style="display:none;font-size: 16px">Maximum value is 365</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="validation-summary-errors validationMessage">
+                            <span id="FreqErrorMessage" style="display:none">Please select a frequency</span>
+                        </div>
+                    </div>
+
+                    <div id="CodesDiv" style="margin-bottom: 32px">
+                        <div class="marginBottom4px height28px">
+                            <label>Clinical Code Mapping</label>
+                        </div>
+                        <div class="marginBottom4px height28px">
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="ReadCode">
+                                <input type="radio" id="ReadCode" class="mdl-radio__button" name="Code" checked value="readCode" />
+                                <span class="mdl-radio__label">Read</span>
+                            </label>
+                        </div>
+
+                        <div id="SnomedCodeDiv" class="marginBottom4px height28px">
+                            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="SnomedCode">
+                                <input type="radio" id="SnomedCode" class="mdl-radio__button" name="Code" value="snomedCode" />
+                                <span class="mdl-radio__label">SNOMED</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="OrganisationField" style="margin-bottom: 24px; margin-right: 24px">
+                        <fieldset class="fieldset" name="Organisation" style="width: 100%">
+                            <legend style="position:static">Organisation</legend>
+                            @Html.DropDownListFor(model => model.OrganisationId, Model.OrganisationList,"Organisation",
+                            new
+                            {
+                            @class = "ui fluid search  dropdown ui-dropdown-min-width orgDropdown",
+                            @id = "organisationDropdown",
+                            })
+                        </fieldset>
+                        <div class="validation-summary-errors validationMessage">
+                            <span id="orgErrorMessage" style="display:none">Please select an organisation</span>
+                        </div>
+                    </div>
+
+                    <fieldset class="fieldset" name="Kiosk" style="width: 100%; margin-bottom: 28px;  margin-right: 24px; width: auto">
+                        <legend style="position:static">Kiosk</legend>
+                        @if (Model.QuestionnaireId > 0)
+                        {
+                            @Html.DropDownListFor(model => model.LinkedKiosk, Model.KioskList, "All Kiosks",
+                            new
+                            {
+                            @class = "ui fluid search  dropdown ui-dropdown-min-width upward multiple kDropdown",
+                            @id = "kioskDropdown",
+                            @multiple = "multiple"
+                            })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(model => model.LinkedKiosk, Enumerable.Empty<SelectListItem>
+                                (), "All kiosks",
+                                new
+                                {
+                                @class = "ui fluid search  dropdown ui-dropdown-min-width upward multiple kDropdown",
+                                @id = "kioskDropdown",
+                                @multiple= "multiple"
+                                })
+                        }
+                    </fieldset>
+
+                    <div id="KioskField">
+                        <label class="mdl-switch__label">Publish questionnaire</label>
+                        <label style="position:absolute;margin-left:10%" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                            @Html.CheckBoxFor(m => m.IsActive, new { @class = "mdl-switch__input", @Id = "PublishQuestionnaire" })
+                        </label>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </section>
+    </main>
+    <button type="button" id="AddQuestion1" class="mdl-button--large-screen-only mdl-button mdl-js-button mdl-button--fab mdl-shadow--2dp AddQuestions">
+        <i class=" mdc-fab__icon material-icons">add</i>
+    </button>
+    <button type="button" id="AddQuestion2" class="mdl-button--small-screen-only mdl-button mdl-js-button mdl-button--fab mdl-shadow--2dp AddQuestions">
+        <i class=" mdc-fab__icon material-icons">add</i>
+    </button>
+    <main class="mdl-layout__content">
+        <section class="mdl-layout__tab-panel" id="QuestionsContent">
+            <div class="page-content">
+                <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="width:100%">
+                    <div class="mdl-card__supporting-text" style="width:100%; height: 136px; padding: 0px" id="questionSupportingText">
+                        <div style="margin-left: 48px; padding-top: 48px; padding-bottom: 66px">
+                            <div class="mdl-textfield-questionnaire mdl-js-textfield">
+                                @Html.TextArea("Title", Model.Title, new { @class = "mdl-textfield__input questionnaireName h6 highEmphasisBlack", @id = "questionnaireName", @placeholder = "Questionnaire Name" })
+                            </div>
+                            <div class="validation-summary-errors validationMessage" style="width:100%">
+                                <span id="questionnaireNameError" style="display:none">Questionnaire name is required</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="AddedQuestionDiv" style="padding:0px 20px; margin-left: 48px">
+                    </div>
+                    <div id="AddEditQuesCard">
+                        <div class="demo-card-wide mdl-card-Questions" style="width:100%;display:none;clear:both;border-left:4px solid #d3772b" id="QuestionCard">
+                            <div style="margin-left: 48px;">
+                                <div id="draggableDiv" style="width: 100%; text-align: center">
+                                    <i class="material-icons" style="transform:rotate(90deg)">
+                                        drag_indicator
+                                    </i>
+                                </div>
+                                <div class="mdl-mini-footer-page" style="width:555px; padding: 12px 24px 24px 0px;">
+                                    <div class="marginRight16px" style="width: 299px;">
+                                        <div class="mdl-textfield-questionnaire mdl-js-textfield">
+                                            <input class="mdl-textfield__input body1 highEmphasisBlack questionPlaceholder" type="text" id="txt_question" placeholder="Question">
+                                            <label class="mdl-textfield__label" for="txt_question" style="color:gray"></label>
+                                        </div>
+                                        <div class="validation-summary-errors validationMessage" style="width:315px">
+                                            <span id="questionErrorMessage" style="display:none">Question text is required </span>
+                                        </div>
+                                    </div>
+                                    <div class="ui  floating labeled icon dropdown button" id="MenuDrop" style=" float:left;width:216px; position: relative;margin-right: 0px !important;padding-left:0 !important;padding-right:0!important;text-align: -webkit-left;height:40px">
+                                        <span class="text subtitle2 highEmphasisBlack" style="margin-left: 16px;margin-top:-10px">Filter</span>
+                                        <i class="material-icons" style="float:right;padding:8px;margin-top:-10px">arrow_drop_down</i>
+                                        <div class="menu subtitle2 highEmphasisBlack" id="OptionText">
+                                            <div class="item active selected" data-value="4">
+                                                <span style="margin-right:5px">
+                                                    <i class="material-icons questionTypeDropdown">radio_button_checked</i>
+                                                </span>
+                                                Multiple choice
+                                            </div>
+                                            <div class="item" data-value="2">
+                                                <span style="margin-right:5px">
+                                                    <i style="height: auto" class="questionTypeDropdown">
+                                                        <img src="~/Numeric.svg" />
+                                                    </i>
+                                                </span>
+                                                <span style="vertical-align: -webkit-baseline-middle;">
+                                                    Numeric answer
+                                                </span>
+                                            </div>
+                                            <div class="item" data-value="1">
+                                                <span style="margin-right:5px">
+                                                    <i class="material-icons questionTypeDropdown">short_text</i>
+                                                </span>
+                                                Text answer
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="TargetDemographic" style="display:none; height: 20px; margin-bottom: 16px;">
+                                    <table id="TargetAgeTable">
+                                        <tr>
+                                            <td>
+                                                <div class="marginRight16px">
+                                                    <div class="ui selection dropdown search" id="TargetGender" style="width:107px !important">
+                                                        <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                                        <div class="default text body2 highEmphasisBlack">Gender</div>
+                                                        <div class="menu" id="GenderMenu" style="width: 107px !important;">
+                                                            <div class="item" data-value="1">All genders</div>
+                                                            <div class="item" data-value="2">Male</div>
+                                                            <div class="item" data-value="3">Female</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td id="TargetAgetd">
+                                                <div class="marginRight16px">
+                                                    <div class="ui selection dropdown search" id="TargetAge" style="width:107px !important;width:auto">
+                                                        <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                                        <div class="default text">Age</div>
+                                                        <div class="menu" id="AgeMenu" style="width: 107px !important;">
+                                                            <div class="item" data-value="1">All ages</div>
+                                                            <div class="item" data-value="2">Over</div>
+                                                            <div class="item" data-value="3">Under</div>
+                                                            <div class="item" data-value="4">Between</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="marginRight16px">
+                                                    <div class="ui selection dropdown search" id="TargetAge1" style="width:50px !important;display:none;width:auto">
+                                                        <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                                        <div class="default text body2 highEmphasisBlack">Age1</div>
+                                                        <div class="menu" id="Age1Menu" style="width: 50px !important;">
+                                                            @for (int i = 1; i < 151; i++)
+                                                            {
+                                                                <div class="item" data-value="@i">@i</div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td id="btwnAnd" style="display:none" class="marginRight16px">
+                                                <span class="mdl-switch__label"> and</span>
+                                            </td>
+                                            <td>
+                                                <div class="marginRight16px">
+                                                    <div class="ui selection dropdown search" id="TargetAge2" style="width:50px !important;display:none;width:auto">
+                                                        <i class="material-icons targetDemographicsDropdown" style="float:right">arrow_drop_down</i>
+                                                        <div class="default text body2 highEmphasisBlack">Age2</div>
+                                                        <div class="menu body2 highEmphasisBlack" id="Age2Menu" style="width: 50px !important;">
+                                                            @for (int i = 1; i < 151; i++)
+                                                            {
+                                                                <div class="item" data-value="@i">@i</div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <div id="optionFields" style="display:none;margin-bottom: -30px ">
+                                    <table id="optionListTable" style="width:100%; padding-right:17px">
+                                        <tbody></tbody>
+                                    </table>
+                                    <br />
+                                </div>
+                                <div id="TextAnswerDiv" style="display:none">
+                                    <fieldset class="fieldset mdl-textfield mdl-js-textfield" id="shortTextBox" name="Character Limit">
+                                        <legend class="legend">Character Limit</legend>
+                                        <input type="number" id="optionCharLimit" min="1" max="150" style="border:0" value="100" />
+                                    </fieldset>
+                                    <div class="validation-summary-errors validationMessage">
+                                        <span id="characterNegaviteError" style="display:none">Character limit can't be zero or less than zero</span>
+                                    </div>
+                                    <div class="validation-summary-errors validationMessage">
+                                        <span id="characterGreaterError" style="display:none">Character limit cant be greater than 150 </span>
+                                    </div>
+                                    <br />
+                                </div>
+                                <div id="MultipleChoiceOptions">
+                                    <div class="mdl-mini-footer-page" style="display:-webkit-box!important;padding:12px 0px!important" id="txtOption">
+                                        <div class="mdl-textfield-questionnaire mdl-js-textfield" id="OptionTextDiv" style="width:59%">
+                                            <div class="ui input left icon" style="width:100%">
+                                                <i class="material-icons uncheckedRadioBtn">radio_button_unchecked</i>
+                                                <input class="mdl-textfield__input body2" style="padding: 0px !important; width: auto" type="text" id="txt_options" placeholder="Option 1">
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div style="width: 40%">
+                                            <div class="mdl-textfield-questionnaire mdl-js-textfield" id="CodeText" style="height: 10%">
+                                                <input class="mdl-textfield__input body2" type="text" id="txt_IntializeCode" />
+                                            </div>
+                                            <div class="ui selection dropdown" id="NestedQuestionValues" style="display:none;">
+                                                <input type="hidden" name="ContinuetonextSection">
+                                                <i class="material-icons targetDemographicsDropdown" style="float: right">arrow_drop_down</i>
+                                                <div class="default text"></div>
+                                                <div class="menu">
+                                                    <div class="item body2" data-value="1">Continue to next section</div>
+                                                    <div class="item body2" data-value="2">Exit questionnaire</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <span class="disabled body2 mediumEmphasisBlack" style="display:inherit" id="AddOption"><i class="material-icons uncheckedRadioBtn">radio_button_unchecked</i>Add option</span>
+                                    <div class="validation-summary-errors validationMessage">
+                                        <span id="questionOptionErrorMessage" style="display:none">Question option is required </span>
+                                    </div>
+                                    <div class="validation-summary-errors validationMessage">
+                                        <span id="CodeErrroMessage" style="display:none"></span>
+                                    </div>
+                                </div>
+                                <div id="NumericTextAnswerdiv" style="display:none">
+                                    <br /><br /><br /><br />
+                                </div>
+                                <input type="hidden" id="QuestionId" name="QuestionId" value="" />
+                            </div>
+                            <footer class="mdl-mini-footer mdl-shadow--6dp mdl-footer_card" id="QuestionCardFooter">
+                                <div class="mdl-mini-footer__right-section">
+                                    <div style="float:right; color: #9e9e9e">
+                                        <i class="material-icons" style="margin-right:15px;cursor:pointer" id="deleteCard" data-id="" data-order="" onmouseover="">delete</i>
+                                        <div class="ui icon bottom left pointing dropdown button" id="QuestionAction" style="background-color:transparent !important;">
+                                            <i class="material-icons" style="margin-right:15px;cursor:pointer" data-id="">more_vert</i>
+                                            <div class="menu">
+                                                <div class="item QuestionMenuItem" data-value="1" id="TargetDemo">
+                                                    <span class="body2 highEmphasisBlack">
+                                                        <i class="material-icons CheckIcon" id="checkIconforTarget"
+                                                           style="display:none; color: #442b2d">check</i>
+                                                    </span>
+                                                    <span id="TargetDemographicsMenu" style="padding-right:16px">
+                                                        Target demographic
+                                                    </span>
+                                                </div>
+                                                <div class="item QuestionMenuItem" data-value="2" id="MapClinicalCodes">
+                                                    <span class="body2 highEmphasisBlack">
+                                                        <i class="material-icons CheckIcon" id="checkIconforCode"
+                                                           style="display:none; color: #442b2d">check</i>
+                                                    </span>
+                                                    <span id="MaptoClinicalCodesMenu" style="padding-right:16px">
+                                                        Map to clinical codes
+                                                    </span>
+                                                </div>
+                                                <div class="item QuestionMenuItem" data-value="3" id="NestedQuestion">
+                                                    <span class="body2 highEmphasisBlack">
+                                                        <i class="material-icons CheckIcon" id="checkIconforNestedQuestion"
+                                                           style="display:none; color: #442b2d">check</i>
+                                                    </span>
+                                                    <span id="GotoSectionMenu" style="padding-right:16px">
+                                                        Go to section based on answer
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </footer>
+                        </div>
+                    </div>
+                    <br /><br />
+                    <br /><br />
+                </div>
+            </div>
+        </section>
+    </main>
+</div>

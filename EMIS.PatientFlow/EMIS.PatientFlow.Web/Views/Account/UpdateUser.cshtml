@@ -1,0 +1,193 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.UpdateUserViewModel
+@using EMIS.PatientFlow.Common.Enums
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "__AjaxAntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
+<style type="text/css">
+    .select2-search__field {
+        width:100% !important;
+    }
+</style>
+
+@Html.Partial("_GoogleAnalytics","UpdateUser")
+<div class="rightBlockheader">
+    <div class="rightBlockHeadingContainer">
+        <span class="rightBlockHeading">
+            Register
+        </span>
+        <span><img src="~/images/arrow.png"></span>
+        <span class="rightBlockSubHeading">
+            Update User
+        </span>
+    </div>
+
+</div>
+
+<div class="rightBlockContent" id="grdUpdateUser">
+    <div>
+        <p class="leftTxt">
+            User Name :
+        </p>
+        <input type="text" name="txtUserName" readonly="readonly" class="rightTxtBox" data-bind="value: viewModel.UserName" />
+    </div>    
+    <div>
+        <p class="leftTxt">
+            Email :<span class="required-field"> *</span>
+        </p>
+        <input type="text" name="txtEmail" class="rightTxtBox" data-bind="value: viewModel.Email" />
+    </div>
+    <div>
+        <p class="leftTxt">
+            User In Roles:<span class="required-field"> *</span>
+        </p>
+        <div class="chkBoxContainer">
+            <!-- ko foreach: viewModel.Roles -->
+            <input type="radio" data-bind="checkedValue: $data.Name, checked: $root.viewModel.SelectedRoles" />
+            <span data-bind="text: DisplayText"></span><br />
+            <!-- /ko -->
+
+        </div>
+    </div>
+    <div data-bind="visible: $root.ShowOrganisation">
+        <p class="leftTxt">
+            Organisation :
+        </p>
+        <div class="rightSelect2 wider">
+            @Html.ListBoxFor(x => x.OrganisationIds, Model.OrganisationList, new { multiple = "multiple", @class = "ListBoxorg" })
+            <span data-bind="visible: $root.OrganisationRequired" class="validationMessage" style="float:left">Organisation is required.</span>
+        </div>
+    </div>
+    <div class="editBtnContainer">
+        <input type="button" value="Save" class="saveEditBtn" id="Formsubmit" data-bind="click : Save" />
+        <input type="button" value="Cancel" class="cancelEditBtn" onclick="return LoadContent(@Convert.ToInt32(NodeType.Users), '0')" />
+    </div>
+   
+    <div style="color: red; margin-left: 40px" data-bind="text:errorMessage">
+        @Html.ValidationMessage("CustomError")
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+
+    function UpdateUserModel(user) {
+        var regSelf=this;
+       
+        this.viewModel = ko.mapping.fromJS(user);
+        this.OrganisationRequired = ko.observable(false);
+        this.errorMessage = ko.observable('');
+        this.checked = ko.observableArray();
+        
+       
+        this.initialize = function () {
+            
+            this.viewModel.Email.extend({
+                validation: {
+                    validator: function (val, other) { return $.trim(val) === '' ? false : true; },
+                    message: 'Email is required.'
+                } }).extend({ email: true });
+        }
+        this.Save = function () {
+            this.errorMessage('');
+            regSelf.viewModel.OrganisationIds($(".ListBoxorg").val());
+            regSelf.OrganisationRequired((regSelf.ShowOrganisation()) && (regSelf.viewModel.OrganisationIds()==null||regSelf.viewModel.OrganisationIds().length == 0));
+            if (this.errors().length === 0  && this.viewModel.SelectedRoles().length > 0 && !regSelf.OrganisationRequired()) {
+                this.PostData(ko.mapping.toJS(this.viewModel));
+            }
+            else {
+                this.errors.showAllMessages();
+            }
+        }
+        this.PostData = function (data) {
+            var form = $('#__AjaxAntiForgeryForm');
+            var token = $('input[name="__RequestVerificationToken"]', form).val();
+
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: '@Url.Action("UpdateUser", "Account")',
+                data: {
+                    __RequestVerificationToken: token,
+                    model: data
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    if (data.Valid) {
+                        return LoadContent(@Convert.ToInt32(NodeType.Users), '0');
+                    }
+                    var msg='';
+                    $.each(data.Errors, function (key, value) {
+                        if (value != null) {
+                            msg+=' '+ value[value.length - 1].ErrorMessage;
+                        }
+                    });
+                    regSelf.errorMessage(msg);
+                },
+                error: function (xhr) {
+                   regSelf.errorMessage('Failed to call the server ;'+xhr.responseText);
+                }
+            });
+        }
+
+        this.initialize();
+        this.errors = ko.validation.group(this.viewModel);
+        this.ShowOrganisation = ko.computed(function() {
+            return (regSelf.viewModel.SelectedRoles().length > 0) &&regSelf.viewModel.SelectedRoles() =="Practice Admin";
+        });
+
+      
+    }
+
+   function PageLoad(){
+     
+        var userModel = @Html.Raw(Json.Encode(Model));
+       var updateUserModel = new UpdateUserModel(userModel);
+        var element = document.getElementById('grdUpdateUser');
+        ko.cleanNode(element);
+        ko.applyBindings(updateUserModel, element);
+
+        var orglistData = [];
+
+        var options = {
+            selector: '.ListBoxorg',
+            responseArrayName: 'OrganisationList',
+            searchKeyField: 'organisationName',
+            textField: 'OrganisationName',
+            data: orglistData,
+            idField: 'Id',
+            multiple: true,
+            placeholder: 'Select Organisations'
+        }
+
+        $.ajax({
+            url: '@Url.Action("GetOrganisationsForDropDown", "Organisation")',
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                debugger;
+                for(var org in data.OrganisationList)
+                {
+                    var orgData = {
+                        id: data.OrganisationList[org].Id,
+                        text: data.OrganisationList[org].OrganisationName
+                    }
+                    orglistData.push(orgData);
+                }
+
+                select2AjaxSingle(options);
+            },
+            error: function (data) {
+                console.log("Get organisations for drop down error");
+            }
+        })        
+
+
+             
+    }
+    PageLoad();
+</script>

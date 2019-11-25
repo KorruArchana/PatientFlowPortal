@@ -1,0 +1,359 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.DepartmentViewModel
+@{
+    ViewBag.Title = "EgtonStaff";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@Html.Partial("_GoogleAnalytics", "MemberList")
+
+<script src="~/Scripts/UserScripts/UserDefinedFunctions.js"></script>
+<script src="~/Scripts/ViewCommonScripts/StaffCommonScript.js"></script>
+
+<script>
+    var dataTable;
+
+    $(document).ready(function () {
+        showLoading();
+
+        var columnindex = 0;
+        var i = 0;
+
+        DataTableIntialization($(window).width());
+
+        //$(window).resize(function () {
+        //    if ($.fn.dataTable.isDataTable('#member-portal-table')) {
+        //        $('.dataTables_paginate,.dataTables_length,.dataTables_info').remove();
+        //        $('#member-portal-table').DataTable().destroy();
+        //        DataTableIntialization($(window).width());
+        //    }
+        //})
+
+        function DataTableIntialization(width) {
+            dataTable = $('#member-portal-table').DataTable({
+                //dom: '<"top"ilp><"clear">', // moves paging to top
+                "dom": "rt<'bottom' lip><'clear'>", //moves paging to bottom
+                bPaginate: true,
+                serverSide: true, // to enable server side processing
+                bFilter: true,
+                processing: true,
+                info: true,
+                pagingType: "simple", // to make the paging type as simple with just prev and next buttons
+                bSortCellsTop: true, // to sort column values .. Not working has to check
+                searching: true, // Has to see why it is needed, Not needed since i have been doing it in every column
+                language: {
+                    processing: '<div class="dataTables_wrapper" > Loading... </div>',
+                    paginate: {
+                        next: ' <i class="material-icons" id="prev">chevron_right</i>',
+                        previous: '<i class="material-icons" id="next">chevron_left</i>'
+                    },
+                    sLengthMenu: width < 380 ? "Rows : _MENU_" : "Rows per Page : _MENU_"
+                },
+                "order": [[1, "asc"]],
+                orderCellsTop: true,
+                columnDefs: [{
+                    "targets": '_all',
+                    "className": "mdl-data-table__cell--non-numeric"
+                },
+                {
+                    "targets": [0, 'no-sort'],
+                    "orderable": false,
+                    bSortable: false
+                }],
+                createdRow: function (row, data, dataIndex) {
+                    if (data.IsDivertSet) {
+                        $(row).find('input[type=checkbox][id="chk' + data.Id + '"]').prop("checked", true);
+                        $(row).find('input[type=checkbox][id="chk' + data.Id + '"]').parent().addClass("is-checked");
+                    }
+                    var a = $(row).find('td:eq(1)').html();
+                    $(row).find('td:eq(1)').attr('data-id', data.Id);
+                    $(row).find('td:eq(1)').attr('data-FullName', data.Title + '.' + data.Firstname + ' ' + data.Surname);
+                    $(row).find('td:eq(4)').attr('data-orgId', data.OrganisationId);
+                },
+                columns: [
+                    {
+                        data: null,
+                        className: "center",
+                        render: function (data, type, row) {
+                            var td = '<td>\
+                                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select" for="' + row.Id + '">\
+                                    <input type="checkbox" class="mdl-checkbox__input" name="memberActionCheckbox"  id="'+ row.Id + '"/>\
+                                </label>\
+                            </td>'
+                            return td;
+                        },
+                    },
+                    {
+                        data: "null",
+                        render: function (data, type, row) {
+
+                            var td = '<td data-id="' + row.Id + '" data-FullName=" ' + row.Title + '.' + row.Firstname + ' ' + row.Surname + '">\
+                                    ' + row.Surname + ', ' + row.Title + ' ' + row.Firstname + '\
+                                </td>'
+                            return td;
+                        }
+                    },
+                    {
+                        data: null,
+                        className: "center",
+                        render: function (data, type, row) {
+                            var title = row.Title;
+                            var firstName = row.Firstname;
+                            var surName = row.Surname;
+                            var td = '<td class="divertSwitch">\
+                                <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" id="divert_' + row.Id + '">\
+                                    <input type="checkbox" class="mdl-switch__input" id="chk'+ row.Id + '" onclick="Divert(this.checked,' + row.SessionHolderId + ',' + row.OrganisationId + ',' + format('{0},{1},{2}', "'" + title + "'", "'" + firstName + "'", "'" + surName + "'") + ')">' +
+                                '</label>\
+                                </td>'
+                            return td;
+                        },
+
+                    },
+                    { data: "SessionHolderId" },
+                    { data: "OrganisationName" },
+                    { data: "DepartmentName" }
+                ],
+                ajax: function (data, callback, settings) {
+                    filterValues = {};
+                    filterValues.draw = data.draw;
+                    filterValues.start = data.start;
+                    filterValues.length = data.length;
+                    filterValues.search = data.search;
+                    filterValues.order = data.order;
+                    filterValues.columns = data.columns;
+                    $.ajax({
+                        url: '../EgtonStaff/GetMembersData',
+                        method: 'GET',
+                        data: filterValues
+                    }).done(callback);
+                },
+                "fnDrawCallback": function () {
+                    componentHandler.upgradeAllRegistered();
+                    $('.mdl-tooltip').toggle(function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    }, function () {
+                        $(".mdl-tooltip").css({ 'margin-top': "-20px" });
+                    });
+                }
+            });
+        }
+       
+
+        $('.member-search-row td').each(function (index, value) {
+            var row = "";
+            var td = $(this);
+            var usedText = [];
+            var itemlist = [];
+             var title = $(this).text();
+             if (title == "Organisation") {
+                 row += "<select class='ui multiple search dropdown table selectionDropdown column_search'\
+                    multiple='multiple' data-column='" + index + "'\
+                     id='"+ title.trim().replace(' ', '_') + "' >";
+                row += '<option value="">Search</option>';
+                var str = '#' + title.trim().replace(' ', '_');
+
+                var memberData = [];
+
+                memberData[4] = @Html.Raw(Json.Encode(Model.OrganisationNameList));
+                memberData[5] = @Html.Raw(Json.Encode(Model.DepartmentNameList));
+
+                $.each(memberData[index].sort(), function (idx, v) {
+
+                    columnindex = i;
+                    i = i + 1;
+                    var newString = [];
+                    if (v.indexOf(",") > -1) {
+                        newString = v.split(/[ ,.]+/);
+                        columnindex = i + 1;
+                        $.each(newString, function (index, tabletext) {
+                            var tabletext1 = camalize(tabletext);
+                            if (usedText.indexOf(tabletext1) === -1) {
+                                itemlist.push(tabletext1);
+                            }
+                            columnindex++;
+                            usedText.push(tabletext1);
+                        });
+                        i = columnindex;
+                    }
+                    else {
+                        itemlist.push(v);
+                    }
+                    td.html(row);
+                    $(str).drop();
+
+                    $('.ui.dropdown.table').drop({ fullTextSearch: true });
+                });
+                itemlist = itemlist.sort(naturalCompare);
+                $.each(itemlist, function (index, tabletext) {
+                    row += '<option value="' + index + '">' + tabletext + '</option>';
+                });
+
+                td.html(row);
+                $(str).drop();
+
+                $('.ui.dropdown.table').drop({ fullTextSearch: true });
+
+                row += '</select>';
+
+             }
+             else if (title != 'Actions' && title != 'Divert' && title != 'Publish' && title != '') {
+                 $(this).html('<input type="text" data-column="' + index + '" placeholder="Search" class="column_search" style="height: 56px;"/>');
+             }
+            else { $(this).html(""); }
+        });
+
+
+        $('input[type="Text"]').on('keyup', function () {
+            var i = $(this).attr('data-column');
+            var v = $(this).val();
+            dataTable.column(i).search(v).draw();
+        });
+      
+        $('.ui.dropdown.table').on("change", function () {
+            var textValue = [];
+            var textSingleValue = $(this).find('option:selected').text();
+            $(this).find('option:selected').each(function () {
+                textValue.push($(this).text());
+            });
+            var data = $.map(textValue, function (index, value) {
+                return index ? '^.*' + $.fn.dataTable.util.escapeRegex(index) + '.*$' : null;
+            });
+            if (data.length === 0) {
+                data = [""];
+            }
+            var val = data.join('|');
+            if (textValue.length > 1) {
+                dataTable.columns($(this).parent().index()).every(function () {
+                    var column = this;
+                    column
+                        .search(val ? val : '', true, false)
+                        .draw();
+                });
+            }
+            else {
+                dataTable
+                    .column($(this).parent().index())
+                    .search(textSingleValue)
+                    .draw();
+            }
+        });
+
+        $('.mdl-mini-footer-page .mdl-card__actions').append($(".dataTables_paginate,.dataTables_length,.dataTables_info"));
+        hideLoading();
+
+    });
+
+   
+
+</script>
+
+@Html.Hidden("IndexMemberUrl", Url.Action("Index", "Staff"))
+@Html.Hidden("AddMemberUrl", Url.Action("AddMember", "Staff"))
+@Html.Hidden("EditMemberUrl", Url.Action("GetMemberDetails", "Staff", new { memberId = "__id__" }))
+@Html.Hidden("GetMessagesUrl", Url.Action("GetAlerts", "Staff", new { memberId = "__id__", MemberName = "__name__" }))
+
+<div style="width: 100%; justify-content: center;padding: 0px !important" class="mdl-grid">
+    <div class="mdl-card portalMdlCard"  style="margin: 0px !important">
+        <div class="mdl-card__title mdl-card--table__header pageHeader">
+            <h2 class="mdl-card__title-text mdl-typography--title pageTitle">Staff</h2>
+            <div class="mdl-card__menu" style="top:25px !important">
+                <button class="mdl-button mdl-js-button AddModuleStyle" id="addbtn">
+                    Add staff
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="filterbtn">
+                    <i class="material-icons">filter_list</i>
+                </button>
+                <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect" id="MemberActions">
+                    <i class="material-icons">more_vert</i>
+                </button>
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect MemberAction"
+                    for="MemberActions">
+                    <li class="mdl-menu__item" style="display:none">
+                        <span><a class="mdl-navigation__link" href="#">View Messages</a></span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <span><a class="mdl-navigation__link" href="#">Remove staff</a></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mdl-card_table">
+            <table class="mdl-data-table mdl-js-data-table" style="width:100%;" id="member-portal-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th id="name">Name</th>
+                        <th id="divert" class="no-sort" style="padding-left:30px">Divert</th>
+                        <th id="id">ID</th>
+                        <th id="org">Organisation</th>
+                        <th id="dep">Department</th>
+                    </tr>
+                    <tr class="member-search-row hidden">
+                        <td></td>
+                        <td>Name</td>
+                        <td>Divert</td>
+                        <td>ID </td>
+                        <td>Organisation</td>
+                        <td>Department</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <content class="mdl-tooltip mdl-tooltip--large" for="name">Staff Name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="divert">Divert Staff</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="id">Staff ID</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="org">Organisation name</content>
+            <content class="mdl-tooltip mdl-tooltip--large" for="dep">Department Name</content>
+        </div>
+        <footer class="mdl-mini-footer-page">
+            <div class="mdl-card__actions flexbox ">
+
+            </div>
+        </footer>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(function () {
+            var eventCategory = 'Staff';
+            var SuccessMessage = @Html.Raw(Json.Encode(TempData["SuccessMessage"]));
+            var ErrorMessage = @Html.Raw(Json.Encode(TempData["ErrorMessage"]));
+            
+            if (SuccessMessage != '' && SuccessMessage != null)
+            {
+                createSnackbar(SuccessMessage);
+            }
+            if (ErrorMessage != '' && ErrorMessage != null) {
+                createSnackbar(ErrorMessage);
+            }
+
+            var DeleteMessage = @Html.Raw(Json.Encode(Session["DeleteMessage"]));
+            var DeleteErrorMessage = @Html.Raw(Json.Encode(Session["DeleteErrorMessage"]));
+            if (DeleteMessage != '' && DeleteMessage != null)
+            {
+                createSnackbar(DeleteMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+            if (DeleteErrorMessage != '' && DeleteErrorMessage != null) {
+                createSnackbar(DeleteErrorMessage);
+                $.ajax({
+                    type: "GET",
+                    url: "../Staff/DestroySession",
+                    success: function (data) {
+                        return null;
+                    }
+                })
+            }
+
+            LogEvent(eventCategory, DeleteMessage, 'Removed');
+        })
+    </script>
+}

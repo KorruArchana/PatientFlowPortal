@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="QuestionnaireDataSet" targetNamespace="http://tempuri.org/QuestionnaireDataSet.xsd" xmlns:mstns="http://tempuri.org/QuestionnaireDataSet.xsd" xmlns="http://tempuri.org/QuestionnaireDataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="QuestionnaireDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="QuestionnaireDataSet" msprop:Generator_UserDSName="QuestionnaireDataSet">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="QuestionnaireDatatable" msprop:Generator_TableClassName="QuestionnaireDatatableDataTable" msprop:Generator_TableVarName="tableQuestionnaireDatatable" msprop:Generator_TablePropName="QuestionnaireDatatable" msprop:Generator_RowDeletingName="QuestionnaireDatatableRowDeleting" msprop:Generator_RowChangingName="QuestionnaireDatatableRowChanging" msprop:Generator_RowEvHandlerName="QuestionnaireDatatableRowChangeEventHandler" msprop:Generator_RowDeletedName="QuestionnaireDatatableRowDeleted" msprop:Generator_UserTableName="QuestionnaireDatatable" msprop:Generator_RowChangedName="QuestionnaireDatatableRowChanged" msprop:Generator_RowEvArgName="QuestionnaireDatatableRowChangeEvent" msprop:Generator_RowClassName="QuestionnaireDatatableRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="QuestionnaireTitle" msprop:Generator_ColumnVarNameInTable="columnQuestionnaireTitle" msprop:Generator_ColumnPropNameInRow="QuestionnaireTitle" msprop:Generator_ColumnPropNameInTable="QuestionnaireTitleColumn" msprop:Generator_UserColumnName="QuestionnaireTitle" type="xs:string" minOccurs="0" />
+              <xs:element name="QuestionText" msprop:Generator_ColumnVarNameInTable="columnQuestionText" msprop:Generator_ColumnPropNameInRow="QuestionText" msprop:Generator_ColumnPropNameInTable="QuestionTextColumn" msprop:Generator_UserColumnName="QuestionText" type="xs:string" minOccurs="0" />
+              <xs:element name="AnswerText" msprop:Generator_ColumnVarNameInTable="columnAnswerText" msprop:Generator_ColumnPropNameInRow="AnswerText" msprop:Generator_ColumnPropNameInTable="AnswerTextColumn" msprop:Generator_UserColumnName="AnswerText" type="xs:string" minOccurs="0" />
+              <xs:element name="Modified" msprop:Generator_ColumnVarNameInTable="columnModified" msprop:Generator_ColumnPropNameInRow="Modified" msprop:Generator_ColumnPropNameInTable="ModifiedColumn" msprop:Generator_UserColumnName="Modified" type="xs:string" minOccurs="0" />
+              <xs:element name="RowNo" msprop:Generator_ColumnVarNameInTable="columnRowNo" msprop:Generator_ColumnPropNameInRow="RowNo" msprop:Generator_ColumnPropNameInTable="RowNoColumn" msprop:Generator_UserColumnName="RowNo" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

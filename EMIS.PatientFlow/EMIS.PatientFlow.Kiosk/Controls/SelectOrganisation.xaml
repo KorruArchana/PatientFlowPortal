@@ -1,0 +1,104 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SelectOrganisation"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    mc:Ignorable="d" 
+    d:DesignHeight="300" d:DesignWidth="300"
+    DataContext="{Binding SelectOrganisation, Source={StaticResource Locator}}">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding GridImageRowDefinition}"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.5*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="0.5*"/>
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" 
+                Style="{DynamicResource HeadingButtonStyle}"
+                Visibility="{Binding IsTitleVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+            <TextBlock Text="{Binding OrganisationWelcomeText}"/>
+        </Button>
+
+        <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="{x:Null}" 
+                   Visibility="{Binding IsLogoVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+            <Line DockPanel.Dock="Bottom" Stroke="#DEDEDE" StrokeThickness="2"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                  X2="{Binding ActualWidth,RelativeSource={RelativeSource Self}}"/>
+            <Image DockPanel.Dock="Top" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,5" Source="{Binding LogoImageSource}"/>
+        </DockPanel>
+
+        <DockPanel Grid.Row="1" Grid.Column="1">
+            <TextBlock DockPanel.Dock="Top" Margin="0,60,0,30" TextAlignment="Center"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+		               Text="{Binding SelectOrganisationText}" Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold" />
+
+            <Grid DockPanel.Dock="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="6*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                                   
+                        <ColumnDefinition Width="0.15*"/>
+                        <ColumnDefinition Width="0.10*"/>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="0.10*"/>
+                        <ColumnDefinition Width="0.15*"/>
+                  
+                </Grid.ColumnDefinitions>
+
+                <StackPanel x:Name="OrganisationListStkPnl" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"/>
+
+                <ScrollViewer Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,10,10,10" 
+                              HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                              VerticalScrollBarVisibility="Auto"
+                              VerticalAlignment="Top"
+                              Style="{StaticResource FavsScrollViewer}">
+
+                    <ItemsControl ItemsSource="{Binding OrganisationList}" HorizontalAlignment="Center" VerticalAlignment="Top" VerticalContentAlignment="Top"  HorizontalContentAlignment="Center"
+                                  Width="{Binding ActualWidth, ElementName=OrganisationListStkPnl}">
+
+                        <ItemsControl.Template>
+                            <ControlTemplate>
+                                <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Top" IsItemsHost="True"/>
+                            </ControlTemplate>
+                        </ItemsControl.Template>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Width="360" Margin="20" MinHeight="120" 
+                                        HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource DefaultButtonStyle}"
+                                        Command="{Binding SelectOrganisation.SetOrganisationCommand, Source={StaticResource Locator}}" 
+                                        CommandParameter="{Binding OrganisationId}">
+                                    <Button.Content>
+                                        <TextBlock Text="{Binding OrganisationName}" VerticalAlignment="Center" TextAlignment="Center"
+                                                   HorizontalAlignment="Center" Padding="10,5"/>
+                                    </Button.Content>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </ScrollViewer>
+            </Grid>
+        </DockPanel>
+    </Grid>
+
+</UserControl>

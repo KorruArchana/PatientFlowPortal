@@ -1,0 +1,73 @@
+﻿<Window x:Class="EMIS.PatientFlow.Kiosk.Controls.ShowAllAlertsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+        mc:Ignorable="d" SizeToContent="Height"
+        Title="ShowAllAlertsWindow"
+        WindowStartupLocation="CenterScreen" WindowStyle="None"  ShowInTaskbar="False"
+        AllowsTransparency="True"  Background="Transparent"
+        DataContext="{Binding Finish, Source={StaticResource Locator}}" BorderThickness="2">
+
+    <Window.Resources> 
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </Window.Resources>
+
+    <Border BorderThickness="2" CornerRadius="10" BorderBrush="{StaticResource Button.Background}" Background="White" Padding="15" Margin="2">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" x:Name="AlertsStackPanel" Orientation="Vertical">
+                <TextBlock  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,15,0,10"
+                            Width="{Binding ActualWidth, ElementName=AlertsStackPanel}"
+                            FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+                            Style="{StaticResource HighLightMessageStyle}"
+                            Text="{Binding AllAlertsDisplayHeadingText}"/>
+
+                <Line Stroke="#DEDEDE" StrokeThickness="3" Margin="0,5,0,20"
+                  VerticalAlignment="Stretch" HorizontalAlignment="Left" 
+                  X2="{Binding ActualWidth,ElementName=AlertsStackPanel}"/>
+
+                <ListView x:Name="AllAlertsListView" DockPanel.Dock="Top" Margin="0,0,0,50"
+                          ItemsSource="{Binding AlertList}" Background="{x:Null}" BorderThickness="0"
+                          ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" x:Name="StkPnl" >
+                                <BulletDecorator Margin="0,0,15,0" VerticalAlignment="Top" >
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Fill="Black" Width="5" Height="5"/>
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" TextAlignment="Left"
+                                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}"
+                                           Width="{Binding ActualWidth, ElementName=AllAlertsListView}"
+                                           Margin="15,0,0,5" Padding="0,0,20,0">
+                                        <Run Text="{Binding ImportantText, Mode=OneWay}" FontWeight="{Binding FontWeight}" Foreground="{Binding FontColor}"/> 
+                                        <Run Text="{Binding AlertText}" Foreground="Gray"/>
+                                    </TextBlock>
+                                </BulletDecorator>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+            </StackPanel>
+
+            <Button Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="5"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                    Style="{StaticResource NextButtonStyle}" Height="60"
+                    Content="{Binding GotItText}" Command="{Binding Finish.GotItCommand, Source={StaticResource Locator}}"/>
+        </Grid>
+    </Border>
+    
+</Window>

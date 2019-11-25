@@ -1,0 +1,131 @@
+﻿@{
+    ViewBag.Title = "MemberMessage";
+}
+<script src="~/Scripts/bootstrap.js"></script>
+<link href="~/Content/UserContent/site.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+        var memberId = @ViewBag.MemberId;
+        var departmentId = @ViewBag.DepartmentId;
+        GetEnabledAndDisabledMessages();
+        $('#cover-spin').show();
+        function GetEnabledAndDisabledMessages() {
+            $.ajax({
+                url: "../Member/GetAlerts",
+                datatype: "JSON",
+                data: "MemberId=" + memberId,
+                type: "Get",
+                success: function (data) {
+                    $.each(data.EnabledMessages, function (i, alert) {
+                        $("#EnabledMessagesList").append('<option class="enabled-disabled-option" value="' + alert.Id + '">' +
+                            alert.AlertText + '</option>');
+                    })
+
+                    $.each(data.DisabledMessages, function (i, alert) {
+                        $("#DisabledMessagesList").append('<option class="enabled-disabled-option" value="' + alert.Id + '">' +
+                            alert.AlertText + '</option>');
+                    })
+                    $('#cover-spin').hide();
+                },
+                error: function () {
+                    alertify.error('Failed to get Alerts for member(' + memberId + ')');
+                }
+            });
+        }
+
+            $('#btnAdd').click(function () {
+            $("#DisabledMessagesList > option:selected").appendTo("#EnabledMessagesList");
+        });
+
+        $('#btnRemove').click(function () {
+            $("#EnabledMessagesList > option:selected").appendTo("#DisabledMessagesList");
+        });
+
+            $('#btnSave').click(function () {
+            $('#cover-spin').show();
+            var enabledmsg = [];
+            $("#EnabledMessagesList option").each(function () {
+            enabledmsg.push($(this).val());
+         });
+
+         $.ajax({
+            url: "../Member/LinkMessagesToMembers",
+            datatype: "JSON",
+            data: "MemberId=" + memberId + "&EnabledMsgs=" + enabledmsg + "&DepartmentId=" + departmentId,
+            type: "Get",
+             success: function (data) {
+                 $('#cover-spin').hide();
+                if(data == 0)
+                    alertify.success("enabled messages are succesfully linked to member(" + memberId + ')');
+                else
+                    alertify.error('Failed to save the alerts for member(' + memberId + ')');
+                }
+            });
+
+            $('#MemberMsgModal').modal('hide');
+        });
+
+        $(document).on('change', '#EnabledMessagesList', function () {
+            if ($("#EnabledMessagesList > option:selected").length > 0) {
+                $('#btnRemove').prop('disabled', false);
+            }
+            else {
+                $('#btnRemove').prop('disabled', true);
+            }
+        });
+
+        $(document).on('change', '#DisabledMessagesList', function () {
+            if ($("#DisabledMessagesList > option:selected").length > 0) {
+                $('#btnAdd').prop('disabled', false);
+            }
+            else {
+                $('#btnAdd').prop('disabled', true);
+            }
+            });
+        $('#Tablerow').height('300%');
+        $('#Tablerow').find('select').height($('#Tablerow').height());
+
+    })
+</script>
+
+<div id="cover-spin"></div>
+<div class="modal-dialog modal-lg">
+    <div class="modal-content" style="overflow:auto">
+        <div class="modal-header" style="overflow:auto; padding: 20px !important">
+            Messages for @ViewBag.MemberName
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <table class="table table-responsive">
+                <tbody>
+                    <tr>
+                        <th class="question-text">Enabled Messages</th>
+                        <th></th>
+                        <th class="question-text">Disabled Messages</th>
+                    </tr>
+                    <tr id="Tablerow">
+                        <td style="width: 40%">
+                            <select class="enabled-disabled-select" id="EnabledMessagesList" multiple size="20"></select>
+                        </td>
+                        <td style="vertical-align:middle;width:20%">
+                            <div style="text-align: center">
+                                <button id="btnRemove" class="btn btn-default btn-arrow-right" disabled>Remove</button>
+                                <button id="btnAdd" class="btn btn-default btn-arrow-left" disabled style="margin-top:10px;">Add</button>
+                            </div>
+                        </td>
+                        <td style="width: 40%">
+                            <select class="enabled-disabled-select" id="DisabledMessagesList" multiple></select>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+        <div class="modal-footer control-float-left field-spacing-popup">
+            <button type="button" id="btncancel" class="btn btn-default btn-lg cancel-button" data-dismiss="modal">Close</button>
+            <button type="button" id="btnSave" class="btn btn-primary btn-lg submit-button">Save</button>
+        </div>
+
+    </div>
+</div>

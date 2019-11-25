@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module FriendlyName="Patches">
+	<SqlBatch Path="..\Patches\" Type="Patches" FriendlyName="Version 1">
+		<SqlPatch Filename="EMISPatientFlowMonitoring_SchemaPatch1_0001.sql" PatchNumber="1.0001" DependantPatchNumber="0.0000" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowMonitoring_SchemaPatch1_0002.sql" PatchNumber="1.0002" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+	</SqlBatch>
+</Module>

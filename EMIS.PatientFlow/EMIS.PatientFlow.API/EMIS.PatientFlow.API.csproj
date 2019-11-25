@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7508EA59-A936-4D68-B669-73F9FBD0F518}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EMIS.PatientFlow.API</RootNamespace>
+    <AssemblyName>EMIS.PatientFlow.API</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Common\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Common\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Data\Appointment.cs" />
+    <Compile Include="Data\AppointmentConfiguration.cs" />
+    <Compile Include="Data\AppointmentSessions.cs" />
+    <Compile Include="Data\BookedAppointment.cs" />
+    <Compile Include="Data\BookedPatients.cs" />
+    <Compile Include="Data\BookedSlot.cs" />
+    <Compile Include="Data\FileRecord.cs" />
+    <Compile Include="Data\MedicalRecord.cs" />
+    <Compile Include="Data\OrganisationInformation.cs">
+      <SubType>code</SubType>
+    </Compile>
+    <Compile Include="Data\PatientMatches.cs" />
+    <Compile Include="Data\PatientNewsletterResponse.cs" />
+    <Compile Include="Data\PCSAppointmentConfiguration.cs" />
+    <Compile Include="Data\PCSAppointmentSessions.cs" />
+    <Compile Include="Data\PCSPatientsAppointmentList.cs" />
+    <Compile Include="Data\PcsMedicalRecord.cs" />
+    <Compile Include="Data\PCSSlotList.cs" />
+    <Compile Include="Data\PCSUserDetails.cs" />
+    <Compile Include="Data\SlotList.cs" />
+    <Compile Include="APIResult.cs" />
+    <Compile Include="Credential.cs" />
+    <Compile Include="Data\TPP\GetPatientRecordDetails\GetPatientRecordRequest.cs" />
+    <Compile Include="Data\TPP\GetPatientRecordDetails\PatientRecordResponse.cs" />
+    <Compile Include="Data\TPP\UpdatePatientRecord\UpdatePatientRecordRequest.cs" />
+    <Compile Include="Data\TPP\GetDiary\GetDairyResponse.cs" />
+    <Compile Include="Data\TPP\GetDiary\GetDiaryRequest.cs" />
+    <Compile Include="Data\TPP\GetAppointmentSlots\GetAppointmentSlotResponse.cs" />
+    <Compile Include="Data\TPP\GetAppointmentSlots\GetAppointmentSlotsRequest.cs" />
+    <Compile Include="Data\TPP\GetOrganisation\GetOrganisationIntegrationRequest.cs">
+      <SubType>code</SubType>
+    </Compile>
+    <Compile Include="Data\TPP\GetOrganisation\GetOrganisationIntegrationResponse.cs">
+      <SubType>code</SubType>
+    </Compile>
+    <Compile Include="Data\TPP\GetPatientRecord\PatientSearchRequest.cs" />
+    <Compile Include="Data\TPP\GetPatientRecord\PatientSearchResponse.cs" />
+    <Compile Include="Data\UserDetails.cs" />
+    <Compile Include="Enums\APIMethod.cs" />
+    <Compile Include="Enums\AppointmentStatus.cs" />
+    <Compile Include="PatientClient.cs" />
+    <Compile Include="PCSClient.cs" />
+    <Compile Include="ResultOutcome.cs" />
+    <Compile Include="Service References\TopasServiceReference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="SocketConnection.cs" />
+    <Compile Include="TopasClient.cs" />
+    <Compile Include="TppClient.cs" />
+    <Compile Include="Utilities\Extension.cs" />
+    <Compile Include="Utilities\Validation.cs" />
+    <Compile Include="WebClient.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EMIS.PatientFlow.Common\EMIS.PatientFlow.Common.csproj">
+      <Project>{768a1fc4-f28a-4fed-bf39-d62cb6e6682e}</Project>
+      <Name>EMIS.PatientFlow.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <COMFileReference Include="EmisWebdll\EM_PACC.dll">
+    </COMFileReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\TopasServiceReference\EMIS.PatientFlow.API.TopasServiceReference.AppointmentDetail.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\TopasServiceReference\EMIS.PatientFlow.API.TopasServiceReference.ClinicDetail.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\TopasServiceReference\schema1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\TopasServiceReference\schema2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\TopasServiceReference\TestKiosk.wsdl" />
+    <None Include="Service References\TopasServiceReference\TestKiosk1.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\TopasServiceReference\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\TopasServiceReference\TestKiosk.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\TopasServiceReference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\TopasServiceReference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\TopasServiceReference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

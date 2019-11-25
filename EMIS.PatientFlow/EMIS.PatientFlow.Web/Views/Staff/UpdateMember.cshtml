@@ -1,0 +1,128 @@
+﻿@model EMIS.PatientFlow.Entities.Member
+
+@{
+    ViewBag.Title = "Update Member";
+}
+<script src="~/Scripts/bootstrap.js"></script>
+@Html.Partial("_GoogleAnalytics", "UpdateMember")
+
+<script>
+
+    $(document).ready(function () {
+        $('#deptdropdown').drop();
+        GetDepts(@Model.OrganisationId);
+        function GetDepts(orgid) {
+            $.ajax({
+                url: "../Department/GetDepartmentsForOrganisation",
+                datatype: "JSON",
+                data: "organisationId=" + orgid,
+                type: "Get",
+                success: function (data) {
+                    $.each(data, function (i, dept) {
+                        $("#deptdropdown").append('<option value="' + dept.Id + '">' +
+                            dept.DepartmentName + '</option>');
+                    })
+                    $('#deptdropdown').val(@Model.DepartmentId);
+                },
+                error: function (ex) {
+                    alert('Failed to get departments under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                }
+            });
+        }
+        $('#btnSubmit').click(function () {
+            $('#cover-spin').show();
+        })
+        $('.btn-cancel').click(function () {
+            $('#CancelModal').modal('hide');
+        })
+        $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+    });
+
+    function SuccessHandling(data) {
+        var membName = $('#deptdropdown').drop('get text') + ' - ' + (data.Message.Title == '' ? '' : data.Message.Title ) + ' ' + data.Message.Firstname + ' ' + data.Message.Surname;
+        SendGoogleEventClick('event type', 'Members', 'Edited', 'Member Updated in Department(' + membName + ')');
+        return (window.location.href = "@Url.Action("Index", "Staff")");
+    }
+     function ErrorHandling(data) {
+        return (window.location.href = "@Url.Action("Index", "Staff")");
+    }
+
+</script>
+
+<style>
+    p {
+        margin: 0 0 0.4em;
+    }
+</style>
+
+<div id="cover-spin"></div>
+<div class="modal-dialog">
+    <div class="modal-content" style="overflow:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="page-header-text-popup">
+                Edit Staff Members
+            </p>
+        </div>
+
+        @using (Ajax.BeginForm("UpdateMemberDepartment", "Staff", new AjaxOptions { UpdateTargetId = "ContentContainer", InsertionMode = InsertionMode.Replace, OnSuccess = "SuccessHandling", OnFailure = "ErrorHandling" }, new { @id = "UpdateMemberForm" }))
+        {
+            <div class="modal-body">
+                @Html.HiddenFor(model => model.OrganisationId)
+                @Html.HiddenFor(model => model.Id)
+                @Html.HiddenFor(model => model.Firstname)
+                @Html.HiddenFor(model => model.Surname)
+                @Html.HiddenFor(model => model.Title)
+
+                <div class="control-float-left field-spacing-popup">
+                    <p class="question-text">Organisation</p>
+                    <div class="options-text">
+                        @Html.DisplayFor(model => model.OrganisationName, new { @class = "options-text-popup" })
+                    </div>
+                </div>
+
+                <div class="control-float-left field-spacing-popup">
+                    <p class="question-text">Staff Member</p>
+                    <div class="options-text">
+                        @string.Format(Model.Title + (String.IsNullOrWhiteSpace(Model.Title) ? "" : ". ") + Model.Firstname + " " + Model.Surname)
+                    </div>
+                </div>
+
+                <div class="control-float-left field-spacing-popup">
+                    <p class="question-text">Select a department</p>
+                    @Html.DropDownListFor(model => model.DepartmentId, Enumerable.Empty<SelectListItem>(),
+                                                                    new
+                                                                    {
+                                                                        @class = "ui fluid search selection dropdown dept-dropdown ui-dropdown-min-width",
+                                                                        @id = "deptdropdown"
+                                                                    })
+                </div>
+            </div>
+
+            <div class="modal-footer control-float-left field-spacing-popup">
+                <button class="btn btn-default btn-lg cancel-button" type="button">
+                    Cancel
+                </button>
+                <button class="btn btn-primary btn-lg submit-button" type="submit" id="btnSubmit">Save Member</button>
+            </div>
+        }
+
+    </div>
+</div>
+<div class="modal fade" id="CancelModal" role="dialog" data-keyboard="true">
+    <div class="modal-dialog modal-sm" style="width:35%;margin-right:2%;margin-bottom:1%">
+        <div class="modal-content">
+            <div class="modal-header">
+                Update Member
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" style="margin-right:5px">No, Stay</button>
+                <button class="btn btn-danger btn-ok" onclick='window.location.href = "@Url.Action("Index","Member")"'>Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,282 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SettingsUc"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding Settings, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Converters/Converters.xaml" />
+                <ResourceDictionary Source="../Converters/HeadingStyleConverter.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0">
+            <TextBlock Text="{Binding WelcomeText}" TextWrapping="Wrap" FontSize="24"/>
+            <Button.Style>
+                <MultiBinding Converter="{StaticResource HeadingStyle}">
+                    <Binding Path="IsCorrectPin"/>
+                    <Binding Source="{StaticResource HeadingButtonStyle}" />
+                    <Binding Source="{StaticResource IncorrectHeadingButtonStyle}" />
+                </MultiBinding>
+            </Button.Style>
+        </Button>
+
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10,30"
+                    Visibility="{Binding IsAdminLoginVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+
+            <TextBlock Text="{Binding EnterYourPinText}" TextWrapping="Wrap" FontWeight="Bold" 
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}" Margin="0,0,0,30" HorizontalAlignment="Center"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Height="20" Width="20" Margin="10" Content="{Binding PasswordDigit1}">
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource RoundedButtonStyle}">
+                            <Binding Path="PasswordDigit1"/>
+                            <Binding Source="{StaticResource EmptyRoundButtonStyle}" />
+                            <Binding Source="{StaticResource FilledRoundButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+                </Button>
+                <Button Height="20" Width="20" Margin="10" Content="{Binding PasswordDigit2}">
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource RoundedButtonStyle}">
+                            <Binding Path="PasswordDigit2"/>
+                            <Binding Source="{StaticResource EmptyRoundButtonStyle}" />
+                            <Binding Source="{StaticResource FilledRoundButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+                </Button>
+                <Button Height="20" Width="20" Margin="10" Content="{Binding PasswordDigit3}">
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource RoundedButtonStyle}">
+                            <Binding Path="PasswordDigit3"/>
+                            <Binding Source="{StaticResource EmptyRoundButtonStyle}" />
+                            <Binding Source="{StaticResource FilledRoundButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+                </Button>
+                <Button Height="20" Width="20" Margin="10" Content="{Binding PasswordDigit4}">
+                    <Button.Style>
+                        <MultiBinding Converter="{StaticResource RoundedButtonStyle}">
+                            <Binding Path="PasswordDigit4"/>
+                            <Binding Source="{StaticResource EmptyRoundButtonStyle}" />
+                            <Binding Source="{StaticResource FilledRoundButtonStyle}" />
+                        </MultiBinding>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+
+            <Grid Margin="0,20,0,10" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="1" Content="1" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="2" Content="2" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="3" Content="3" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="4" Content="4" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="5" Content="5" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="6" Content="6" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="7" Content="7" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="8" Content="8" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="9" Content="9" Margin="10"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                </StackPanel>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="0" Content="0" Margin="{Binding  SizeHelperModel.ResolutionHelper.MarginThickness, Source={StaticResource Locator}}"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DefaultButtonStyle}">
+                    </Button>
+                    <Button Command="{Binding Settings.NumberClickCommand, Source={StaticResource Locator}}" 
+                            CommandParameter="X" Margin="10" Content="Delete" IsEnabled="{Binding IsDeleteEnabled}"
+                            Width="{Binding SizeHelperModel.ResolutionHelper.DOBButtonWidth,Source={StaticResource Locator}}"
+                            Height="{Binding SizeHelperModel.ResolutionHelper.DOBButtonHeight,Source={StaticResource Locator}}" 
+                            Style="{DynamicResource DeleteButtonStyle}">
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+        </StackPanel>
+
+        <Grid Grid.Row="1" Visibility="{Binding IsAdminDetailsVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="10,20,10,20">
+                <TextBlock Text="Technical information" HorizontalAlignment="Center"
+                           Style="{DynamicResource HighLightMessageStyle}" Margin="0,15,0,30"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockXLargeFont, Source={StaticResource Locator}}"/>
+
+                <Border BorderBrush="Gray" BorderThickness="1">
+                    <Grid Background="#F5F5F5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4*"/>
+                            <ColumnDefinition Width="6*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Text="Software Version: " 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="0,20,0,0" Foreground="{DynamicResource LightGrayColor}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SoftwareVersionText}" 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="10,20,0,0" Style="{DynamicResource HighLightMessageStyle}"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Text="IP Address: " 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="0,20,0,0" Foreground="{DynamicResource LightGrayColor}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding IPAddressText}" 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="10,20,0,0" Style="{DynamicResource HighLightMessageStyle}"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Text="Server Uri: " 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="0,20,0,0" Foreground="{DynamicResource LightGrayColor}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ServerUriText}" 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="10,20,0,0" TextWrapping="Wrap" Style="{DynamicResource HighLightMessageStyle}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" Text="Kiosk Key: " 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="0,20,0,0" Foreground="{DynamicResource LightGrayColor}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding KioskRegistrationKeyText}" 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="10,20,0,0" TextWrapping="Wrap" Style="{DynamicResource HighLightMessageStyle}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Text="Sync Service Key: " 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="0,20,0,0" Foreground="{DynamicResource LightGrayColor}" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SyncServiceRegistrationKeyText}" 
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="10,20,0,0" TextWrapping="Wrap" Style="{DynamicResource HighLightMessageStyle}"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" Text="Kiosk Serial Number: "  
+                                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                                   Margin="0,20,0,20" Foreground="{DynamicResource LightGrayColor}"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding KioskSerialNumberText}" FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}" 
+                               Margin="10,20,0,20" TextWrapping="Wrap" Style="{DynamicResource HighLightMessageStyle}"/>
+
+                    </Grid>
+                </Border>
+
+                <Grid Margin="0,40,0,30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="6*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2.5*"/>
+                            <ColumnDefinition Width="1.5*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Content="Close Software*" Margin="0,0,10,0" 
+                                Style="{DynamicResource DefaultButtonStyle}"
+                                FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonLargeFont, Source={StaticResource Locator}}"
+                                Command="{Binding Settings.ExitCommand, Source={StaticResource Locator}}"/>
+
+                    </Grid>
+                     
+                    <Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Content="Reboot system" Margin="15,0,30,0" MinHeight="60"
+                                Style="{DynamicResource DefaultButtonStyle}"
+                                FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonLargeFont, Source={StaticResource Locator}}"
+                                Command="{Binding Settings.RestartCommand, Source={StaticResource Locator}}"/>
+
+                        <Button Grid.Column="1" Content="Shut down system" Margin="30,0,0,0" MinHeight="60"
+                                Style="{DynamicResource DefaultButtonStyle}"
+                                FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonLargeFont, Source={StaticResource Locator}}"
+                                Command="{Binding Settings.ShutDownCommand, Source={StaticResource Locator}}"/>
+                        
+                    </Grid>
+                </Grid>
+
+                <TextBlock Text="* Closing the software will take you back to Windows." TextWrapping="Wrap"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockMediumFont, Source={StaticResource Locator}}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module FriendlyName="PatientFlow">
+ 	<SqlBatch Path="StoredProcedures\" Type="StoredProcedures">		
+		<SqlFile Filename="PatientFlow.SaveLog.sql" />
+		<SqlFile Filename="PatientFlow.GetKiosksUsageLog.sql" />
+		<SqlFile Filename="PatientFlow.GetAuditTrail.sql" />
+	</SqlBatch>
+</Module>

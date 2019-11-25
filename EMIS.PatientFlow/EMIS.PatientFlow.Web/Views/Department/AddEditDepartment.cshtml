@@ -1,0 +1,243 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.DepartmentViewModel
+
+@{
+    ViewBag.Title = "AddEditDepartment";
+    ViewBag.Savebutton = "Save";
+    if (Model.Id > 0)
+    {
+        ViewBag.Module = Model.DepartmentName;
+    }
+    else
+    {
+        ViewBag.Module = "Add Department";
+    }
+    ViewBag.Controller = "Department";
+    ViewBag.FormId = "AddEditDepartment";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+    ViewBag.SaveAction = null;
+}
+@Html.Partial("_GoogleAnalytics", "Departments")
+<script type="text/javascript">
+    $(document).ready(function () {
+        Intialize();
+        if (@Model.Id> 0) {
+            $('#OrganisationField').addClass('disableddiv');
+            $('#departmentMenuActions').css({ 'display': 'block' });
+            $('#departmentMenuActions ul').append("\
+                                             <li class='mdl-menu__item'>\
+                                            <span><a class='mdl-navigation__link' href='#' style='color:black' id='DeleteDepartment'>Delete</a></span>\
+                                            </li>\
+                                            ");
+            //Legend text on page loads in jquery
+            $('form input[type="text"],[type="number"],select').each(function () {
+                const event = new onfocusEditEvent($(this));
+            });
+        }
+
+
+        $('#DeleteDepartment').click(function () {
+            var departmentId =@Html.Raw(Json.Encode(Model.Id));
+            var departmentName =@Html.Raw(Json.Encode(Model.DepartmentName));
+            var linkCount =@Html.Raw(Json.Encode(Model.LinkCount));
+            var linkedMessageCount =@Html.Raw(Json.Encode(Model.LinkedMessageCount));
+
+            if (linkCount > 0) {
+                hideLoading();
+                showDialog({
+                    liElement: "Delete",
+                    title: "Department staff?",
+                    text: "There are staff associated with this department. You must move them to a new department before you can delete it.",
+                    negative: {
+                        title: 'Got it'
+                    }
+                });
+            }
+            else if (linkedMessageCount > 0) {
+                hideLoading();
+                showDialog({
+                    liElement: "Delete",
+                    title: "Department Messages?",
+                    text: "There are arrival messages associated with this department. You must unlink these messages from this department before you can delete it.",
+                    negative: {
+                        title: 'Got it'
+                    }
+                });
+            }
+            else {
+                showDialog({
+                liElement: "Delete",
+                title: "Delete Department?",
+                text: "Do you want to delete '" + departmentName + "'?",
+                negative: {
+                    title: 'Cancel'
+                },
+                positive: {
+                    title: 'Delete',
+                    onClick: function (e) {
+                        showLoading();
+                        $.ajax({
+                            type: "Get",
+                            url: "/Department/DeleteDepartment",
+                            data: "departmentId=" + departmentId,
+                            success: function (data) {
+                                hideLoading();
+                                window.location.href = "@Url.Action("Index", "Department")";
+                            },
+                            error: function (data) {
+                                hideLoading();
+                            }
+                        });
+                    }
+                }
+            });
+            }
+        });
+
+        $('input[type="text"]').on('focus focusout', function (e) {
+            if (e.type == "focus") {
+
+                const event = new onfocusEvent($(this));
+            }
+            else if (e.type == "focusout") {
+                setNormalOutline($(this));
+                if ($(this).val() == "") {
+                    const event = new outFocusEvent($(this));
+                }
+            }
+        })
+
+        $('.orgDropdown').click(function () {
+            setActiveOutline($(this));
+        });
+
+        $('#OrganisationField').focusout(function () {
+            $(this).children().eq(0).addClass("Normal-outline");
+            $(this).children().eq(0).removeClass("Active-outline");
+        });
+
+
+        $('#organisationDropdown').change(function () {
+            $('#organisationDropdown').val().length > 0 ? new onfocusEvent($(this)) : new outFocusEvent($(this));
+            $('#orgErrorMessage').css({ 'display': 'none' });
+        })
+
+        $('input[type="text"]').on('keyup', function () {
+            $('#depttexterror,#departmentNameError').css({ 'display': 'none' });
+        })
+
+        function Intialize() {
+            if ($('#organisationDropdown').children().length <= 2) {
+                $('#organisationDropdown').prop("selectedIndex", 1);
+                $('#OrganisationField').hide();
+            }
+            $('#organisationDropdown').drop({ match: 'text', sortSelect: true });
+            $('#txt_DepartmentName').focus();
+            $('#txt_DepartmentName').closest('fieldset').addClass("Active-outline");
+            $('#txt_DepartmentName').closest('fieldset').removeClass("Normal-outline");
+
+        }
+
+        $('#AddEditDepartment').keypress(function (e) {
+            if (e.keyCode == 13) {
+                $('#addupdatebtn').trigger('click');
+            }
+        })
+
+        $('#addupdatebtn').click(function (e) {
+            var eventCategory = 'Departments';
+            if (@Model.Id > 0) {
+                LogEvent(eventCategory, 'Edited', eventCategory);
+            }
+            else {
+                LogEvent(eventCategory, 'Added', eventCategory);
+            }
+            showLoading();
+            var depName = $('#txt_DepartmentName').val();
+            depName = encodeURIComponent(depName);
+            var OrgId = $('#organisationDropdown').val();
+            if (depName != "" && OrgId != "") {
+                $.ajax({
+                    type: "get",
+                    url: '/Department/IsValidDepartmentName',
+                    dataType: "Json",
+                    data: "DepartmentName=" + depName + "&Id=" + $('#DepartmentId').val() + "&OrganisationId=" + OrgId,
+                    success: function (data) {
+                        if (!data.Result) {
+                            hideLoading();
+                            e.preventDefault();
+                            $('#departmentNameError').css({ 'display': 'block' });
+                        }
+                        else {
+                            $.ajax({
+                                type: "post",
+                                url: "../Department/SaveDepartment",
+                                data: "DepartmentName=" + depName + "&Id=" + $('#DepartmentId').val() + "&OrganisationId=" + OrgId,
+                                dataType: 'json',
+                                success: function (data) {
+                                    hideLoading();
+                                    window.location.href = '@Url.Action("Index","Department")';
+                                },
+                                error: function () {
+                                    hideLoading();
+                                    window.location.href = '@Url.Action("Index","Department")'
+                                }
+                            });
+                        }
+                    }
+                })
+            }
+            else {
+                if (depName.val() == "") {
+                    hideLoading();
+                    $('#depttexterror').css({ 'display': 'block' });
+                }
+                if (OrgId == "") {
+                    hideLoading();
+                    $('#orgErrorMessage').css({ 'display': 'block' });
+                }
+                return false;
+            }
+        })
+    })
+</script>
+
+<div style="width: 100%; justify-content: center;flex-grow:1;padding:0px" class="mdl-grid lightblueBackground">
+    <div class="mdl-card portalMdlCard DepUserPracticeAdminStyle" style="overflow-y:auto;overflow-x:hidden">
+        @Html.HiddenFor(m => m.Id, new { id = "DepartmentId" })
+
+        <br />
+        <div>
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Department" style="width: 100%; margin:auto">
+                <legend>Department</legend>
+                @Html.TextBoxFor(m => m.DepartmentName, new { @class = "mdl-textfield__input", @id = "txt_DepartmentName", @placeholder = "Department Name", @UseMnemonic = "false" })
+                <label class="mdl-textfield__label" for="txt_DepartmentName">Department</label>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage">
+                <span id="depttexterror" style="display:none">Enter a department name</span>
+                <span id="departmentNameError" style="display:none">Department name already exists</span>
+            </div>
+            <br />
+        </div>
+        <br />
+
+        <div id="OrganisationField">
+            <fieldset class="fieldset" name="Organisation" style="width:100%;margin:auto;">
+                <legend style="position:static">Organisation</legend>
+                @Html.DropDownListFor(model => model.OrganisationId, Model.OrganisationsList,"Organisation",
+                  new
+                  {
+                      @class = "ui fluid search  dropdown ui-dropdown-min-width orgDropdown",
+                      @id = "organisationDropdown",
+                      @name="orgDropdown"
+                  })
+
+            </fieldset>
+            <div class="validation-summary-errors validationMessage">
+                <span id="orgErrorMessage" style="display:none">Select an organisation</span>
+            </div>
+            <br />
+        </div>
+        <br />
+        <br />
+    </div>
+</div>

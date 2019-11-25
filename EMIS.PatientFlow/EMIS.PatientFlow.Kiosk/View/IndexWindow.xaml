@@ -1,0 +1,198 @@
+﻿<Window x:Class="EMIS.PatientFlow.Kiosk.View.IndexWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:k="clr-namespace:EMIS.PatientFlow.Kiosk.KeyBoard"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras"      
+        xmlns:controls="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+        xmlns:ignore="http://www.ignore.com"
+        mc:Ignorable="d ignore"
+        WindowStyle="None"
+        WindowState="Maximized"
+        ResizeMode="NoResize"
+        Icon="..\Assets\Icons\icon.ico"
+        xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+        DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+    
+    <Window.Resources>
+        <ResourceDictionary Source="../Converters/Converters.xaml" />
+    </Window.Resources>
+
+    <Grid x:Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height=".9*"/>
+            <RowDefinition Height="5.6*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.Background>
+                #12A593
+            </Grid.Background>
+
+            <StackPanel Grid.Column="0" Background="Transparent" Orientation="Horizontal"
+                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0">
+
+                <Button x:Name="HomeButton" Click="OnHomebuttonClick" Margin="10,0" Width="45" Height="50"
+                     Style="{DynamicResource DefaultButtonStyle}" Background="#0C8479">
+
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Left" >
+                        <Image Source="{StaticResource HomeImageSource}" Margin="0,15,0,0" Width="35px" Height="35px"></Image>
+                        <TextBlock Text="" TextAlignment="Center"  FontWeight="DemiBold" FontSize="16" />
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="BackButton" Click="OnBackbuttonClick" Margin="10,0" Height="50"
+                     Style="{DynamicResource DefaultButtonStyle}" Background="#0C8479">
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" >
+                        <Image Source="{StaticResource BackImageSource}" Width="45px" Height="40px"></Image>
+                        <TextBlock Text="Back" TextAlignment="Left" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                   FontSize="20" Margin="-3,0,10,0"/>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+
+            <Label x:Name="LblTimeOut" Content="Timing Out..." Grid.Column="1" 
+                   VerticalAlignment="Top" HorizontalAlignment="center" 
+                   FontSize="36" Foreground="White" Margin="5"/>
+
+            <Button Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Style="{StaticResource DefaultButtonStyle}" Margin="-40,0,0,0"
+                    Background="Transparent" Foreground="White" MouseDoubleClick="BtnAdminLogin_MouseDoubleClick"
+                    FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargFont, Source={StaticResource Locator}}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="TbkDate" Margin="0,5,5,5"/>
+                    <TextBlock x:Name="TbkTime" Margin="5,5,0,5" FontWeight="Bold"/>
+                </StackPanel>
+            </Button>
+
+            <Grid Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="LanguageButton" Grid.Column="1" Height="50" Margin="0,0,20,0" DataContext="{Binding}"
+                    Style="{StaticResource DefaultButtonStyle}" Background="#0C8479" HorizontalContentAlignment="Left"
+                    FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonMediumFont, Source={StaticResource Locator}}"
+                    Click="BtnLanguage_Click">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <Image Source="{StaticResource LanguageGlobeIcon}" Margin="10,10,15,10" HorizontalAlignment="Left" VerticalAlignment="Center" ></Image>
+                            <TextBlock Text="{Binding DisplayText}" Margin="5"
+                               FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonMediumFont, Source={StaticResource Locator}}"
+                               TextAlignment="Left" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </Grid>
+
+            <Popup Grid.Row="1"  x:Name="LanguagePopup"
+                   Placement="Center"
+                   PlacementTarget="{Binding ElementName=ContentControl}"
+                   HorizontalAlignment="Center"  VerticalAlignment="Center"
+                   MaxWidth="800"
+                   PopupAnimation="Fade" AllowsTransparency="True" 
+                   MaxHeight="{Binding SizeHelperModel.ResolutionHelper.LanguagePopUpHeight, Source={StaticResource Locator}}">
+                <Border BorderBrush="#12A593" BorderThickness="3" Background="White" CornerRadius="10">
+                    <Grid>
+                        <!--<Grid.RowDefinitions>
+                            <RowDefinition Height="2.2*"/>
+                            <RowDefinition Height="0.6*"/>
+                            <RowDefinition Height="8.4*"/>
+                        </Grid.RowDefinitions>-->
+                        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Style="{StaticResource FavsScrollViewer}"
+                                      VerticalAlignment="Top" Padding="0,0,10,0">
+
+                            <ListView x:Name="FrequentlyUsedLangListView" ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="15"
+                                      BorderThickness="0" HorizontalAlignment="Left" ItemsSource="{Binding}">
+
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" 
+                                       MaxWidth="{Binding SizeHelperModel.ResolutionHelper.LanguagePopUpWidth, Source={StaticResource Locator}}"/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Loaded">
+                                        <cmd:EventToCommand Command="{Binding ListLoaded}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Margin="10" Height="60"
+                                                Width="160"
+                                                Style="{DynamicResource DefaultButtonStyle}" BorderBrush="{x:Null}"
+                                                FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonMediumFont, Source={StaticResource Locator}}"
+                                                HorizontalContentAlignment="Center" Content="{Binding DisplayText}"
+                                                Command="{Binding SelectedLanguageCommand}" CommandParameter="{Binding LanguageId}"
+                                                Click="LanguageinLanguageListClick" Tag="{Binding LanguageId}"/>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </ScrollViewer>
+                        <!--<Canvas Grid.Row="1" x:Name="lineCanvas">
+                            <Line Stroke="#DEDEDE" StrokeThickness="2"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center" X1="30" X2="850"
+                          Width="{Binding SizeHelperModel.ResolutionHelper.LanguagePopUpWidth, Source={StaticResource Locator}}"/>
+                        </Canvas>-->
+
+                        <ScrollViewer  VerticalScrollBarVisibility="Auto" Style="{StaticResource FavsScrollViewer}"
+                                      VerticalAlignment="Top" Padding="0,0,10,0">
+                            <ListView x:Name="LanguageListView" ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="15"
+                                      BorderThickness="0" HorizontalAlignment="Left" ItemsSource="{Binding}">
+
+                                <ListView.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" MaxWidth="770"/>
+                                    </ItemsPanelTemplate>
+                                </ListView.ItemsPanel>
+
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Loaded">
+                                        <cmd:EventToCommand Command="{Binding ListLoaded}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Margin="10" Height="60"
+                                               Width="{Binding SizeHelperModel.ResolutionHelper.LanguageButtonWidth, Source={StaticResource Locator}}"
+                                                Style="{DynamicResource DefaultButtonStyle}" BorderBrush="{x:Null}"
+                                                FontSize="{Binding SizeHelperModel.ResolutionHelper.ButtonMediumFont, Source={StaticResource Locator}}"
+                                                HorizontalContentAlignment="Center" Content="{Binding DisplayText}"
+                                                Command="{Binding SelectedLanguageCommand}" CommandParameter="{Binding LanguageId}"
+                                                Click="LanguageinLanguageListClick" Tag="{Binding LanguageId}"/>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </ScrollViewer>
+
+                    </Grid>
+                </Border>
+            </Popup>
+
+        </Grid>
+
+        <ContentControl x:Name="ContentControl" Grid.Row="1" />
+
+        <Viewbox Width="50" Height="50" Grid.Row="0" Grid.RowSpan="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" >
+            <local:ProgressBarUc x:Name="ProgressBar" Visibility="{Binding ProgressBarVisibility, UpdateSourceTrigger=PropertyChanged}"/>
+        </Viewbox>
+    </Grid>
+</Window>

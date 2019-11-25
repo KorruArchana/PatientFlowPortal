@@ -1,0 +1,734 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.AlertsViewModel
+
+@{
+    ViewBag.Title = "AddEditAlerts";
+}
+@Html.Partial("_GoogleAnalytics", "AddEditAlert")
+
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+<script src="~/Scripts/bootstrap.js"></script>
+
+<link rel="stylesheet" href="~/Content/jquery.dataTables.min.css" />
+<script type="text/javascript" src="~/Scripts/jquery.dataTables.min.js"></script>
+
+
+@*Bootstrap Date-Picker Plugin *@
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.css" />
+
+<script src="~/Scripts/UserScripts/multiple-select.js"></script>
+<link href="~/Content/multiple-select.css" rel="stylesheet" />
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.MessageTypeDiv').show();
+        var name,surname,firstname, dob,id;
+        var PatientTable = $("#patient-table").DataTable({
+            "scrollY": "100px",
+            "scrollCollapse": true,
+            "paging": false,
+            "searching": false,
+            "ordering": false,
+            "info": false,
+        });
+
+        Initialize();
+        $('#FindPatient').click(function () {
+            $('#cover-spin').show();
+            var s = $('#surname').val();
+            var org = $('#orgdropdown').val();
+            var sdate = $('#dob').val();
+
+            var string = s.trim() + " " + sdate;
+            $('#SelectedPatient').html('');
+            $.ajax({
+                url: '/Messages/SearchPatient',
+                data: 'organisationId=' + org + '&filter=' + string,
+                type: 'get',
+                datatype:'JSON',
+                success: function (data) {
+                    $('#cover-spin').hide();
+                    PatientTable.clear().draw();
+                    $.each(data, function (i, patient) {
+                        PatientTable.row.add([patient.Surname + "," + patient.Firstname + " (" + patient.Dob + ")- ID:" + patient.PatientId]).draw();
+                    })
+
+                    if (PatientTable.rows().data().length == 0) {
+                        if ($('#surname').val()=='')
+                            $('#patient-table').find('.dataTables_empty').text("We could not find a patient with this date of birth.Please check the date and try again.");
+                        else if ($('#dob').val()=='')
+                            $('#patient-table').find('.dataTables_empty').text(" We could not find a patient with this surname.Please check the spelling and try again.");
+                        else
+                            $('#patient-table').find('.dataTables_empty').text(" We could not find a patient with this date of birth and surname.Please check these details and try again.");
+                    }
+                   $('#PatientTableDiv').show();
+                },
+                error: function () {
+                    $('#patient-table').find('.dataTables_empty').text("Failed connection to API");
+                    $('#PatientTableDiv').show();
+                    $('#cover-spin').hide();
+                 }
+            })
+        })
+
+        PatientTable.on('click', 'tbody tr', function () {
+            if (PatientTable.rows().data().length > 0) {
+                $('#patient-table').find('tbody tr').removeClass('selected');
+                $(this).addClass('selected');
+
+                name = $(this).text();
+                surname = name.slice(0, name.indexOf(','));
+                firstname = name.slice(name.indexOf(',') + 1, name.indexOf('('));
+                dob = name.slice(name.indexOf('(') + 1, name.indexOf(')'));
+                id = name.slice(name.indexOf(':') + 1);
+
+                $('#PatientVM_Firstname').val(firstname);
+                $('#PatientVM_PatientId').val(id);
+                $('#PatientVM_Surname').val(surname);
+                $('#PatientVM_Dob').val(dob);
+                $('#SelectedPatient').html("You Selected " + firstname + " " + surname + "(" + dob + ")");
+            }
+            else {
+                $('#SelectedPatient').html('');
+            }
+        });
+
+        function Initialize() {
+            $('#LessThan_Age1').val('');
+            $('#GreaterThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+            $('.submit-button').addClass('disabled');
+            $('#DeptMembDropdownDiv').hide();
+            $('#SpecificPatientEdit').hide();
+            if ($('#orgdropdown').children('option').length == 2) {
+                $('#orgdropdown').prop('selectedIndex', 1);
+                organisationDropdownchange();
+                $('#SpecificPatientEdit').hide();
+                $('#SelectedDepMembers').show();
+                $('#orgdropdown').addClass("disabled");
+                $('.submit-button').removeClass('disabled');
+            }
+            $('#orgdropdown').drop();
+            $('#kioskdropdown').drop();
+            
+            var $radios = $('input:radio[name=AlertsDisplayType]');
+            if ($radios.is(':checked') === false) {
+                $radios.filter('[value="1"]').prop('checked', true);
+            }
+
+            $('#NumOfChar').html($('.message-textbox').val().length);
+
+            if ($('input[value="Group"]').is(':checked')) {
+                $('#Group').show();
+                $('#SpecificPatient').hide();
+            }
+            else {
+                $('#Group').hide();
+                $('#SpecificPatient').show();
+                $('#PatientTableDiv').hide();
+            }
+
+        }
+
+        $('input[value="Group"]').change(function() {
+            $('#Group').show();
+            $('#SpecificPatient').hide();
+            $('.ms-parent').css("width","500px");
+        });
+        $('input[value="Specific Patient"]').change(function () {
+                    $('#Group').hide();
+                    $('#SpecificPatient').show();
+                    $('#PatientTableDiv').hide();
+                    $('#dob').val('');
+                    $('#surname').val('');
+
+                    var dateoptions = {
+                        format: 'dd/mm/yyyy',
+                        endDate: new Date(),
+                        startDate: new Date(new Date().getFullYear() - 150, new Date().getMonth(), new Date().getDate()),
+                        autoclose: true,
+
+                    };
+                    $('#datepicker').datepicker(dateoptions);
+
+    });
+
+
+        function GetKiosksOfOrg(orgid) {
+            $.ajax({
+                url: "../Kiosk/GetKioskList",
+                datatype: "JSON",
+                data: "organisationId=" + orgid,
+                type: "Get",
+                success: function (data) {
+                    $("#kioskdropdown").empty().drop("clear");
+                    $("#kioskdropdown").append('<option value="" disabled selected> All Kiosks </option>');
+                    $.each(data, function (i, kiosk) {
+                        if (kiosk != null) {
+                            $('#kioskdropdown').append('<option value="' + kiosk.KioskGuid + '">'
+                                + kiosk.KioskName + '</option>');
+                        }
+                    })
+                },
+                error: function (ex) {
+                    alert('Failed to get kiosks under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                }
+            });
+        }
+
+        function GetDeptAndMembOfOrg(orgid) {
+                $.ajax({
+                    url: "../Department/GetDepartmentMemberList",
+                    datatype: "JSON",
+                    data: "OrganisationId=" + orgid,
+                    type: "Get",
+                    success: function (data) {
+                        $.each(data, function (i, dept) {
+                            var group = $('<optgroup value="' + dept.Id + '" label= "' + dept.DepartmentName + '"/>');
+                            $.each(dept.MemberList, function (i, memb) {
+
+                                group.append('<option value="' + memb.Id + '" > ' + memb.Title + '. ' + memb.Firstname + ' ' + memb.Surname + '</option > ');
+                            })
+                            $("#SelectedDepMembers").append(group);
+                        })
+
+                            $("#SelectedDepMembers").multipleSelect({
+                                placeholder: "All Department and All Members",
+                                filter: true
+                            });
+                    },
+                    error: function (ex) {
+                        alert('Failed to get departments under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                    }
+                });
+        }
+
+        function GetDeptAndMembOfOrgForEdit(orgid, selectedOptGroup, selectedOptions) {
+
+            $.ajax({
+                    url: "../Department/GetDepartmentMemberList",
+                    datatype: "JSON",
+                    data: "OrganisationId=" + orgid,
+                    type: "Get",
+                success: function (data) {
+                    $.each(data, function (i, dept) {
+                            var group = $('<optgroup value="' + dept.Id + '" label= "' + dept.DepartmentName + '"/>');
+                        $.each(dept.MemberList, function (i, memb) {
+                                group.append('<option value="' + memb.Id + '" > ' + memb.Title + '. ' + memb.Firstname + ' ' + memb.Surname + '</option > ');
+                        })
+                        $("#SelectedDepMembers").append(group);
+                        })
+
+                        $("#SelectedDepMembers").multipleSelect({
+                            placeholder: "All Department and All Members",
+                            filter: true
+                        });
+                        $("#SelectedDepMembers").multipleSelect("setSelects", selectedOptions);
+                        $("#SelectedDepMembers").multipleSelect("setSelectsOptgrpValue", selectedOptGroup);
+                    },
+                    error: function (ex) {
+                        alert('Failed to get departments under' + $('#orgdropdown').text() + 'organisation. ' + ex);
+                    }
+                });
+        }
+        $('#surname').on('keypress keydown keyup change', function () {
+            if ($(this).val() == '' && $('#dob').val()=='') {
+                $('#FindPatient').addClass("disabled");
+            }
+            else
+                $('#FindPatient').removeClass("disabled");
+
+            $('#PatientTableDiv').hide();
+            PatientTable.clear().draw();
+            $('#SelectedPatient').html('');
+
+        })
+
+        $('#dob').on('keypress keydown keyup change', function () {
+            if ($(this).val() == '' && $('#surname').val()== '') {
+                $('#FindPatient').addClass("disabled");
+            }
+            else
+                $('#FindPatient').removeClass("disabled");
+            $('#PatientTableDiv').hide();
+                PatientTable.clear().draw();
+
+            $('#SelectedPatient').html('');
+
+        })
+    $('#orgdropdown').change(organisationDropdownchange);
+       function organisationDropdownchange() {
+           $('.submit-button').removeClass('disabled');
+            PatientTable.clear().draw();
+            if ($('#orgdropdown').val() != '') {
+                var orgid = $('#orgdropdown').val();
+                $('#PatientVM_Organisation').val($('#orgdropdown').val());
+                $('#SelectedDepMembers').empty();
+                $('#DeptMembDropdownDiv').show();
+                if ($('input[name=MessageType]:checked').val() =="Group") {
+                    GetDeptAndMembOfOrg(orgid);
+                    GetKiosksOfOrg(orgid);
+                }
+            }
+            else {
+                $('#DeptMembDropdownDiv').hide();
+            }
+        }
+
+        $('input[type=radio][name=MessageType]').change(function () {
+            if ($('input[name=MessageType]:checked').val() == "Group" && $('#orgdropdown').val() != '' ) {
+                $('#SelectedDepMembers').empty();
+                var orgid = $('#orgdropdown').val();
+                GetDeptAndMembOfOrg(orgid);
+                GetKiosksOfOrg(orgid);
+            }
+        })
+
+        function SetLinkedKioskValues() {
+
+            var tags = @Html.Raw(Json.Encode(Model.LinkedKiosk));
+            $('#kioskdropdown').drop("set selected", tags);
+        };
+        if (@Model.Id > 0) {
+            SetLinkedKioskValues();
+            RadioBtnDataUpdate();
+            $('.MessageTypeDiv').hide();
+            $('#SpecificPatientEdit').hide();
+            $('.OrgDiv').show();
+            $('.submit-button').removeClass('disabled');
+
+            var selectedOptGroup = [];
+            var selectedOptions = [];
+
+            var selecteddep = $('#SelectedDepartments').val();
+            var selectedmem = $('#SelectedMembers').val();
+            if (selecteddep) {
+                selectedOptGroup = selecteddep.split(',');
+            }
+            if (selectedmem) {
+                selectedOptions = selectedmem.split(',');
+            }
+
+            if ($('#orgdropdown').val() != '') {
+                var orgid = $('#orgdropdown').val();
+                $('#DeptMembDropdownDiv').show();
+                GetDeptAndMembOfOrgForEdit(orgid, selectedOptGroup, selectedOptions);
+            }
+        }
+        else {
+            if (@Model.PatientVM.PatientMessageId > 0)
+            {
+                $('.MessageTypeDiv').hide();
+                $('#SpecificPatient').hide();
+                $('#SpecificPatientEdit').show();
+                $('.OrgDiv').hide();
+            }
+        }
+
+        function RadioBtnDataUpdate() {
+            if ($('#LessThan').is(':checked')) {
+                 $('#LessThan_Age1').removeAttr('disabled');
+                 $('#LessThan_Age1 ').val(@Model.Age1);
+
+                 $('#GreaterThan_Age1').val('');
+                 $('#Between_Age1').val('');
+                 $('#Between_Age2').val('');
+            }
+
+            if ($('#GreaterThan').is(':checked')) {
+                 $('#GreaterThan_Age1').removeAttr('disabled');
+                 $('#GreaterThan_Age1').val(@Model.Age1);
+
+                 $('#LessThan_Age1').val('');
+                 $('#Between_Age1').val('');
+                 $('#Between_Age2').val('');
+            }
+
+            if ($('#Between').is(':checked')) {
+                 $('#Between_Age1').val(@Model.Age1);
+                 $('#Between_Age2').val(@Model.Age2);
+
+                 $('#Between_Age1').removeAttr('disabled');
+                 $('#Between_Age2').removeAttr('disabled');
+                 $('#LessThan_Age1').val('');
+                 $('#GreaterThan_Age1').val('');
+             }
+        }
+
+        $('#AllAges').change(function () {
+            $('#LessThan_Age1').attr('disabled', 'disabled');
+            $('#GreaterThan_Age1').attr('disabled', 'disabled');
+            $('#Between_Age1').attr('disabled', 'disabled');
+            $('#Between_Age2').attr('disabled', 'disabled');
+
+            $('#LessThan_Age1').val('');
+            $('#GreaterThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+
+        });
+        $('#LessThan').change(function () {
+            $('#LessThan_Age1').removeAttr('disabled');
+            $('#GreaterThan_Age1').attr('disabled', 'disabled');
+            $('#Between_Age1').attr('disabled', 'disabled');
+            $('#Between_Age2').attr('disabled', 'disabled');
+
+            $('#GreaterThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+
+        });
+        $('#GreaterThan').change(function () {
+            $('#GreaterThan_Age1').removeAttr('disabled');
+            $('#LessThan_Age1').attr('disabled', 'disabled');
+            $('#Between_Age1').attr('disabled', 'disabled');
+            $('#Between_Age2').attr('disabled', 'disabled');
+
+            $('#LessThan_Age1').val('');
+            $('#Between_Age1').val('');
+            $('#Between_Age2').val('');
+
+        });
+        $('#Between').change(function () {
+            $('#Between_Age1').removeAttr('disabled');
+            $('#Between_Age2').removeAttr('disabled');
+            $('#LessThan_Age1').attr('disabled', 'disabled');
+            $('#GreaterThan_Age1').attr('disabled', 'disabled');
+            $('#LessThan_Age1').val('');
+            $('#GreaterThan_Age1').val('');
+
+        });
+
+        $('.message-textbox').on('keyup', function (e) {
+            $('#NumOfChar').html($(this).val().length);
+        });
+
+        var form = $('#AddEditAlertForm');
+        var validator = form.validate();
+
+        $('#AddEditAlertForm').submit(function () {
+            $('#cover-spin').show();
+            if (!form.valid()) {
+                alert("Required fields are missing. Form is not valid. ");
+            }
+            else {
+                var finalvalues = $('#SelectedDepMembers').multipleSelect("getSelects");
+                $('#SelectedDepartments').val(finalvalues.selectedOptGroups);
+                $('#SelectedMembers').val(finalvalues.selectedOptions);
+            }
+
+            var orgName = decodeURI($("#OrganisationId option:selected").text());
+            if (@Model.Id > 0) {
+                SendGoogleEventClick('event type', 'Alerts', 'Edit', 'Alert Edited(' + orgName + ')');
+            }
+            else {
+                SendGoogleEventClick('event type', 'Alerts', 'Add', 'New Alert Added(' + orgName + ')');
+            }
+        });
+        $('.btn-cancel').click(function () {
+            $('#CancelModal').modal('hide');
+        })
+        $('.cancel-button').click(function () {
+            $('#CancelModal').modal('show');
+        });
+
+    });
+
+    function SuccessHandling(data) {
+        $('#AddEditAlertModal').modal('hide');
+        return (window.location.href = "@Url.Action("Index","Messages")");
+    }
+
+</script>
+<div id="cover-spin"></div>
+<div class="modal-dialog modal-lg">
+    <div class="modal-content" style="overflow-y:auto">
+        <div class="modal-header" style="overflow:auto">
+            <p class="page-header-text-popup">
+                @if (Model.Id > 0 || Model.PatientVM.PatientMessageId > 0)
+                {
+                    <span> Edit Message</span>}
+                else
+                {
+                    <span> Add Message</span>}
+            </p>
+        </div>
+        @using (Ajax.BeginForm("SaveAlert", "Messages", new AjaxOptions
+        {
+            UpdateTargetId = "ContentContainer",
+            InsertionMode = InsertionMode.Replace,
+            OnSuccess = "SuccessHandling"
+        }, new { @id = "AddEditAlertForm" }))
+        {
+            <div class="modal-body">
+
+                @Html.HiddenFor(x => x.Id)
+                @Html.HiddenFor(x => x.SelectedDepartments)
+                @Html.HiddenFor(x => x.SelectedMembers)
+
+                <p id="summary"></p>
+                <div class="control-float-left field-spacing">
+                    <p class="question-text">Message Text<span class="requiredfield"> *</span></p>
+                    <label class="control-float-left question-text" style="font-weight: normal"><span id="NumOfChar">0</span>/300 Char</label>
+                    @Html.TextAreaFor(modelItem => Model.AlertText, new { @class = "form-control control-float-left message-textbox options-text", @maxLength = "300" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.AlertText)</div>
+                </div>
+                <div class="control-float-left field-spacing MessageTypeDiv">
+                    <p class="question-text">Is this a message for group of patients or a specific patient</p>
+                    <div>
+                        <label>
+                            @Html.RadioButtonFor(x => x.MessageType, "Group", new { @class = "control-float-left radio-buttons", @checked = (Model.MessageType == null || Model.MessageType == "Group") })
+                            <span class="options-text">Group</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            @Html.RadioButtonFor(x => x.MessageType, "Specific Patient", new { @class = "control-float-left radio-buttons" })
+                            <span class="options-text">Specific Patient</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="control-float-left field-spacing nullify-field-spacing OrgDiv">
+                    <p class="question-text">Which group of patients should see this message when they check in for their appointment?<span class="requiredfield"> *</span></p>
+                    @Html.DropDownListFor(x => x.OrganisationId, new SelectList(Model.OrganisationList, "Value", "Text"), "Select Organisation",
+                                                                                                                    new { @class = "ui fluid search dropdown", @id = "orgdropdown" })
+                    <div class="validation-summary-errors control-float-left requiredfield-errortext">@Html.ValidationMessageFor(model => model.OrganisationId)</div>
+                </div>
+
+
+                @if (Model.MessageType == null || Model.MessageType == "Group")
+                {
+                    <div id="Group">
+                        <div class="control-float-left field-spacing">
+                            <p class="question-text">Display Type</p>
+                            @foreach (var type in @Model.AlertsDisplayTypes)
+                            {
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.AlertsDisplayType, type.Value, new { @class = "control-float-left radio-buttons" })
+                                        <span class="options-text">@type.Text</span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <div class="control-float-left field-spacing" id="DeptMembDropdownDiv">
+                            <p class="question-text">Appointments for which department and staff members</p>
+                            @Html.ListBoxFor(x => x.SelectedMemberList, Enumerable.Empty<SelectListItem>(),
+                                                                                                 new { @id = "SelectedDepMembers", @multiple = "multiple", @style = "min-width: 500px;" })
+                        </div>
+                        <div class="control-float-left field-spacing">
+                            <p class="question-text">Gender</p>
+                            <div>
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.Gender, "None", new { @class = "control-float-left radio-buttons", @checked = (Model.Gender == null) })
+                                        <span class="options-text">All Genders</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.Gender, "F", new { @class = "control-float-left radio-buttons" })
+                                        <span class="options-text">Female</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>
+                                        @Html.RadioButtonFor(x => x.Gender, "M", new { @class = "control-float-left radio-buttons" })
+                                        <span class="options-text">Male</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="control-float-left field-spacing">
+                                <p class="question-text">Age:</p>
+                                <table style="margin: 10px; font-size: 20px;">
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <label>
+                                                    @Html.RadioButtonFor(x => x.Operation, "None",
+        new
+        {
+            @class = "control-float-left radio-buttons",
+            @Id = "AllAges",
+            @checked = (Model.Operation == null)
+        })
+                                                    <span class="options-text">All Ages</span>
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <label>
+                                                    @Html.RadioButtonFor(x => x.Operation, "Less than", new { @class = "control-float-left radio-buttons", @Id = "LessThan" })
+                                                    <span class="options-text">Less than</span>
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td class="td-number-input" style="padding-bottom:20px;">
+                                            @Html.TextBoxFor(m => m.Age1, new { @type = "number", @Id = "LessThan_Age1", disabled = "disabled", min = 1, max = 150 })
+                                        </td>
+                                        <td class="td-number-input" style="padding-bottom:20px;">years old</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <label>
+                                                    @Html.RadioButtonFor(x => x.Operation, "Over", new { @class = "control-float-left radio-buttons", @Id = "GreaterThan" })
+                                                    <span class="options-text">Over</span>
+                                                </label>
+                                            </div>
+
+                                        </td>
+                                        <td class="td-number-input" style="padding-bottom:20px">
+                                            @Html.TextBoxFor(m => m.Age1, new { type = "number", Id = "GreaterThan_Age1", disabled = "disabled", min = 1, max = 150 })
+                                        </td>
+                                        <td class="td-number-input" style="padding-bottom:20px">years old</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <label>
+                                                    @Html.RadioButtonFor(x => x.Operation, "Between", new { @class = "control-float-left radio-buttons", @Id = "Between" })
+                                                    <span class="options-text">Between</span>
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td class="td-number-input" style="padding-bottom:20px">
+                                            @Html.TextBoxFor(m => m.Age1, new { type = "number", Id = "Between_Age1", disabled = "disabled", min = 1, max = 150 })
+                                        </td>
+                                        <td class="td-number-input" style="text-align:center;padding-bottom:20px;">and</td>
+                                        <td style="padding-bottom:13px">
+                                            @Html.TextBoxFor(m => m.Age2, new { type = "number", Id = "Between_Age2", disabled = "disabled", min = 1, max = 150 })
+                                        </td>
+                                        <td class="td-number-input" style="padding-bottom:20px">years old</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="control-float-left field-spacing nullify-field-spacing">
+                            <p class="question-text">Where should the message be displayed?</p>
+                            @if (Model.Id > 0)
+                            {
+                                @Html.DropDownListFor(x => x.LinkedKiosk, Model.KioskList,
+                                                                                                        new
+                                                                                                        {
+                                                                                                            @class = "ui fluid multiple search selection dropdown",
+                                                                                                            @id = "kioskdropdown",
+                                                                                                            @multiple = "multiple"
+                                                                                                        })
+                            }
+                            else
+                            {
+                                @Html.DropDownListFor(x => x.LinkedKiosk, Enumerable.Empty<SelectListItem>(), "All Kiosks",
+                                                                                                  new
+                                                                                                  {
+                                                                                                      @class = "ui fluid multiple search selection dropdown",
+                                                                                                      @id = "kioskdropdown",
+                                                                                                      @multiple = "multiple"
+
+                                                                                                  })}
+                        </div>
+
+                    </div>
+                }
+                <div id="SpecificPatient">
+                    @Html.HiddenFor(x => x.PatientVM.PatientId)
+                    @Html.HiddenFor(x => x.PatientVM.PatientMessageId)
+                    @Html.HiddenFor(x => x.PatientVM.Surname)
+                    @Html.HiddenFor(x => x.PatientVM.Firstname)
+                    @Html.HiddenFor(x => x.PatientVM.Message)
+                    @Html.HiddenFor(x => x.PatientVM.OrganisationId, new { @id = "PatientVM_Organisation" })
+                    @Html.HiddenFor(x => x.PatientVM.OrganisationName)
+                    @Html.HiddenFor(x => x.PatientVM.Dob)
+
+                    <div class="control-float-left field-spacing" style="width:40%">
+                        <p class="question-text">DOB</p>
+                        <div class="input-group date" id="datepicker">
+                            <input class="form-control control-float-left options-text" type="text" id="dob">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-float-left field-spacing" style="width:40%">
+                        <p class="question-text">Surname</p>
+                        <input type="text" id="surname" class="form-control control-float-left" maxlength="50" />
+                    </div>
+                    <div class="control-float-left field-spacing">
+                        <button class="btn btn-success disabled" type="button" id="FindPatient">Find Patient</button>
+                    </div>
+
+                    <div class="control-float-left field-spacing" id="PatientTableDiv">
+                        <p class="question-text">Select one patinet</p>
+                        <table class="table table-responsive patient-table" id="patient-table" style="height:50px; min-width: 300px;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        NAME
+                                    </th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="control-float-left field-spacing">
+                        <span id="SelectedPatient" class="question-text"></span>
+                    </div>
+                    <div id="SpecificPatientEdit" class="control-float-left">
+                        <div class="control-float-left field-spacing-popup">
+                            <p class="question-text">Organisation</p>
+                            <div class="options-text">
+                                @Html.DisplayFor(x => x.PatientVM.OrganisationName, new { @class = "options-text-popup" })
+                            </div>
+                        </div>
+                        <div class="control-float-left field-spacing-popup">
+                            <p class="question-text">Patient Name</p>
+                            <div class="options-text">
+                                @Html.DisplayFor(x => x.PatientVM.Firstname, new { @class = "options-text-popup" })
+                                @Html.DisplayFor(x => x.PatientVM.Surname, new { @class = "options-text-popup" })
+                            </div>
+                        </div>
+                        <div class="control-float-left field-spacing-popup">
+                            <p class="question-text">Date of Birth</p>
+                            <div class="options-text">
+                                @Html.DisplayFor(x => x.PatientVM.Dob, new { @class = "options-text-popup" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer control-float-left field-spacing-popup">
+
+                <button class="btn btn-default btn-lg cancel-button" type="button">
+                    Cancel
+                </button>
+                <button class="btn btn-primary btn-lg submit-button" type="submit">Save Message</button>
+
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="CancelModal" data-keyboard="true">
+    <div class="modal-dialog" style="width:35%;margin-right:2%;margin-bottom:1%">
+        <div class="modal-content">
+            <div class="modal-header">
+                Add/Update Message
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default btn-cancel" style="margin-right:5px">No, Stay</button>
+                <button class="btn btn-danger btn-ok" onclick='window.location.href = "@Url.Action("Index","Alerts")"'>Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

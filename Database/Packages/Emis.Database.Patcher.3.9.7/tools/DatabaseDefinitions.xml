@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DatabaseDefinitions>
+	<!-- EMIS Web Standard Databases -->
+	<DatabaseDefinition name="EMISWeb" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISWebDoc" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISState" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISScheduler" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISExternalMessaging" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISMonitoring" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISEmail" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="ServerAgentJobs" databaseName="msdb" isPatchable="false"/>
+	<DatabaseDefinition name="QUTE" isPatchable="false" defunct="true"/>
+	
+	<!-- MKB -->
+	<DatabaseDefinition name="MKBRuntime" isPatchable="false" installUnitTestFramework="true"/>
+	
+	<!-- Spoke Databases -->
+	<DatabaseDefinition name="EMISBusinessContinuity" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISSpokeIndex" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISSpokeMonitoring" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISSpokeTemplate" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISSpokeDocumentCacheTemplate" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- Shared Services -->
+	<DatabaseDefinition name="EMISIndex" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISResourcePublication" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="IdentityServer" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- System Configuration -->
+	<DatabaseDefinition name="EMISConfigurationManager" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- Connect Databases -->
+	<DatabaseDefinition name="EMISConnectCentral" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISConnectCatalogue" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISConnectDistributed" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- GPES -->
+	<DatabaseDefinition name="GPES" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- SDS -->
+	<DatabaseDefinition name="EMISPatchHub" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISPatchHubSignalRBackplane" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISMasterControlProgram" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISSDSLogging" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- PatientAccess -->
+	<DatabaseDefinition name="PatientAccess" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="PatientAccessCredentialStore" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="PFSAPI" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- PatientFlow -->
+	<DatabaseDefinition name="EMISPatientFlowKiosk" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISPatientFlowConfiguration" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISPatientFlowMonitoring" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- Streaming Databases -->
+	<DatabaseDefinition name="EMISMessageFarm" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISMessageClient" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- Extract Services Databases -->
+	<DatabaseDefinition name="EMISIQLiveExtractionRecords" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="PDWPatch" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="DataWarehouse" isPatchable="true" isDataWarehouse="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="ExtractCentralControl" isPatchable="true" isDataWarehouse="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- Notify Server -->
+	<DatabaseDefinition name="NotifyService" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- DeviceManagement -->
+	<DatabaseDefinition name="DeviceManagement" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- Business Intelligence Databases -->
+	<DatabaseDefinition name="EmisTfsReporting" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EmisScsmReporting" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISInternalDW" isPatchable="true" installUnitTestFramework="true" runSqlCop="false"/>
+	<DatabaseDefinition name="EMISInternalAudit" isPatchable="true" installUnitTestFramework="true" runSqlCop="false"/>
+	<DatabaseDefinition name="EmisInternalODS" isPatchable="false" installUnitTestFramework="false" runSqlCop="false"/>
+	<DatabaseDefinition name="EMISInternalDW_StagingAndAudit" isPatchable="true" defunct="true"/>
+	<DatabaseDefinition name="EMISDataWarehouse" isPatchable="true" defunct="true"/>
+	
+	<!-- Database Development -->
+	<DatabaseDefinition name="DatabaseMerge" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	<DatabaseDefinition name="EMISPatchControl" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+	
+	<!-- Test Environments Utilities -->
+	<DatabaseDefinition name="EnvironmentStore" isPatchable="true" installUnitTestFramework="true" runSqlCop="true" />
+	<DatabaseDefinition name="NerveCentre" isPatchable="true" installUnitTestFramework=" false " runSqlCop=" false  "/>
+	<DatabaseDefinition name="ObeliskMonitoring" isPatchable="true" installUnitTestFramework=" false " runSqlCop=" false "/>
+	<DatabaseDefinition name="BuildSystem" isPatchable="true" installUnitTestFramework=" false " runSqlCop=" false "/>
+	<DatabaseDefinition name="TFSAccessTool" isPatchable="true" installUnitTestFramework="false" runSqlCop=" false "/>
+
+  <!-- Ascribe Databases -->
+  <DatabaseDefinition name="EHSC_HAP" databaseName="OAT1_EHSC_HAP_Live" isPatchable="true" installUnitTestFramework="true" runSqlCop="true"/>
+  
+</DatabaseDefinitions>

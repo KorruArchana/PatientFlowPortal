@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.SelectDayUc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             mc:Ignorable="d" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             d:DesignHeight="300" d:DesignWidth="300"
+             DataContext="{Binding SelectDay, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Converters/Converters.xaml" />
+                <ResourceDictionary Source="../Converters/ActualWidthConverter.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Row="0" Style="{DynamicResource HeadingButtonStyle}">
+            <TextBlock Text="{Binding DayWelcomeText}" TextWrapping="Wrap"/>
+        </Button>
+
+        <StackPanel Grid.Row="1">
+            <Viewbox Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,5">
+                <local:ProgressBarUc Visibility="{Binding IsProgressBarVisible, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"/>
+            </Viewbox>
+            
+            <TextBlock Margin="5,0,5,30" TextAlignment="Center"
+                       FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"
+		               Text="{Binding SelectDayText}" Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.3*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="0.3*"/>
+                </Grid.ColumnDefinitions>
+
+                <ItemsControl Grid.Column="1"  HorizontalAlignment="Center" VerticalAlignment="Center" 
+                              ItemsSource="{Binding DaysModel}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+
+                        <DataTemplate>
+                            <Button Command="{Binding SelectDay.DaySelectionCommand,Source={StaticResource Locator}}"
+						        CommandParameter="{Binding Value}" 
+                                 Margin="{Binding  SizeHelperModel.ResolutionHelper.ButtonMargin, Source={StaticResource Locator}}" 
+                                Style="{DynamicResource DefaultButtonStyle}">
+                                <Button.Width>
+                                    <Binding Source="{StaticResource Locator}" Path="SizeHelperModel.ResolutionHelper.DOBButtonWidth" Converter="{StaticResource ActualWidthMinusParameterConverter}">
+                                        <Binding.ConverterParameter>
+                                            <sys:Int32>5</sys:Int32>
+                                        </Binding.ConverterParameter>
+                                    </Binding>
+                                </Button.Width>
+                                <Button.Height>
+                                    <Binding Source="{StaticResource Locator}" Path="SizeHelperModel.ResolutionHelper.DOBButtonHeight" Converter="{StaticResource ActualWidthMinusParameterConverter}">
+                                        <Binding.ConverterParameter>
+                                            <sys:Int32>-5</sys:Int32>
+                                        </Binding.ConverterParameter>
+                                    </Binding>
+                                </Button.Height>
+                            <TextBlock>
+                            <Run Text="{Binding DisplayText}" FontWeight="Bold"></Run><Run FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockXMediumFont, Source={StaticResource Locator}}" Text="{Binding OrdinalText}"></Run>
+                                </TextBlock>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+            </Grid>
+        </StackPanel>
+    </Grid>
+
+</UserControl>

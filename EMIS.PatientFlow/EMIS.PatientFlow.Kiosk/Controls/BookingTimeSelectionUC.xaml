@@ -1,0 +1,274 @@
+﻿<UserControl x:Class="EMIS.PatientFlow.Kiosk.Controls.BookingTimeSelectionUc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
+             xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras"
+             xmlns:local="clr-namespace:EMIS.PatientFlow.Kiosk.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+        DataContext="{Binding BookingTimeSelection, Source={StaticResource Locator}}">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Converters/Converters.xaml" />
+                <ResourceDictionary Source="BookingTimeSelectionUCStyle.xaml"/>
+                <ResourceDictionary Source="../Converters/AppointmentButtonStyleConverter.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="9.2*"/>
+        </Grid.RowDefinitions>
+
+        <Viewbox Grid.Row="0" Width="50" Height="50"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" >
+            <local:ProgressBarUc Visibility="{Binding IsProgressBarVisible, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"/>
+        </Viewbox>
+
+        <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" 
+                   Foreground="{DynamicResource LightGrayColor}" FontWeight="Bold"
+                   Text="{Binding SelectAppointmentDateText}" 
+                   FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}"/>
+       
+        <Grid Grid.Row="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="8*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Style="{StaticResource PreviousNextButtonStyle}"
+                    Content="&lt;" FontSize="50" IsEnabled="{Binding IsPreviousButtonEnabled}"
+                    Command="{Binding BookingTimeSelection.PreviousMonthCommand, Source={StaticResource Locator}}"/>
+
+            <Button Grid.Column="2" Style="{StaticResource PreviousNextButtonStyle}" 
+                    Content="&gt;" FontSize="50"
+                    Command="{Binding BookingTimeSelection.NextMonthCommand, Source={StaticResource Locator}}"/>
+
+            <DockPanel x:Name="CalenderStkPnl" Grid.Column="1">
+                <StackPanel DockPanel.Dock="Top" Background="#F0F0F0">
+                    <TextBlock TextAlignment="Center" Margin="10" FontWeight="Bold" Foreground="#087A6F"
+                           FontSize="{Binding SizeHelperModel.ResolutionHelper.TextBlockLargeFont, Source={StaticResource Locator}}">
+                    <Run Text="{Binding CalenderMonthText}"/>
+                    <Run Text="{Binding CalenderYearText}"/>
+                    </TextBlock>
+                </StackPanel>
+
+
+                <DockPanel DockPanel.Dock="Bottom" Background="#F6F6F6"
+                           Width="{Binding ActualWidth, ElementName=CalenderStkPnl}" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                    
+                    <StackPanel Orientation="Horizontal" Margin="5,5" 
+                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Button Style="{StaticResource CalenderButtonStyle}"
+                                Width="35" Height="35"/>
+                        <TextBlock Style="{StaticResource HelpDescriptionStyle}" Text="{Binding AppointmentsText}" Margin="5,0,0,0" />
+
+                        <Button Style="{StaticResource CalenderButtonStyle}" IsEnabled="False"                                
+                                Width="35" Height="35" Margin="40,0,0,0"/>
+                        <TextBlock Style="{StaticResource HelpDescriptionStyle}" Text="{Binding NoAppointmentsText}" Margin="5,0,40,0"/>
+
+                        <Button Style="{StaticResource CalenderTodayButtonStyle}" Background="Transparent" 
+                                Width="35" Height="35" Margin="5,0,0,0"/>
+                        <TextBlock Style="{StaticResource HelpDescriptionStyle}" Text="{Binding TodayText}" Margin="5,0,0,0"/>
+
+                    </StackPanel>
+
+                </DockPanel>
+
+                <ListView DockPanel.Dock="Top" ItemsSource="{Binding MonthCalender}"
+                          HorizontalAlignment="Center" VerticalAlignment="Top" Background="Transparent" BorderThickness="0"
+                          ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+
+                    <ListView.Template>
+                        <ControlTemplate>
+                            <DockPanel LastChildFill="True">
+                                    <Grid DockPanel.Dock="Top" Grid.Row="0" Background="#F6F6F6"
+                                  Width="{Binding ActualWidth, ElementName=CalenderStkPnl}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="1">
+                                        <TextBlock Style="{StaticResource DaysTextBlock}" Text="Mon"/>
+                                    </Border>
+                                    <Border Grid.Column="2">
+                                        <TextBlock Style="{StaticResource DaysTextBlock}" Text="Tue"/>
+                                    </Border>
+                                    <Border Grid.Column="3">
+                                        <TextBlock Style="{StaticResource DaysTextBlock}" Text="Wed"/>
+                                    </Border>
+                                    <Border Grid.Column="4">
+                                        <TextBlock Style="{StaticResource DaysTextBlock}" Text="Thu"/>
+                                    </Border>
+                                    <Border Grid.Column="5">
+                                        <TextBlock Style="{StaticResource DaysTextBlock}" Text="Fri"/>
+                                    </Border>
+                                    <Border Grid.Column="6">
+                                        <TextBlock Style="{StaticResource DaysTextBlock}" Foreground="Gray" Text="Sat"/>
+                                    </Border>
+                                    <Border Grid.Column="7">
+                                        <TextBlock Style="{StaticResource DaysTextBlock}" Foreground="Gray" Text="Sun"/>
+                                    </Border>
+
+                                </Grid>
+                                    <ItemsPresenter DockPanel.Dock="Top"></ItemsPresenter>
+                                
+                            </DockPanel>
+                        </ControlTemplate>
+                    </ListView.Template>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Background="#FFFFFF" HorizontalAlignment="Center" Margin="0,10,0,8"
+                                  Width="{Binding ActualWidth, ElementName=CalenderStkPnl}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="1"
+                                        Content="{Binding Monday.Day}" IsEnabled="{Binding Monday.IsSlotPresent}"
+                                        Visibility="{Binding Monday.IsValidDate, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                                        Command="{Binding BookingTimeSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                                        CommandParameter="{Binding Monday.Day}">
+                                    <Button.Style>
+                                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                            <Binding Path="Monday.IsToday"/>
+                                            <Binding Source="{StaticResource CalenderTodayButtonStyle}" />
+                                            <Binding Source="{StaticResource CalenderButtonStyle}" />
+                                        </MultiBinding>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Grid.Column="2"
+                                        Content="{Binding Tuesday.Day}" IsEnabled="{Binding Tuesday.IsSlotPresent}"
+                                        Visibility="{Binding Tuesday.IsValidDate, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                                        Command="{Binding BookingTimeSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                                        CommandParameter="{Binding Tuesday.Day}">
+                                    <Button.Style>
+                                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                            <Binding Path="Tuesday.IsToday"/>
+                                            <Binding Source="{StaticResource CalenderTodayButtonStyle}" />
+                                            <Binding Source="{StaticResource CalenderButtonStyle}" />
+                                        </MultiBinding>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Grid.Column="3"
+                                        Content="{Binding Wednesday.Day}" IsEnabled="{Binding Wednesday.IsSlotPresent}"
+                                        Visibility="{Binding Wednesday.IsValidDate, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                                        Command="{Binding BookingTimeSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                                        CommandParameter="{Binding Wednesday.Day}">
+                                    <Button.Style>
+                                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                            <Binding Path="Wednesday.IsToday"/>
+                                            <Binding Source="{StaticResource CalenderTodayButtonStyle}" />
+                                            <Binding Source="{StaticResource CalenderButtonStyle}" />
+                                        </MultiBinding>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Grid.Column="4"
+                                        Content="{Binding Thursday.Day}" IsEnabled="{Binding Thursday.IsSlotPresent}"
+                                        Visibility="{Binding Thursday.IsValidDate, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                                        Command="{Binding BookingTimeSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                                        CommandParameter="{Binding Thursday.Day}">
+                                    <Button.Style>
+                                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                            <Binding Path="Thursday.IsToday"/>
+                                            <Binding Source="{StaticResource CalenderTodayButtonStyle}" />
+                                            <Binding Source="{StaticResource CalenderButtonStyle}" />
+                                        </MultiBinding>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Grid.Column="5"
+                                        Content="{Binding Friday.Day}" IsEnabled="{Binding Friday.IsSlotPresent}"
+                                        Visibility="{Binding Friday.IsValidDate, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                                        Command="{Binding BookingTimeSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                                        CommandParameter="{Binding Friday.Day}">
+                                    <Button.Style>
+                                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                            <Binding Path="Friday.IsToday"/>
+                                            <Binding Source="{StaticResource CalenderTodayButtonStyle}" />
+                                            <Binding Source="{StaticResource CalenderButtonStyle}" />
+                                        </MultiBinding>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Grid.Column="6"
+                                        Content="{Binding Saturday.Day}" IsEnabled="{Binding Saturday.IsSlotPresent}"
+                                        Visibility="{Binding Saturday.IsValidDate, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                                        Command="{Binding BookingTimeSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                                        CommandParameter="{Binding Saturday.Day}">
+                                    <Button.Style>
+                                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                            <Binding Path="Saturday.IsToday"/>
+                                            <Binding Source="{StaticResource CalenderTodayButtonStyle}" />
+                                            <Binding Source="{StaticResource CalenderButtonStyle}" />
+                                        </MultiBinding>
+                                    </Button.Style>
+                                </Button>
+
+                                <Button Grid.Column="7"
+                                        Content="{Binding Sunday.Day}" IsEnabled="{Binding Sunday.IsSlotPresent}"
+                                        Visibility="{Binding Sunday.IsValidDate, Converter={StaticResource BoolToVisibleHiddenCollapsed}}"
+                                        Command="{Binding BookingTimeSelection.DateSelectedCommand, Source={StaticResource Locator}}"
+                                        CommandParameter="{Binding Sunday.Day}">
+                                    <Button.Style>
+                                        <MultiBinding Converter="{StaticResource AppointmentButtonStyle}">
+                                            <Binding Path="Sunday.IsToday"/>
+                                            <Binding Source="{StaticResource CalenderTodayButtonStyle}" />
+                                            <Binding Source="{StaticResource CalenderButtonStyle}" />
+                                        </MultiBinding>
+                                    </Button.Style>
+                                </Button>
+
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                
+            </DockPanel>
+            
+        </Grid>
+    </Grid>
+  
+</UserControl>

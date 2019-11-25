@@ -1,0 +1,826 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{05F695AD-BA58-40D8-920E-EFD431652F45}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EMIS.PatientFlow.Kiosk</RootNamespace>
+    <AssemblyName>EMIS.PatientFlow.Kiosk</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ExpressionBlendVersion>12.0.50716.0</ExpressionBlendVersion>
+    <NuGetPackageImportStamp>a47f3fdb</NuGetPackageImportStamp>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Kiosk\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Kiosk\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Win32Resource>
+    </Win32Resource>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Assets\Icons\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="GalaSoft.MvvmLight">
+      <HintPath>..\packages\MvvmLightLibs.5.0.2.0\lib\net40\GalaSoft.MvvmLight.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Extras">
+      <HintPath>..\packages\MvvmLightLibs.5.0.2.0\lib\net40\GalaSoft.MvvmLight.Extras.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Client">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.1.2\lib\net40\Microsoft.AspNet.SignalR.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation">
+      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop, Version=1.0.168.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NRtfTree">
+      <HintPath>..\packages\RTFLib\NRtfTree.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework.Aero">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.configuration">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.Entity">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\net40\System.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Runtime">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\net40\System.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\net40\System.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.0.2.0\lib\net40\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PresentationCore">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Controls\ArrivalConfirmationAndRouting.xaml.cs">
+      <DependentUpon>ArrivalConfirmationAndRouting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ArrivalRouting.xaml.cs">
+      <DependentUpon>ArrivalRouting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ArrivedAppointmentErrorUC.xaml.cs">
+      <DependentUpon>ArrivedAppointmentErrorUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\BookingTimeSelectionUC.xaml.cs">
+      <DependentUpon>BookingTimeSelectionUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ConfirmBooking.xaml.cs">
+      <DependentUpon>ConfirmBooking.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ArriveByBarcodeUC.xaml.cs">
+      <DependentUpon>ArriveByBarcodeUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FinishRoutingModelUc.xaml.cs">
+      <DependentUpon>FinishRoutingModelUc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FirstAvailableAppointmentUC.xaml.cs">
+      <DependentUpon>FirstAvailableAppointmentUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\HomePageUC.xaml.cs">
+      <DependentUpon>HomePageUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MultipleAppointmentsUC.xaml.cs">
+      <DependentUpon>MultipleAppointmentsUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MultiplePatientsExceptionPage.xaml.cs">
+      <DependentUpon>MultiplePatientsExceptionPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectionDayMonthYearUC.xaml.cs">
+      <DependentUpon>SelectionDayMonthYearUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectPostCodeUC.xaml.cs">
+      <DependentUpon>SelectPostCodeUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DemographicGotGPMessageUc.xaml.cs">
+      <DependentUpon>DemographicGotGPMessageUc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DemographicDetailsUc.xaml.cs">
+      <DependentUpon>DemographicDetailsUc.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DoctorSelectionUC.xaml.cs">
+      <DependentUpon>DoctorSelectionUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ExceptionDivert.xaml.cs">
+      <DependentUpon>ExceptionDivert.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FinishBookingUC.xaml.cs">
+      <DependentUpon>FinishBookingUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FinishQuestionnairesUC.xaml.cs">
+      <DependentUpon>FinishQuestionnairesUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\FinishUC.xaml.cs">
+      <DependentUpon>FinishUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\OutOfServiceUC.xaml.cs">
+      <DependentUpon>OutOfServiceUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ProgressBarUC.xaml.cs">
+      <DependentUpon>ProgressBarUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectDayUC.xaml.cs">
+      <DependentUpon>SelectDayUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectGenderUC.xaml.cs">
+      <DependentUpon>SelectGenderUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectMonthUC.xaml.cs">
+      <DependentUpon>SelectMonthUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectOptionUC.xaml.cs">
+      <DependentUpon>SelectOptionUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectOrganisation.xaml.cs">
+      <DependentUpon>SelectOrganisation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectSlotTypeUC.xaml.cs">
+      <DependentUpon>SelectSlotTypeUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectSurnameUC.xaml.cs">
+      <DependentUpon>SelectSurnameUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectYearUC.xaml.cs">
+      <DependentUpon>SelectYearUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SettingsUC.xaml.cs">
+      <DependentUpon>SettingsUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SingleAppointmentUC.xaml.cs">
+      <DependentUpon>SingleAppointmentUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SiteMapUC.xaml.cs">
+      <DependentUpon>SiteMapUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SurveyQuestions.xaml.cs">
+      <DependentUpon>SurveyQuestions.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SurveysChooseOptionUC.xaml.cs">
+      <DependentUpon>SurveysChooseOptionUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\ActualWidthConverter.cs" />
+    <Compile Include="Converters\AppointmentButonStyleConverter.cs" />
+    <Compile Include="Converters\BoolToVisibleHiddenCollapsedConverter.cs" />
+    <Compile Include="Converters\DoctorDetailsConverter.cs" />
+    <Compile Include="Converters\HeadingStyleConverter.cs" />
+    <Compile Include="Converters\IsOnBottomConverter.cs" />
+    <Compile Include="Converters\PassThroughConverter.cs" />
+    <Compile Include="Converters\PolyGonPointsConverter.cs" />
+    <Compile Include="Converters\RoundedButtonStyleConverter.cs" />
+    <Compile Include="DatabaseAccess\DBAccess.Appointment.cs" />
+    <Compile Include="DatabaseAccess\DBAccess.cs" />
+    <Compile Include="DatabaseAccess\DBAccess.Demographics.cs" />
+    <Compile Include="DatabaseAccess\DBAccess.Language.cs" />
+    <Compile Include="DatabaseAccess\DBAccess.KioskConfiguration.cs" />
+    <Compile Include="DatabaseAccess\DBAccess.Questionaire.cs" />
+    <Compile Include="DatabaseAccess\DBAccess.PushConfiguration.cs" />
+    <Compile Include="DatabaseAccess\Repository\AppointmentRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\BaseRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\ConfigurationRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\DemographicRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\Interfaces\IAppointmentRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\Interfaces\IConfigurationRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\Interfaces\IDemographicRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\Interfaces\ILanguageRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\Interfaces\IPushServiceAlertRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\Interfaces\IPushServiceRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\Interfaces\IQuestionnaireRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\LanguageRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\PushServiceAlertRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\PushServiceRepository.cs" />
+    <Compile Include="DatabaseAccess\Repository\QuestionnaireRepository.cs" />
+    <Compile Include="Enum\AgeOperations.cs" />
+    <Compile Include="Enum\AppointmentArrivalStatus.cs" />
+    <Compile Include="Enum\AppointmentReasonType.cs" />
+    <Compile Include="Enum\AppPages.cs" />
+    <Compile Include="Enum\ErrorCodes.cs" />
+    <Compile Include="Enum\KioskConfigType.cs" />
+    <Compile Include="Enum\LanguageText.cs" />
+    <Compile Include="Enum\Modules.cs" />
+    <Compile Include="Helper\APIHelper.cs" />
+    <Compile Include="Helper\AppointmentHelper.cs" />
+    <Compile Include="Helper\Constants.cs" />
+    <Compile Include="Helper\CurrentLanguageText.cs" />
+    <Compile Include="Helper\CustomDelegatingHandler.cs" />
+    <Compile Include="Helper\DIResolver.cs" />
+    <Compile Include="Helper\GlobalVariables.cs" />
+    <Compile Include="Helper\KioskDataHelper.cs" />
+    <Compile Include="Helper\Logger.cs" />
+    <Compile Include="Helper\ResolutionSizeHelper\SizeHelper.cs" />
+    <Compile Include="Helper\SlotWeekCalender.cs" />
+    <Compile Include="Helper\TPPHelper.cs" />
+    <Compile Include="Helper\Utilities.cs" />
+    <Compile Include="Helper\ViewModelHelper.cs" />
+    <Compile Include="Helper\WakeUp.cs" />
+    <Compile Include="HubClients\BaseHubClient.cs" />
+    <Compile Include="HubClients\KioskHubClient.cs" />
+    <Compile Include="KeyBoard\KioskKeyBoard.cs" />
+    <Compile Include="KeyBoard\NumericKeyboard.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="KeyBoard\TouchScreenKeyboard.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LASTINPUTINFO.cs" />
+    <Compile Include="Model\Alerts.cs" />
+    <Compile Include="Model\AnonymousSurvey.cs" />
+    <Compile Include="Model\ApiUser.cs" />
+    <Compile Include="Model\Appointment.cs" />
+    <Compile Include="Model\AppointmentCollection.cs" />
+    <Compile Include="Model\AppointmentDetail.cs" />
+    <Compile Include="Model\AppointmentSession.cs" />
+    <Compile Include="Model\AppointmentSlots.cs" />
+    <Compile Include="Model\AppointmentSlotType.cs" />
+    <Compile Include="Model\BookingAppointments.cs" />
+    <Compile Include="Model\DemographicDetail.cs" />
+    <Compile Include="Model\DemographicDisplay.cs" />
+    <Compile Include="Model\DemographicListCollection.cs" />
+    <Compile Include="Model\Divert.cs" />
+    <Compile Include="Model\DoctorDetailsBooking.cs" />
+    <Compile Include="Model\Entity.cs" />
+    <Compile Include="Model\Kiosk.cs" />
+    <Compile Include="Model\KioskArrival.cs" />
+    <Compile Include="Model\KioskRegistrationGuid.cs" />
+    <Compile Include="Model\KioskSettings.cs" />
+    <Compile Include="Model\LinkedMember.cs" />
+    <Compile Include="Model\Member.cs" />
+    <Compile Include="Model\Message.cs" />
+    <Compile Include="Model\Module.cs" />
+    <Compile Include="Model\LanguageModel.cs" />
+    <Compile Include="Model\MonthModel.cs" />
+    <Compile Include="Model\NonAnonymousSurveyFrequency.cs" />
+    <Compile Include="Model\Options.cs" />
+    <Compile Include="Model\Organisation.cs" />
+    <Compile Include="Model\Patient.cs" />
+    <Compile Include="Model\PatientMatch.cs" />
+    <Compile Include="Model\PatientMatchOrder.cs" />
+    <Compile Include="Model\PatientMessage.cs" />
+    <Compile Include="Model\Questionnaire.cs" />
+    <Compile Include="Model\QuestionnaireAnswerOption.cs" />
+    <Compile Include="Model\KioskStatus.cs" />
+    <Compile Include="Model\Questions.cs" />
+    <Compile Include="Properties\Resources.es-ES.Designer.cs">
+      <DependentUpon>Resources.es-ES.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\Resources.fr-FR.Designer.cs">
+      <DependentUpon>Resources.fr-FR.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\Resources.en-US.Designer.cs">
+      <DependentUpon>Resources.en-US.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="TemplateSelector\QuestionnaireDataTemplateSelector.cs" />
+    <Compile Include="UnsafeNativeMethods.cs" />
+    <Compile Include="ViewModel\ArrivalConfirmationAndRoutingViewModel.cs" />
+    <Compile Include="ViewModel\ArrivalRoutingViewModel.cs" />
+    <Compile Include="ViewModel\ArrivedAppointmentErrorViewModel.cs" />
+    <Compile Include="ViewModel\BarcodeArrivalViewModel.cs" />
+    <Compile Include="ViewModel\BookingTimeSelectionViewModel.cs" />
+    <Compile Include="ViewModel\ConfirmBookingViewModel.cs" />
+    <Compile Include="ViewModel\DemographicGpMessageViewModel.cs" />
+    <Compile Include="ViewModel\DoctorSelectionViewModel.cs" />
+    <Compile Include="ViewModel\ExceptionDivertViewModel.cs" />
+    <Compile Include="ViewModel\FinishBookingViewModel.cs" />
+    <Compile Include="ViewModel\FinishQuestionnaireViewModel.cs" />
+    <Compile Include="ViewModel\FinishRoutingViewModel.cs" />
+    <Compile Include="ViewModel\FinishViewModel.cs" />
+    <Compile Include="ViewModel\FirstAvailableAppointmentViewModel.cs" />
+    <Compile Include="ViewModel\HomePageViewModel.cs" />
+    <Compile Include="ViewModel\MultipleAppointmentsViewModel.cs" />
+    <Compile Include="ViewModel\MultiplePatientsExceptionPageViewModel.cs" />
+    <Compile Include="ViewModel\OutOfServiceViewModel.cs" />
+    <Compile Include="ViewModel\PatientDemographicDetailsViewModel.cs" />
+    <Compile Include="ViewModel\SelectDayMonthYearViewModel.cs" />
+    <Compile Include="ViewModel\SelectDayViewModel.cs" />
+    <Compile Include="ViewModel\SelectGenderViewModel.cs" />
+    <Compile Include="ViewModel\SelectMonthViewModel.cs" />
+    <Compile Include="ViewModel\SelectOptionViewModel.cs" />
+    <Compile Include="ViewModel\SelectOrganisationViewModel.cs" />
+    <Compile Include="ViewModel\SelectPostCodeViewModel.cs" />
+    <Compile Include="ViewModel\SelectSurnameViewModel.cs" />
+    <Compile Include="ViewModel\SelectYearViewModel.cs" />
+    <Compile Include="ViewModel\SettingsViewModel.cs" />
+    <Compile Include="ViewModel\SingleAppointmentViewModel.cs" />
+    <Compile Include="ViewModel\SiteMapViewModel.cs" />
+    <Compile Include="ViewModel\SizeHelperViewModel.cs" />
+    <Compile Include="ViewModel\SelectSlotTypeViewModel.cs" />
+    <Compile Include="ViewModel\SurveyQuestionsViewModel.cs" />
+    <Compile Include="ViewModel\SurveysChooseOptionViewModel.cs" />
+    <Compile Include="ViewModel\ViewModelBase.cs" />
+    <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="View\IndexWindow.xaml.cs">
+      <DependentUpon>IndexWindow.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.es-ES.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.es-ES.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.fr-FR.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.fr-FR.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.en-US.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.en-US.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="App.Config">
+      <SubType>Designer</SubType>
+    </None>
+    <Resource Include="Assets\Fonts\OpenSans-Bold.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-BoldItalic.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-ExtraBold.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-ExtraBoldItalic.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-Italic.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-Light.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-LightItalic.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-Regular.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-Semibold.ttf" />
+    <Resource Include="Assets\Fonts\OpenSans-SemiboldItalic.ttf" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+    <None Include="Settings.StyleCop" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Controls\ArrivalConfirmationAndRouting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ArrivalRouting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ArrivedAppointmentErrorUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\BookingTimeSelectionUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\BookingTimeSelectionUCStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ConfirmBooking.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ArriveByBarcodeUC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\FinishRoutingModelUc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DoctorSelectionUCStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FirstAvailableAppointmentUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\HomePageUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MultipleAppointmentsUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\MultiplePatientsExceptionPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectionDayMonthYearUC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SelectPostCodeUC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DemographicGotGPMessageUc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DemographicDetailsUc.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\DoctorSelectionUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ExceptionDivert.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FinishBookingUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FinishQuestionnairesUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\FinishUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\OutOfServiceUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ProgressBarUC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SelectDayUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectGenderUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectMonthUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectOptionUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectOrganisation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectSlotTypeUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectSurnameUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SelectYearUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SettingsUC.xaml">
+      <SubType>Form</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SingleAppointmentUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SiteMapUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SurveyQuestions.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SurveyQuestionsStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SurveysChooseOptionUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Converters\ActualWidthConverter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Converters\AppointmentButtonStyleConverter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Converters\Converters.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Converters\HeadingStyleConverter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Converters\PassThroughConverter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\IndexWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.SQL.Server.Compact.4.0">
+      <Visible>False</Visible>
+      <ProductName>SQL Server Compact 4.0 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EMIS.PatientFlow\EMIS.PatientFlow.API\EMIS.PatientFlow.API.csproj">
+      <Project>{7508ea59-a936-4d68-b669-73f9fbd0f518}</Project>
+      <Name>EMIS.PatientFlow.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\EMIS.PatientFlow\EMIS.PatientFlow.Common\EMIS.PatientFlow.Common.csproj">
+      <Project>{768a1fc4-f28a-4fed-bf39-d62cb6e6682e}</Project>
+      <Name>EMIS.PatientFlow.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Icons\UIIcons\ArrivalDownArrow.png" />
+    <Resource Include="Assets\Icons\UIIcons\Back.png" />
+    <Resource Include="Assets\Icons\UIIcons\Home.png" />
+    <Resource Include="Assets\Icons\UIIcons\CheckBox_Yes.png" />
+    <Resource Include="Assets\Icons\UIIcons\CheckBox.png" />
+    <Resource Include="Assets\Icons\UIIcons\Backspace.png" />
+    <Resource Include="Assets\Icons\UIIcons\BackSpaceKeyboard.png" />
+    <Resource Include="Assets\Icons\UIIcons\Shift.png" />
+    <Resource Include="Assets\Icons\UIIcons\ArrivalBarSample.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Albanian.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Arabic.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Bengali.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Chinese.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\English.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Farsi.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\French.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\German.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Greek.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Gujarati.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Hindi.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Iraqi.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Italian.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Kurdish.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Polish.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Portuguese.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Punjabi.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Romanian.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Slovakian.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Somalian.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Spanish.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Tamil.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Thai.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Turkish.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Urdu.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Welsh.png" />
+    <Resource Include="Assets\Icons\Flags\FullSizeFlags\Russian.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Albanian.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Arabic.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Bengali.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Chinese.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\English.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Farsi.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\French.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\German.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Greek.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Gujarati.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Hindi.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Iraqi.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Italian.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Kurdish.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Polish.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Portuguese.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Punjabi.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Romanian.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Russian.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Slovakian.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Somalian.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Spanish.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Tamil.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Thai.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Turkish.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Urdu.png" />
+    <Resource Include="Assets\Icons\Flags\SquareFlags\Welsh.png" />
+    <Resource Include="Assets\Icons\UIIcons\DownArrow.png" />
+    <Resource Include="Assets\Icons\UIIcons\DownArrow_Pressed.png" />
+    <Resource Include="Assets\Icons\UIIcons\UpArrow.png" />
+    <Resource Include="Assets\Icons\UIIcons\UpArrow_Pressed.png" />
+    <Resource Include="Assets\Icons\UIIcons\ErrorAppointmentImage.png" />
+    <Resource Include="Assets\Icons\UIIcons\Calender.png" />
+    <Resource Include="Assets\Icons\UIIcons\Check.png" />
+    <Resource Include="Assets\Icons\UIIcons\Close.png" />
+    <Resource Include="Assets\Icons\UIIcons\Rawdon House.png" />
+    <Resource Include="Assets\Icons\UIIcons\Stafford House.png" />
+    <Resource Include="Assets\Fonts\LICENSE.txt" />
+    <Resource Include="Assets\Icons\UIIcons\GlobeIcon.png" />
+    <Content Include="Assets\LanguageFile\KioskLanguageFile.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Assets\Icons\icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(ProjectDir)App.config" "$(TargetPath).config"
+"$(ProjectDir)..\..\3rd Party\SDSConfigUtility.exe" "$(TargetPath).config" "$(ProjectDir)ConfigValues.txt"</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

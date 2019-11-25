@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Controller>
+	<Database Category="EMISPatientFlowConfiguration" DatabaseName="EMISPatientFlowConfiguration">
+		<Module>HouseKeeping\HouseKeepingModule.xml</Module>
+		<Module>Patches\PatchesModule.xml</Module>
+		<Module>PatientFlow\PatientFlowModule.xml</Module>
+	</Database>
+</Controller>

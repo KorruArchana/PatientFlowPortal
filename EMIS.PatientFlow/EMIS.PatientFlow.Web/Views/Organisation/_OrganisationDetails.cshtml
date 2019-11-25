@@ -1,0 +1,335 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.OrganisationViewModel
+@using EMIS.PatientFlow.Common.Enums
+@using EMIS.PatientFlow.Common.Extensions
+<div id="divSuccessMsg"></div>
+
+@Html.Partial("_GoogleAnalytics","OrganisationDetails")
+
+<script type="text/javascript">
+    if ('@System.Configuration.ConfigurationManager.AppSettings.AllKeys.Contains("SystemType")' == "True") {
+        var OrgSystemType = '@System.Configuration.ConfigurationManager.AppSettings["SystemType"]';
+        if (('@Model.SystemTypeId' == 1 && OrgSystemType == "EMIS - PCS") || ('@Model.SystemTypeId' == 2 && OrgSystemType == "EMIS - Web")) {
+            $('#AddEditOrg').hide();
+            $('#AddEditKiosk').hide();
+        }
+    }
+    else {
+        if ('@Model.SystemTypeId' == 2) {
+            $('#AddEditOrg').hide();
+            $('#AddEditKiosk').hide();
+        }
+    }
+</script>
+
+<div id="Maindiv">
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockHeading">
+                Organisation
+            </span>
+            <span><img src="~/images/arrow.png"></span>
+            <span class="rightBlockSubHeading">
+                @Model.OrganisationName
+            </span>
+        </div>
+        <div class="rightBlockTopButtonContainer">
+           @if (User.IsInRole("EMIS Super User"))
+            {
+                <a id="AddEditOrg" href="#" style="text-decoration:none" onclick="return LoadEditContent('EditOrganisation', @Model.Id)">
+                    <input class="AddOrEditText EditTextColor" type="text" value="Edit Organisation" readonly="readonly"/>
+                    <img src="~/Images/edit-icon.png"/>
+                </a>
+            }
+        </div>
+    </div>
+	<div class="rightBlockContent">
+		<div>
+			<p class="leftTxt">
+				SystemType:
+			</p>
+			<p class="rightTxt">
+				@Model.SystemType
+			</p>
+		</div>
+
+		<div>
+			<p class="leftTxt">
+				Site Number:
+			</p>
+			<p class="rightTxt">
+				@Model.SiteNumber
+			</p>
+		</div>
+		<br /><br />
+	</div>
+    @if (Model.SystemType == SystemType.EmisWeb.GetDisplayName() || Model.SystemType == SystemType.EmisPcs.GetDisplayName())
+    {
+        <div id="DepartmentDiv">
+			<div class="rightBlockheader">
+				<div class="rightBlockHeadingContainer">
+					<span class="rightBlockSubHeading">
+						Departments under @Model.OrganisationName
+					</span>
+
+				</div>
+				<div class="rightBlockTopButtonContainer">
+
+                    <a href="#" style="text-decoration:none" onclick="return LoadAddContent('AddDepartment', @Model.Id, @Convert.ToInt32(NodeType.OrganisationDetails))">
+                        <input type="text" class="AddOrEditText AddTextColor" value="Add Department" readonly="readonly"/>
+						<img src="~/Images/plus.png" />
+					</a>
+
+				</div>
+			</div>
+			<div id="gridContainer" class="rightBlockContent">
+
+				<table class="TFtable">
+					<thead>
+						<tr>
+							<th>Department Name</th>
+
+							<th>Actions</th>
+
+						</tr>
+					</thead>
+					<tbody data-bind="foreach: items">
+						<tr>
+							<td><a href="#" data-bind="text: DepartmentName, click: $parent.details"> </a></td>
+
+							<td>
+
+
+								<span data-bind="if:LinkCount==0"><a href="#" class="deleteLinkBtn" title="Delete Department" data-bind="click: $parent.deleteDept"></a></span>
+								<span data-bind="if:LinkCount>0"> <a class="disableddeleteLinkBtn" title="Linked"> </a> </span>
+
+							</td>
+
+						</tr>
+					</tbody>
+					<tfoot>
+						<tr style="background-color:white;">
+							<td colspan="5"><div id="paginationHolder"></div></td>
+						</tr>
+					</tfoot>
+				</table>
+
+
+			</div>
+		</div>
+    }
+			@{
+				int pageSize = EMIS.PatientFlow.Web.Helper.Config.PageSize;
+			}
+			<br /><br />
+
+    <div class="rightBlockheader">
+        <div class="rightBlockHeadingContainer">
+            <span class="rightBlockSubHeading">
+                Kiosks under @Model.OrganisationName
+            </span>
+
+        </div>
+        <div class="rightBlockTopButtonContainer">
+
+            <a href="#" id="AddEditKiosk"  style="text-decoration:none" onclick="return LoadAddContent('AddKiosk', @Model.Id, @Convert.ToInt32(NodeType.OrganisationDetails))">
+                <input type="text" class="AddOrEditText AddTextColor" value="Add Kiosk" readonly="readonly"/>
+                <img src="~/Images/plus.png" />
+            </a>
+
+        </div>
+    </div>
+
+		<div id="grdKiosk" class="rightBlockContent">
+			<table class="TFtable">
+				<thead>
+					<tr>
+						<th>Kiosk Name</th>
+					    <th>PC Name</th>
+                        <th>IP Address</th>
+                        <th>Version</th>
+						<th>Status</th>
+						<th>Usage for day</th>						
+						@if (User.IsInRole("EMIS Super User"))
+						{
+							<th>Actions</th>
+						}
+					</tr>
+				</thead>
+				<tbody data-bind="foreach: itemsKiosk">
+					<tr>
+						<td><a href="#" data-bind="text: KioskName, click: $parent.updateKiosk"> </a></td>
+					    <td data-bind="text:PcName"></td>
+                        <td data-bind="text:IpAddress"></td>
+                        <td data-bind="text:KioskVersion"></td>
+						<td data-bind="text:KioskStatus"></td>
+						<td data-bind="text:Usage"></td>
+						@if (User.IsInRole("EMIS Super User"))
+						{
+							<td>
+								<span>
+									<a href="#" class="deleteLinkBtn" title="Delete Kiosk" data-bind="click:$parent.deleteKiosk"> </a>
+								</span>
+							</td>
+						}
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr style="background-color:white;">
+						<td colspan="5"><div id="paginationHolderKiosk"></div></td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+    
+</div>
+
+<script type="text/javascript">
+
+    var pagedViewModelKiosk = function (pageSize,organisationId) {
+        var self = this;
+        self.items = ko.observableArray();
+        self.itemsKiosk = ko.observableArray();
+        self.currentPage = ko.observable(1);
+        self.currentPageKiosk = ko.observable(1);
+        self.totalCount = ko.observable(1);
+        self.totalCountKiosk = ko.observable(1);
+        self.pageSize = pageSize;
+        self.pageCount = ko.computed(function () {
+            if ((self.totalCount() % self.pageSize) == 0)
+                return parseInt((self.totalCount() / self.pageSize));
+            else
+                return parseInt((self.totalCount() / self.pageSize)) + 1;
+        });
+        self.pageCountKiosk = ko.computed(function () {
+            if ((self.totalCountKiosk() % self.pageSize) == 0)
+                return parseInt((self.totalCountKiosk() / self.pageSize));
+            else
+                return parseInt((self.totalCountKiosk() / self.pageSize)) + 1;
+        });
+        self.update = function (item) {
+            return LoadEditContent('EditDepartment',item.Id);
+        }
+        self.deleteDept = function (item) {
+            if (confirm("Are you sure you want to Delete ?")) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Department")',
+                    data: { nodeId: item.Id,organisationId:organisationId },
+                    type: "GET",
+                    success: function (data) {
+                        self.initialize();
+                        updateSiteSubmenu();
+                    }
+                });
+            }
+
+        }
+        self.updateKiosk = function (item) {
+            return LoadAddContent('KioskDetails', @Model.Id, item.Id);
+        }
+        self.details = function (item) {
+            return LoadContent(@Convert.ToInt32(NodeType.DepartmentDetails),item.Id,organisationId);
+        }
+        self.initialize = function () {
+            self.currentPage(1);
+            self.currentPageKiosk(1);
+            self.totalCount(0);
+            self.totalCountKiosk(0);
+            self.itemsKiosk.removeAll();
+            self.getData(self.currentPage());
+            self.getDataKiosk(self.currentPageKiosk());
+        }
+        self.getData = function (pageNumber) {
+            $.ajax({
+                url: '@Url.Action("GetDepartments","Department")',
+                data: { pageNumber: pageNumber, pageSize: self.pageSize,organisationId:organisationId},
+                type: "GET",
+                success: function (data) {
+                    self.items.removeAll();
+                    self.currentPage(pageNumber);
+                    self.totalCount(data.TotalCount);
+                    if (data.DepartmentList.length > 0) {
+                        for (i = 0; i < data.DepartmentList.length; i++) {
+                            self.items.push(data.DepartmentList[i]);
+                        }
+                    }
+                    self.createPagination();
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+
+        self.deleteKiosk = function (item) {
+            $.ajax({
+                url: '@Url.Action("DeleteKiosk","Kiosk")',
+                data:
+                    {
+                        kioskId : item.Id,
+                        organisationId: organisationId
+                    },
+                type: "GET",
+                cache: false,
+                success: function (data) {
+                    self.itemsKiosk.remove(item);
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+        self.getDataKiosk = function (pageNumber) {
+            $.ajax({
+                url: '@Url.Action("GetKiosksWithUsageLog", "Kiosk")',
+                data: { pageNumber: pageNumber, pageSize: self.pageSize,OrganisationId:organisationId},
+                type: "GET",
+                success: function (data) {
+                    self.itemsKiosk.removeAll();
+                    self.currentPageKiosk(pageNumber);
+                    self.totalCountKiosk(data.TotalCount);
+                    if (data.KioskList.length > 0) {
+                        for (i = 0; i < data.KioskList.length; i++) {
+                            self.itemsKiosk.push(data.KioskList[i]);
+                        }
+                    }
+                    self.createPaginationKiosk();
+                },
+                error: function (data) {
+
+                }
+            });
+        }
+        self.createPagination = function () {
+            $("#paginationHolder").pagination({
+                pages: self.pageCount(),
+                itemsOnPage: self.pageSize,
+                currentPage: self.currentPage(),
+                cssStyle: 'light-theme',
+                onPageClick: self.loadPage
+            });
+        };
+        self.createPaginationKiosk = function () {
+            $("#paginationHolderKiosk").pagination({
+                pages: self.pageCountKiosk(),
+                itemsOnPage: self.pageSize,
+                currentPage: self.currentPageKiosk(),
+                cssStyle: 'light-theme',
+                onPageClick: self.loadPageKiosk
+            });
+        };
+        self.loadPage = function (pageNo, event) {
+            self.getData(pageNo);
+        };
+        self.loadPageKiosk = function (pageNo, event) {
+            self.getDataKiosk(pageNo);
+        };
+        self.initialize();
+    };
+    $(document).ready(function () {
+        var vm = new pagedViewModelKiosk(@pageSize,@Model.Id);
+        var element = document.getElementById('Maindiv');
+        ko.cleanNode(element);
+        ko.applyBindings(vm, element);
+    });
+</script>
+

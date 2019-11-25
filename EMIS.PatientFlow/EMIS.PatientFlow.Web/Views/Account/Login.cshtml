@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html>
+<head>
+    <title>Patient Flow</title>
+    <meta charset="UTF-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=11">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" type="text/css" href="~/Content/UserContent/mainStyles.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/UserContent/IEStyles.css" />
+    <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Roboto'>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css">
+    <script src="~/Scripts/UserScripts/ModalPopup.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            check_capslock_form($('#LoginForm'));
+            $('#loginBtn').click(function () {
+                showLoadingLoginPage();
+            });
+
+            $('#showPassword').on('change', function () {
+                var checked = $(this).is(':checked');
+                if (checked) {
+                    $('#Password').attr("type", "text");
+                }
+                else
+                    $('#Password').attr("type", "password");
+            });
+
+            //check if capslock key was pressed in the whole window
+            document.onkeydown = function (e) {
+                e = e || event;
+                if (typeof (window.lastpress) === 'undefined') { window.lastpress = e.timeStamp; }
+                if (typeof (window.capsLockEnabled) !== 'undefined') {
+                    if (e.keyCode == 20 && e.timeStamp > window.lastpress + 50) {
+                        window.capsLockEnabled = !window.capsLockEnabled;
+                        $('#capslockdiv').toggle();
+                    }
+                    window.lastpress = e.timeStamp;
+                }
+
+            };
+
+            //check what key was pressed in the form
+            function check_capslock(e) {
+                var s = String.fromCharCode(e.keyCode);
+                if (s.toUpperCase() === s && s.toLowerCase() !== s && !e.shiftKey) {
+                    window.capsLockEnabled = true;
+                    $('#capslockdiv').show();
+                }
+                else {
+                    window.capsLockEnabled = false;
+                    $('#capslockdiv').hide();
+                }
+            }
+
+            function check_capslock_form(where) {
+                if (!where) { where = $(document); }
+                where.find('input,select').each(function () {
+                    if (this.type != "hidden") {
+                        $(this).keypress(check_capslock);
+                    }
+                });
+            }
+        });
+
+
+
+
+    </script>
+
+</head>
+
+<body class="HideOverflow">
+        @Html.Partial("_GoogleAnalytics", "LoginPage")
+        @model EMIS.PatientFlow.Web.ViewModel.LoginViewModel
+        @{
+            ViewBag.Title = "Login";
+        }
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "LoginForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="loginContainer" style="z-index:13">
+                <div>
+                    <label style="font-weight: bold">Username</label>
+                    <br/>
+                    @Html.TextBoxFor(model => model.UserName, new { @class = "loginData", placeholder = "Username",@style= "border-bottom:1px solid #d2d2d2 !important" })
+                    <div class="validation-summary-errors validationMessage">@Html.ValidationMessageFor(m => m.UserName)</div>
+                </div>
+                <br />
+
+                <div>
+                    <label style="font-weight: bold">Password</label>
+                    <br/>
+                    @Html.PasswordFor(model => model.Password, new { @class = "loginData", placeholder = "Password" })
+                    <div id="capslockdiv" style="display: none; color: red;">Caps Lock On</div>
+                    <div class="validation-summary-errors validationMessage">@Html.ValidationMessageFor(m => m.Password)</div>
+                </div>
+                <br />
+
+                <div>
+                    <label >
+                        <input type="checkbox" id="showPassword" style="height: 18px; width: 18px; margin-right: 10px;" />
+                        <span style="position:absolute">
+                            Show Password
+                        </span>
+                    </label>
+                </div>
+
+                <div>
+                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect login-btn" id="loginBtn">Login</button>
+                </div>
+                <div class="validation-summary-errors validationMessage">
+                    @Html.ValidationMessage("CustomError")
+                </div>
+
+            </div>
+
+        }
+
+        @*<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>*@
+        @section Scripts {
+            @Scripts.Render("~/bundles/jqueryval")
+        }
+        <!-- IsLoginPage=true -->
+
+</body>
+
+</html>
+<!--<![endif]-->
+<!--[if lte IE 9 ]>
+     <html>
+         <head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=11">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+
+             <style>
+                .browser-warning {
+                    display: block;
+                    background: rgb(250, 126, 28);
+                    width: 100%;
+                    border-top: solid 1px #999;
+                    border-bottom: solid 1px #999;
+                    text-align: center;
+                    padding: 5px 0 5px 0;
+                }
+
+            </style>
+         </head>
+ <body>
+     <div class="browser-warning">
+         We have detected you are using an outdated browser.  To fully benefit from all our site’s features, we recommend you upgrade to a newer version or different web browser;
+         <a href="http://www.google.com/chrome/">Chrome</a> or
+         <a href="http://windows.microsoft.com/en-US/internet-explorer/downloads/ie">Internet Explorer 10 and above </a>.
+     </div>
+ </body>
+
+
+
+     </html>
+
+
+ <![endif]-->

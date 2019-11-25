@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=11">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="google" content="notranslate">
+    <meta http-equiv="Content-Language" content="en">
+
+    <meta http-equiv="refresh" content="@FormsAuthentication.Timeout.TotalSeconds;url=@FormsAuthentication.LoginUrl" />
+
+    <title>@ViewBag.Title - Patient Flow</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="~/Content/UserContent/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="~/Scripts/jquery.dataTables.min.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/UserScripts/DataTable.js"></script>
+
+    @*Material Design*@
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-blue.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+    <link rel="stylesheet" href="~/Content/UserContent/mainstyles.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/UserContent/IEStyles.css" />
+    <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Roboto'>
+    <script src="~/Scripts/UserScripts/ModalPopup.js"></script>
+    <link href="~/Content/semantic.css" rel="stylesheet" />
+    <script src="~/Scripts/UserScripts/semantic.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/UserScripts/Cookie.js"></script>
+    @Html.Partial("_GoogleAnalytics")
+
+    <script>
+        $(document).ready(function () {
+            $('.mdl-navigation__link').click(function () {
+                showLoading();
+            })
+
+            $('.mdl-menu__item').click(function () {
+                showLoading();
+                window.location = $(this).find("a").attr("href");
+            })
+        });
+
+        $(window).on('load', function () {
+            $('.SelectedLinks > .mdl-menu__item:not(:last-child)').prepend(' <span><i class="material-icons" id="checkIcon">check</i></span>');
+            $('.SelectedLinks').find('.material-icons').css({ 'visibility': 'hidden', 'font-size': '18px', 'font-weight': 'lighter' });
+            $('.mdl-menu__item').filter(function (item, value) {
+                var path = window.location.pathname;
+                path = path.replace(/\/$/, "");
+                path = decodeURIComponent(path);
+                path = path.replace("Egton", "");
+                if (path != '') {
+                    return $(this).find("a").attr("href") === path;
+                }
+
+            }).first().map(function (index, value) {
+                $(this).addClass('active');
+                if ($('.mdl-menu__item').hasClass('active')) {
+                    $(this).find('#checkIcon').css({ 'visibility': 'visible' });
+                }
+            })
+        })
+    </script>
+
+</head>
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <span>
+                    <a style="text-decoration:none; color: #ffffff;" class="mdl-layout-title h6 highEmphasisBlack" href="@Url.Action("Index","Home")">Patient Flow</a>
+                </span>
+                <div class="mdl-layout-spacer"></div><!-- Add spacer, to align navigation to the right -->
+                <nav class="mdl-navigation mdl-layout--large-screen-only" id="navLink">
+                    <a class="mdl-navigation__link" href="@Url.Action("Index","Staff")">Staff</a>
+                    <a class="mdl-navigation__link" href="@Url.Action("Index","Messages")">Messages</a>
+                    <a class="mdl-navigation__link" href="@Url.Action("Index","Questionnaire")">Questionnaires</a>
+                </nav>
+                <nav class="mdl-navigation mdl-layout--small-screen-only">
+                    <a class="mdl-navigation__link" href="@Url.Action("Index","Staff")">
+                        <i class="material-icons" id="staffIcon">group</i>
+                    </a>
+                    <a class="mdl-navigation__link" href="@Url.Action("Index","Messages")">
+                        <i class="material-icons" id="MessageIcon">message</i>
+                    </a>
+                    <a class="mdl-navigation__link" href="@Url.Action("Index","Questionnaire")">
+                        <i class="material-icons" id="QuestionnaireIcon">question_answer</i>
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <div class="mdl-layout__drawer-button" id="menu-switcher"><i class="material-icons">menu</i></div>
+        <ul id="appBarMenu" class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect SelectedLinks" for="menu-switcher" style="padding:8px 0px 0px 0px">
+            <li class="mdl-menu__item">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Index","Staff")">Staff</a></span>
+            </li>
+            <li class="mdl-menu__item">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Index","Messages")">Messages</a></span>
+            </li>
+            <li class="mdl-menu__item">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Index","Questionnaire")">Questionnaires</a></span>
+            </li>
+            @if (!User.IsInRole("Practice Admin"))
+            {
+                <li class="mdl-menu__item">
+                    <span><a class="mdl-navigation__link" href="@Url.Action("Index","Organisation")">Organisations</a></span>
+                </li>
+            }
+            <li class="mdl-menu__item">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Index","Department")">Departments</a></span>
+            </li>
+            <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Index","Kiosk")">Kiosks</a></span>
+            </li>
+            <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Index","Report")">Reports</a></span>
+            </li>
+            <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Index", "Account")">Users</a></span>
+            </li>
+            <li class="mdl-menu__item">
+                <span><a class="mdl-navigation__link" href="@Url.Action("Logout","Account")">Log out</a></span>
+            </li>
+        </ul>
+
+        <div class="mdl-tooltip mdl-tooltip--large" data-mdl-for="staffIcon">Staff</div>
+        <div class="mdl-tooltip mdl-tooltip--large" data-mdl-for="MessageIcon">Message</div>
+        <div class="mdl-tooltip mdl-tooltip--large" data-mdl-for="QuestionnaireIcon">Questionnaire</div>
+
+        @RenderBody()
+
+    </div>
+    @RenderSection("scripts", required: false)
+    <footer class="cookie-footer">
+        <div class="defaultDiv">
+            <div class="footer-cookie-close">
+                <a href="/#close" id="footer-cookie-close" style="text-decoration: none; ">
+                    <span style="color:white">I agree</span>
+                </a>
+            </div>
+            <div class="footer-cookie-content">
+                <p><b>Egton uses cookies</b> to improve your experience on our site. <a href="@Url.Action("CookiePage", "Home")" rel="noopener noreferrer" target="_blank" style="color:white">View our cookie policy</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
+<!--<![endif]-->
+<!--[if lte IE 9 ]>
+<html>
+        <head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=11">
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+            <style>
+               .browser-warning {
+                   display: block;
+                   background: rgb(250, 126, 28);
+                   width: 100%;
+                   border-top: solid 1px #999;
+                   border-bottom: solid 1px #999;
+                   text-align: center;
+                   padding: 5px 0 5px 0;
+               }
+
+           </style>
+        </head>
+<body>
+    <div class="browser-warning">
+        We have detected you are using an outdated browser.  To fully benefit from all our site’s features, we recommend you upgrade to a newer version or different web browser;
+        <a href="http://www.google.com/chrome/">Chrome</a> or
+        <a href="http://windows.microsoft.com/en-US/internet-explorer/downloads/ie">Internet Explorer 10 and above </a>.
+    </div>
+</body>
+
+    </html>
+
+<![endif]-->

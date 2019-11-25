@@ -1,0 +1,72 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMIS.PatientFlow.Services", "EMIS.PatientFlow.Services\EMIS.PatientFlow.Services.csproj", "{A6486238-5E65-408E-A0A4-DE51B1CFFFE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMIS.PatientFlow.Common", "EMIS.PatientFlow.Common\EMIS.PatientFlow.Common.csproj", "{768A1FC4-F28A-4FED-BF39-D62CB6E6682E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMIS.PatientFlow.API", "EMIS.PatientFlow.API\EMIS.PatientFlow.API.csproj", "{7508EA59-A936-4D68-B669-73F9FBD0F518}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMIS.PatientFlow.Interfaces", "EMIS.PatientFlow.Interfaces\EMIS.PatientFlow.Interfaces.csproj", "{61E11331-9E07-49B9-91E3-44EE88BA6ABB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMIS.PatientFlow.Entities", "EMIS.PatientFlow.Entities\EMIS.PatientFlow.Entities.csproj", "{C185BA3A-6849-4D1B-BD8F-7CBBEB279337}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMIS.PatientFlow.Repositories", "EMIS.PatientFlow.Repositories\EMIS.PatientFlow.Repositories.csproj", "{40298BB3-4E66-4FD1-82ED-90FB61933E7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EMIS.PatientFlow.DatabaseAccess", "EMIS.PatientFlow.DatabaseAccess\EMIS.PatientFlow.DatabaseAccess.csproj", "{58A6A85A-4DA0-4417-9CFC-B72AA4D5FBEA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6486238-5E65-408E-A0A4-DE51B1CFFFE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6486238-5E65-408E-A0A4-DE51B1CFFFE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6486238-5E65-408E-A0A4-DE51B1CFFFE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6486238-5E65-408E-A0A4-DE51B1CFFFE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{768A1FC4-F28A-4FED-BF39-D62CB6E6682E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{768A1FC4-F28A-4FED-BF39-D62CB6E6682E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{768A1FC4-F28A-4FED-BF39-D62CB6E6682E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{768A1FC4-F28A-4FED-BF39-D62CB6E6682E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7508EA59-A936-4D68-B669-73F9FBD0F518}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7508EA59-A936-4D68-B669-73F9FBD0F518}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7508EA59-A936-4D68-B669-73F9FBD0F518}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7508EA59-A936-4D68-B669-73F9FBD0F518}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61E11331-9E07-49B9-91E3-44EE88BA6ABB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61E11331-9E07-49B9-91E3-44EE88BA6ABB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61E11331-9E07-49B9-91E3-44EE88BA6ABB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61E11331-9E07-49B9-91E3-44EE88BA6ABB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C185BA3A-6849-4D1B-BD8F-7CBBEB279337}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C185BA3A-6849-4D1B-BD8F-7CBBEB279337}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C185BA3A-6849-4D1B-BD8F-7CBBEB279337}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C185BA3A-6849-4D1B-BD8F-7CBBEB279337}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40298BB3-4E66-4FD1-82ED-90FB61933E7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40298BB3-4E66-4FD1-82ED-90FB61933E7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40298BB3-4E66-4FD1-82ED-90FB61933E7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40298BB3-4E66-4FD1-82ED-90FB61933E7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58A6A85A-4DA0-4417-9CFC-B72AA4D5FBEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58A6A85A-4DA0-4417-9CFC-B72AA4D5FBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58A6A85A-4DA0-4417-9CFC-B72AA4D5FBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58A6A85A-4DA0-4417-9CFC-B72AA4D5FBEA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 1
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://sv-teamfs:8080/tfs/emiscollection
+		SccProjectUniqueName0 = EMIS.PatientFlow.Services\\EMIS.PatientFlow.Services.csproj
+		SccProjectName0 = EMIS.PatientFlow.Services
+		SccAuxPath0 = http://sv-teamfs:8080/tfs/emiscollection
+		SccLocalPath0 = EMIS.PatientFlow.Services
+		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,31 @@
+﻿@using EMIS.PatientFlow.Web.Enums
+
+@{
+    string name = ViewBag.ReportName.ToString();
+}
+
+@Html.Partial("_GoogleAnalytics",name)
+
+<table width="100%" style="height: 100%">
+    <tr>
+        <td>
+            @if (ViewBag.ReportName == Constants.LogReport)
+            {
+                <iframe id="myReport" width="99%" height="800px" frameborder="0" src="~/ReportModule/LogReport/Reports.aspx" style="overflow:scroll;"></iframe>
+            }
+            else if (ViewBag.ReportName == Constants.Questionnaire)
+            {
+                <iframe id="myReport" width="99%" height="800px" frameborder="0" src="~/ReportModule/QuestionnaireReport/QuestionaireRep.aspx" style="overflow:scroll;"></iframe>
+            }
+            else if (ViewBag.ReportName == Constants.SynService)
+            {
+                <iframe id="myReport" width="99%" height="800px" frameborder="0" src="~/ReportModule/SyncServiceReport/SyncServiceReport.aspx" style="overflow:scroll;"></iframe>
+            }
+        </td>
+    </tr>
+</table>
+<script>
+    $('#myReport').load(function () {
+        setTimeout(loadingSpinner.hide, 700);
+    });
+</script>

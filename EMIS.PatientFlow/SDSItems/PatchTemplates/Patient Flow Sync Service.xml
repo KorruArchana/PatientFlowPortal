@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<patchTemplate productGuid="B15B29BD-0D34-47D4-BA9E-884EE8EDD5D4">
+  <patchAction name="StopService">
+    <serviceInfo name="EMIS PatientFlow SyncService"/>
+  </patchAction>
+  <patchAction name="CopyFiles">
+    <patchFolder relativePath="EMIS.PatientFlow.build.SyncService" copyType="Contents">
+      <patchFilePattern extension=".pdb" exclude="true"/>
+    </patchFolder>
+  </patchAction>
+  <patchAction name="PatchDatabase">
+    <targetDatabase name="EMISPatientFlowKiosk"/>
+    <ndoLocation path="EMIS Web\Build\Database\EMISPatientFlowKiosk\NDOController.xml"/>
+  </patchAction>
+  <patchAction name="StartService">
+    <serviceInfo name="EMIS PatientFlow SyncService" exePath="EMIS.PatientFlow.SyncService.exe"/>
+  </patchAction>
+</patchTemplate>

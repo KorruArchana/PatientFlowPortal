@@ -1,0 +1,3 @@
+PatientFlow	data source=localhost;Integrated Security=SSPI;Initial Catalog=PatientFlow
+Security	data source=localhost;Integrated Security=SSPI;Initial Catalog=Security
+SignalR	data source=localhost;Integrated Security=SSPI;Initial Catalog=SignalR

@@ -1,0 +1,1350 @@
+﻿@model EMIS.PatientFlow.Web.ViewModel.KioskEditViewModel
+@{
+    ViewBag.Title = "AddEditKiosk";
+    if (Model.KioskInstance.Id > 0)
+    {
+        ViewBag.Module = "Edit Kiosk";
+        ViewBag.Savebutton = "Save Changes";
+    }
+    else
+    {
+        ViewBag.Module = "Add Kiosk";
+        ViewBag.Savebutton = "Add Kiosk";
+    }
+
+    ViewBag.SaveAction = "SaveKiosk";
+    ViewBag.Controller = "Kiosk";
+    ViewBag.FormId = "AddEditKiosk";
+    Layout = "~/Views/Shared/_AddEditLayout.cshtml";
+}
+
+@Html.Partial("_GoogleAnalytics", "Kiosks")
+
+<script>
+    var counter = 0;
+    var siteMapList = [];
+    $(document).ready(function () {
+        Initialize();
+        function Initialize() {
+            $('#DemographicDetails').addClass("disableddiv");
+            $('#SiteMapTable').hide();
+            $('#statusdropdown').drop();
+            $('#organisationDropdown').drop({ match: 'text', sortSelect: true });
+            $('#languageDropdown').drop();
+            $('#languageDropdown').drop("set selected", 1);
+            $('#demographicDropdown').drop();
+            $('#slotDropdown').drop();
+            $('#memberDropdown').drop();
+            var slotId = 0;
+            var sessionHolderId = 0;
+
+            //Disabling the fields when module is not enabled
+            DisablingQuestionnaireFields();
+            DisablingBookAppointmentFields();
+            DisablingSiteMapFields();
+            DisablingArrivalsFields();
+
+        $('#EnableQuestionnaire').change(function () {
+            DisablingQuestionnaireFields();
+        })
+
+            function DisablingArrivalsFields(){
+                if ($('#EnableArrival').is(":Checked")) {
+                    $('#ArrivalFields').removeClass("disableddiv");
+                }
+                else {
+                    $('#ArrivalFields').addClass("disableddiv");
+                }
+            }
+
+            function DisablingQuestionnaireFields() {
+                var practiceAdmin = @(User.IsInRole("Practice Admin").ToString().ToLower());
+                if (practiceAdmin)
+                {
+                    var ModuleList = @Html.Raw(Json.Encode(Model.Module));
+                    var IsQuestionnaireEnabled = false;
+                    var value = ModuleList.filter(function (index, value) {
+                        if (index.Id==2) {
+                            IsQuestionnaireEnabled = true;
+                        }
+                    });
+
+                    if (IsQuestionnaireEnabled)
+                     {
+                        $('#questionnairefields').removeClass("disableddiv");
+                    }
+                    else
+                     {
+                        $('#questionnairefields').hide();
+                        $('#QuestionnaireLabel').hide();
+                    }
+                }
+                else
+                {
+                    if ($('#EnableQuestionnaire').is(":Checked")) {
+                        $('#questionnairefields').removeClass("disableddiv");
+                    }
+                    else {
+                        $('#questionnairefields').addClass("disableddiv");
+                    }
+                }
+        }
+
+            $('#EnableBookAppointment').change(function () {
+            DisablingBookAppointmentFields();
+        })
+
+        function DisablingBookAppointmentFields() {
+            if ($('#EnableBookAppointment').is(":Checked")) {
+                $('#bookAppointmentFields').removeClass("disableddiv");
+            }
+            else {
+                $('#bookAppointmentFields').addClass("disableddiv");
+            }
+        }
+
+            $('#EnableSiteMap').change(function () {
+            DisablingSiteMapFields();
+        })
+
+            function DisablingSiteMapFields() {
+                if ($('#EnableSiteMap').is(":Checked")) {
+                $('#siteMapFields').removeClass("disableddiv");
+            }
+                else {
+                $('#siteMapFields').addClass("disableddiv");
+            }
+            }
+
+            $('.languageDropdown,.orgDropdown,.demographicDropdown,.staffDropdown,.SlotDropdown').click(function () {
+                setActiveOutline($(this));
+            });
+
+            $('#DemographicField,#OrganisationField,#SlotField,#StaffMemberField,#LanguageField').focusout(function () {
+                $(this).children().eq(0).addClass("Normal-outline");
+                $(this).children().eq(0).removeClass("Active-outline");
+            });
+        //Setting the welcome text in the kiosk
+        var KioskTitle =@Html.Raw(Json.Encode(Model.KioskInstance.Title));
+        $('#welcomeText').text('"welcome to ' + ((@Model.KioskInstance.Id > 0) ? KioskTitle : "{KioskTitle}") + '" is displayed on kiosk home screen');
+
+        //Edit kiosk Intailization
+            if (@Model.KioskInstance.Id> 0) {
+             var showDemographic =@Html.Raw(Json.Encode(Model.KioskInstance.ShowDemographicDetails));
+                 if (showDemographic) {
+                     $('#DemographicDetails').removeClass("disableddiv");
+                  }
+                 else {
+                     $('#DemographicDetails').addClass("disableddiv");
+                 }
+            //Kiosk logo
+            $('#KioskId').val(@Model.KioskInstance.Id);
+            var logoImage =@Html.Raw(Json.Encode(Model.KioskLogoByte));
+            if (logoImage == "") {
+                $('#dropArea').show();
+            }
+            else {
+                $('#dragAndDropText,#selectTxt').hide();
+                $('#dropArea').css({ 'height': '180px' });
+                $('#LogoDelete').css({ 'visibility': 'visible' });
+                $('.uploader').show().attr('src', "data:image/png;base64,"+logoImage).css({ 'visibility': 'visible', 'width': '13%' });;
+            }
+
+            //Kiosk siteMap
+            var kioskSiteMapList =@Html.Raw(Json.Encode(Model.KioskInstance.KioskSiteMapList));
+            if (kioskSiteMapList.length > 0) {
+                $('#SiteMapTable').show();
+                $('#SiteMapNameHeader').css({ 'visibility': 'visible' });
+                $.each(kioskSiteMapList, function (i, v) {
+                    $('#SiteMapTable >tbody').append('<tr><td id="' + counter + '"><img src="' + "data:image/png;base64,"+v.SiteMapData + '" style="width:40%"></td>' +
+                        '<td>' +
+                        ' <div class="mdl-textfield mdl-js-textfield"> <input class="mdl-textfield__input" type="text" style="margin-left: 10px;" value="' + v.SiteMapName + '"id="kioskSiteMapName" onchange="SiteMapTextChanged(this)"/></div></td > ' +
+                        '<td><a href="#" data-keyboard="false" id="Delete" title="Delete" class="DeleteModal" style="margin-left: 20px;"> <i class="material-icons">delete</i ></a></td>');
+                    siteMapList.push({
+                        SiteMapData: v.SiteMapData,
+                        SiteMapid: counter
+                    });
+                    $('#SiteMapImageId').val(counter);
+                    ++counter;
+                })
+                }
+                var selectedOrgs =@Html.Raw(Json.Encode(Model.KioskInstance.SelectedOrganisationText));
+                var selectedOrgsId =@Html.Raw(Json.Encode(Model.KioskInstance.SelectedOrganisationList));
+                $('#organisationDropdown').drop("set selected", GetIdList(selectedOrgsId));
+
+            var languageList = @Html.Raw(Json.Encode(Model.KioskInstance.SelectedLanguageList));
+            $('#languageDropdown').drop("set selected", GetstringList(languageList));
+
+            var demographicList =@Html.Raw(Json.Encode(Model.KioskInstance.SelectedDemographicDetails));
+            $('#demographicDropdown').drop("set selected", GetstringList(demographicList));
+
+            function GetstringList(intList) {
+                var stringList = [];
+                if (intList != null) {
+                    $.each(intList, function (i, Id) { stringList.push(Id.toString()) })
+                }
+                return stringList;
+            }
+
+            function GetIdList(intList) {
+                var idList = [];
+                if (intList != null) {
+                    $.each(intList, function (i, Id) { idList.push('*' + Id.toString()) })
+                }
+                return idList;
+            }
+
+                //set Branch,Slot,Member on Edit
+                var allMembersList =@Html.Raw(Json.Encode(Model.SessionHolderList));
+                $('#memberDropdown').empty().drop("clear"); //clear everything assigned from html and has to add through jquery.
+
+                if (allMembersList.length == 0) {
+                    $.each(selectedOrgsId, function (index, value) {                        
+                        GetAddMemberInfoForNewlyAddedOrg(value);
+                    });
+                }
+                else {
+                    $.each(allMembersList, function (key, value) {
+                        $('#memberDropdown').append('<option value="' + ++sessionHolderId + '"data-value="' + value.SessionHolderId
+                            + '" data-id="' + value.OrganisationId
+                            + '" data-selected =' + value.IsSelected + '>'
+                            + value.FullName + '--' + value.OrganisationName + '</option>');
+                    });
+                }
+
+            //slots
+            var slotList =@Html.Raw(Json.Encode(Model.AvailableSlotTypes));
+            $.each(slotList, function (key, value) {
+                $('#slotDropdown').append('<option value="' + ++slotId + '"data-value="' + value.SlotTypeId
+                    + '" data-id="' + value.OrganisationId
+                    + '" data-selected =' + value.IsSelected + '>'
+                    + value.Description + '--' + value.OrganisationName + '</option>');
+            })
+
+            //Branch Location
+            var branchList =@Html.Raw(Json.Encode(Model.BranchList));
+            var row = " ";
+            $.each(branchList, function (index, branch) {
+                row += "<tr id='" + branch.OrganisationId + "'>\
+                            <td width='80%' data-id='"+ branch.OrganisationId + "'>\
+                                <fieldset class='fieldset' name='Location' style='width:90%' id='LocationField'><legend style='position: static'>Location</legend>\
+                        <select class='ui dropdown locationdropdown_"+ index + "_' style='width:100%' id='locationDrop'> <option value='0'>All Branch</option> "
+                $.each(branch.SitesList, function (index, value) {
+                    if (branch.SitesList != null) {
+                        row += '<option value="' + value.Value + '" data-selected=' + value.Selected + '>' + value.Text + '</option>';
+                    }
+                });
+                row += "</select>\
+                        </td>\
+                        <td width='20%'>\
+                         <fieldset class='fieldset' name='IsMainLocation' style='float:left'>\
+                         <legend style='position: static'>IsMainLocation</legend>\
+                         <select class='ui single dropdown IsMainLocationDropdown_"+ index + "_' id='IsMainLocationDrop'>"
+                if (branch.IsMainLocation) {
+                    row += " <option value='0'>No</option>\
+                         <option value='1' data-selected='true'>Yes</option>"
+                }
+                else {
+                    row += "<option value='0' data-selected='true'>No</option>\
+                         <option value='1'>Yes</option>"
+                }
+                row += " </select>\
+                         </fieldset>\
+                         </td></tr>"
+            });
+
+            $('#branchLocation').append(row);
+
+            setTimeout(function () {
+                var selectedSlotList = [];
+                var selectedlocation = [];
+                var ismainlocation = [];
+                var selectedMemberList = [];
+
+                $("#slotDropdown option[data-selected='true']").each(function () {
+                    selectedSlotList.push($(this).attr('value'));
+                });
+                $('#slotDropdown').drop('set selected', selectedSlotList);
+
+
+                $("#memberDropdown option[data-selected='true']").each(function () {
+                    selectedMemberList.push($(this).attr('value'));
+                });
+                $('#memberDropdown').drop('set selected', selectedMemberList)
+
+
+                $("#locationDrop option[data-selected='true']").each(function () {
+                    selectedlocation.push($(this).attr('value'));
+                });
+                $("#IsMainLocationDrop option[data-selected='true']").each(function () {
+                    ismainlocation.push($(this).attr('value'));
+                });
+
+                for (var i = 0; i < branchList.length; i++) {
+                    $('.locationdropdown_' + i + '_').drop("set selected", selectedlocation[i]);
+                    $('.IsMainLocationDropdown_' + i + '_').drop("set selected", ismainlocation[i]);
+                }
+
+            }, 100)
+
+            //Legend text on page loads in jquery
+            $('form input[type="text"],[type="number"],select').each(function () {
+                const event = new onfocusEditEvent($(this));
+            });
+        }
+    }
+
+        $('input[type="text"],[type="number"]').on('focus focusout', function (e) {
+                if (e.type == "focus") {
+                    if (e.target.type == "number") {
+                    $(this).closest('fieldset').children().eq(3).show()
+                  }
+                    const event = new onfocusEvent($(this));
+                }
+                 else if (e.type == "focusout") {
+                  setNormalOutline($(this));
+                     if (e.target.type == "number") {
+                        $(this).closest('fieldset').children().eq(3).hide()
+                     }
+                    if ($(this).val() == "") {
+                         const event = new outFocusEvent($(this));
+                    }
+                }
+        })
+
+        $('#EnableDemographicDetails').change(function () {
+            if ($(this).is(":Checked")) {
+                $('#DemographicDetails').removeClass("disableddiv");
+            }
+            else {
+                $('#DemographicDetails').addClass("disableddiv");
+            }
+        })
+
+        $('#EnableArrival').change(function () {
+            if ($(this).is(":Checked")) {
+                $('#ArrivalFields').removeClass("disableddiv");
+            }
+            else {
+                $('#ArrivalFields').addClass("disableddiv");
+            }
+        })
+
+
+        var previousOrgSelectedValue = $('#organisationDropdown').val();
+
+        previousOrgSelectedValue.forEach(function (value, index) {
+            this[index] = value.substr(1);
+        }, previousOrgSelectedValue);
+
+        var memberList = $('#memberDropdown').val();
+        var i = 0;
+        var j = 0;
+
+        $('#organisationDropdown').change(function () {
+            $('#orgErrorMessage').css({ 'display': 'none' });
+            $('#organisationDropdown').val().length > 0 ? new onfocusEvent($(this)) : new outFocusEvent($(this));
+            var SelectedOrgValue = $('#organisationDropdown').val();
+
+            SelectedOrgValue.forEach(function (value, index) {
+                this[index] = value.substr(1);
+            }, SelectedOrgValue);
+
+                        var OrgIdToProcess;
+                        if (SelectedOrgValue != null) {
+                            if (previousOrgSelectedValue == null && SelectedOrgValue.length == 1) {
+                                OrgIdToProcess = SelectedOrgValue;
+                                GetAddInfoForNewlyAddedOrg(OrgIdToProcess);
+                                GetAddMemberInfoForNewlyAddedOrg(OrgIdToProcess);
+                            }
+                            else if (previousOrgSelectedValue != null && previousOrgSelectedValue.length == SelectedOrgValue.length - 1) {
+                                var difference = [];
+                                jQuery.grep(SelectedOrgValue, function (el) {
+                                    if (jQuery.inArray(el, previousOrgSelectedValue) == -1) difference.push(el);
+                                    i++;
+                                });
+                                OrgIdToProcess = difference[0];
+                                GetAddInfoForNewlyAddedOrg(OrgIdToProcess);
+                                GetAddMemberInfoForNewlyAddedOrg(OrgIdToProcess);
+                            }
+                        }
+                        if (previousOrgSelectedValue != null) {
+                            if (SelectedOrgValue != null && previousOrgSelectedValue.length - 1 == SelectedOrgValue.length) {
+                                var difference = [];
+                                jQuery.grep(previousOrgSelectedValue, function (el) {
+                                    if (jQuery.inArray(el, SelectedOrgValue) == -1) difference.push(el);
+                                    i++;
+                                });
+                                OrgIdToProcess = difference[0];
+                                RemoveAddInfoForUnlinkedOrg(OrgIdToProcess);
+                            }
+                            else if (previousOrgSelectedValue.length == 1 && SelectedOrgValue == null) {
+                                var difference = [];
+                                jQuery.grep(previousOrgSelectedValue, function (el) {
+                                    if (jQuery.inArray(el, SelectedOrgValue) == -1) difference.push(el);
+                                    i++;
+                                });
+                                OrgIdToProcess = difference[0];
+                                RemoveAddInfoForUnlinkedOrg(OrgIdToProcess);
+                            }
+                        }
+                        previousOrgSelectedValue = SelectedOrgValue;
+        })
+
+        $('#slotDropdown, #memberDropdown, #demographicDropdown, #languageDropdown').change(function () {
+            $('#LangErrorMessage').css({ 'display': 'none' });
+            $(this).val().length > 0 ? new onfocusEvent($(this)) : new outFocusEvent($(this));
+                    })
+
+        if (memberList != null) {
+            memberList = unique(memberList);
+                }
+        if (memberList != null) {
+            $.each(memberList, function (index, value) {
+                    selectedMemberList.push({
+                        OrganisationId: parseInt($('#memberDropdown option[value=' + value + ']').attr('data-id')),
+                    SessionHolderId: parseInt($('#memberDropdown option[value=' + value + ']').attr('data-value'))
+                    });
+                })
+        }
+        function GetAddInfoForNewlyAddedOrg(OrgIdToProcess) {
+            showLoading();
+            $.ajax({
+                url: "../Kiosk/GetAdditionalDetails",
+                type: "Get",
+                dataType: "Json",
+                data: "organisationId=" + OrgIdToProcess,
+                success: function (data) {
+                    hideLoading();
+                    $('#LocationField').css({ 'visibility': 'visible' });
+                            var branchList = data.branchList;
+                            var row = " ";
+                            row += "<tr id='" + branchList.OrganisationId + "'>\
+                                    <td width='80%' data-id='"+ branchList.OrganisationId + "'>\
+                                    <fieldset class='fieldset' name='Location' style='width:90%' id='LocationField'><legend style='position: static'>Location</legend>\
+                            <select class='ui dropdown locationdropdown' style='width:100%' id='locationDrop'> <option value='0'>All Branch</option> "
+                    $.each(branchList.SitesList, function (index, value) {
+                    if (branchList.SitesList != null) {
+                        row += '<option value="' + value.Value + '">' + value.Text + '</option>';
+                    }
+                });
+                    row += "</select>\
+                            </td>\
+                            <td width='20%'>\
+                             <fieldset class='fieldset' name='IsMainLocation' style='float:left'>\
+                             <legend style='position: static'>IsMainLocation</legend>\
+                             <select class='ui single dropdown IsMainLocationDropdown' id='IsMainLocationDrop'>\
+                             <option value='0'>No</option>\
+                             <option value='1'>Yes</option>\
+                             </select>\
+                             </fieldset>\
+                             </td></tr>"
+                    $('#branchLocation').append(row);
+                setTimeout(function () {
+                        $('.locationdropdown').drop();
+                        $('.IsMainLocationDropdown').drop();
+                }, 100)
+
+                    //slot
+                    if (data.slotList != null) {
+                        $.each(data.slotList, function (key, value) {
+                            $('#slotDropdown').append('<option value="' + ++i + '"data-value="' + value.SlotTypeId + '' + '" data-id="' + value.OrganisationId + '">'
+                                + value.Description + '--' + value.OrganisationName + '</option>');
+                        })
+                    }
+                },
+                error: function (data) {
+                    hideLoading();
+                    alertify.error("Error! cannot load" + data)
+                }
+            })
+        }
+
+        function GetAddMemberInfoForNewlyAddedOrg(OrgIdToProcess) {
+            showLoading();
+            $.ajax({
+                url: "../Kiosk/GetAdditionalMemberDetails",
+                type: "Get",
+                dataType: "Json",
+                data: "organisationId=" + OrgIdToProcess,
+                success: function (data) {
+                    hideLoading();
+                    if (data.memberList != null) {
+                        $.each(data.memberList, function (key, value) {
+                            $('#memberDropdown').append('<option value="' + ++j + '"data-value="' + value.SessionHolderId + '' + '" data-id="' + value.OrganisationId + '">'
+                                + value.FullName + '--' + value.OrganisationName + '</option>');
+                        });
+                    }
+                },
+                error: function (data) {
+                    hideLoading();
+                    alertify.error("Error! cannot load" + data)
+                }
+            })
+        }
+
+        function RemoveAddInfoForUnlinkedOrg(OrgIdToProcess) {
+            $('#slotDropdown option[data-id =' + OrgIdToProcess + ']').remove();
+            $('#memberDropdown option[data-id =' + OrgIdToProcess + ']').remove();
+            $('#branchLocation tr[id="' + OrgIdToProcess + '"').remove();
+                }
+
+
+        //kiosk title helper text
+        $('#kioskTitle').on('keyup', function () {
+                    if ($('#kioskTitle').val().length > 0) {
+                $('#welcomeText').show();
+                $('#welcomeText').text('"welcome to ' + $('#kioskTitle').val() + ' " is displayed on kiosk home screen');
+                    }
+            else {
+                $('#welcomeText').hide();
+                    }
+                });
+
+        /*kiosk logo drag and drop commands starts here */
+        var dropzone = document.getElementById('dropArea');
+
+        dropzone.ondrop = function (e) {
+                    e.preventDefault();
+                    this.className = 'dropArea';
+                    upload(e.dataTransfer.files);
+                }
+        dropzone.ondragover = function () {
+                    this.className = 'dropArea';
+                    return false;
+                }
+        dropzone.ondragleave = function () {
+                    this.className = 'dropArea';
+                    return false;
+                }
+        //Logo upload function
+        var upload = function (input) {
+            var row = $(input)[0];
+            row.convertToBase64();
+        }
+
+        //file reader for logo
+        File.prototype.convertToBase64 = function (callback) {
+                    if (this.type == 'image/png' || this.type == 'image/jpg' || this.type == 'image/jpeg' || this.type == 'image/gif') {
+                        $('#logoFileError').css({ 'display': 'none' })
+                var filereader = new FileReader();
+                $('#dragAndDropText,#selectTxt').hide();
+                        filereader.onload = function (e) {
+                            var fs = $('#dropArea').attr('name');
+                    $('#dropArea').children().eq(0).html(fs);
+                    $('#dropArea').css({ 'height': '180px' });
+                    $('#LogoDelete').css({ 'visibility': 'visible' });
+                    $('.uploader').show().attr('src', event.target.result).css({ 'visibility': 'visible', 'width': '13%' });
+                    $('#KioskLogo').val(e.target.result.substring(e.target.result.indexOf(',') + 1))
+
+                };
+                        if (this.size > 50000) {
+                    $('.uploader').removeAttr('src');
+                            document.getElementById('logoImagetxt').innerHTML = ' ';
+                    $('#dropArea').css({ 'height': '2px' });
+                    $('#LogoDelete').css({ 'visibility': 'hidden' });
+                    $('#dropArea').children().eq(0).html(' ');
+                    $('#logoError').css({ 'display': 'block' })
+                    $('#dragAndDropText,#selectTxt').show();
+                        }
+                        else {
+                    $('#logoError').css({ 'display': 'none' })
+                    $('#dropArea #logoImagetxt').text(this.name);
+                            filereader.readAsDataURL(this);
+                        }
+                    }
+                    else {
+                        $('#logoFileError').css({ 'display': 'block' });
+                $('.uploader').removeAttr('src');
+                        document.getElementById('logoImagetxt').innerHTML = ' ';
+                $('#dropArea').css({ 'height': '2px' });
+                $('#LogoDelete').css({ 'visibility': 'hidden' });
+                $('#dropArea').children().eq(0).html(' ');
+                $('#dragAndDropText,#selectTxt').show();
+                    }
+
+                }
+        //delete logo modal
+        $('#DeletelogoModal').on('click', function () {
+            $('#LogoPath').removeAttr('src');
+            $('#selectTxt').css({ 'display': '' });
+            $('#dragAndDropText').css({ 'display': '' });
+            $('#dropArea').css({ 'height': '2px' });
+            $('#dropArea').children().eq(0).html(' ');
+            $('#LogoDelete').css({ 'visibility': 'hidden' });
+            $('.uploader').removeAttr("style").css({ 'visibility': 'hidden' });
+            $('#KioskLogo').val("");
+                })
+
+        /*kiosk logo drag and drop commands ends here */
+
+        //Drag and drop siteMap
+        var dropSiteMap = document.getElementById('dropAreaSiteMap');
+        dropSiteMap.ondrop = function (e) {
+                    e.preventDefault();
+                    this.className = 'dragAndDropTextSiteMap';
+                    var files_list = e.dataTransfer.files;
+                    for (var i = 0; i < files_list.length; i++) {
+                        SitemapUpload(e.dataTransfer.files[i]);
+                    }
+                }
+        dropSiteMap.ondragover = function () {
+                    this.className = 'dropAreaSiteMap';
+                    return false;
+                }
+        dropSiteMap.ondragleave = function () {
+                    this.className = 'dropAreaSiteMap';
+                    return false;
+                }
+        var SitemapUpload = function (input) {
+            var row = $(input)[0];
+            row.readFile();
+        }
+        File.prototype.readFile = function (callback) {
+                    if (this.type == 'image/png' || this.type == 'image/jpg' || this.type == 'image/jpeg' || this.type == 'image/gif') {
+                        $('#SiteMapTypeError,#SiteMapError').css({ 'display': 'none' })
+                var fileReader = new FileReader();
+                        fileReader.onload = function (e) {
+                            $('#SiteMapTable >tbody').append('<tr><td id="' + counter + '"><img src="' + e.target.result + '"style="width:40%;"></td></tr>');
+                            $('#AddSiteMap').css({ 'visibility':'visible'});
+                            siteMapList.push({
+                                SiteMapData: e.target.result.substring(e.target.result.indexOf(',') + 1),
+                                SiteMapid: counter
+                            });
+                        };
+                    if (this.size > 1000141) {
+                      $('#dropAreaSiteMap').show();
+                        $('#SiteMapError').css({ 'display': 'block' });
+                      $('#dragAndDropTextSiteMap,#selectTxtSiteMap').show();
+                        }
+                        else {
+                    $('#SiteMapTable').show();
+                    $('#dropAreaSiteMap').hide();
+                            ++counter;
+                    $('#SiteMapImageId').val(counter);
+                    $('#dragAndDropTextSiteMap,#selectTxtSiteMap').hide();
+                            fileReader.readAsDataURL(this);
+                        }
+                    }
+                    else {
+                        $('#SiteMapTypeError').css({ 'display': 'block' })
+            }
+                }
+
+        $('#AddSiteMap').on('click', function (e) {
+            $('#SiteMapNameHeader').css({ 'visibility': 'visible' });
+            $('#dropAreaSiteMap,#dragAndDropTextSiteMap,#selectTxtSiteMap,#siteMapNamediv').show();
+            $('#SiteMapTable >tbody').find('td:last').after('<td> <div class="mdl-textfield mdl-js-textfield"> <input class="mdl-textfield__input" type="text"  placeHolder="Site Map Name" value="' + $('#siteMapName').val() + '" id="kioskSiteMapName" onchange="SiteMapTextChanged(this)" /></div></td>');
+            $('#SiteMapTable >tbody').find('td:last').after('<td><a href="#" data-keyboard="false" id="Delete" title="Delete" class="DeleteModal"> <i class="material-icons">delete</i ></a></td>');
+            $('#siteMapName').val('');
+            $('#AddSiteMap').css({ 'visibility': 'hidden' });
+         });
+
+        //delete kiosk sitemap
+        $(document).on('click', '.DeleteModal', function () {
+                    var removedElements = 0;
+                    var id = $(this).parent().siblings(":first").attr('id');
+            $(this).closest("tr").remove();
+                    if ($('#SiteMapTable tr').length == 1) {
+                $('#SiteMapTable').hide();
+                        siteMapList = [];
+                    }
+            else {
+                $.each(siteMapList, function (i, v) {
+                            if (id == v.SiteMapid) {
+                                removedElements = i;
+                            }
+                        })
+                siteMapList.splice(removedElements, 1);
+                    }
+                })
+
+        $('#AddEditKiosk').submit(function (e) {
+            showLoading();
+                    var count = $("input[type=checkbox][name^='AvailableModules']").length;
+                    var value =  $("input[type=checkbox][name^='AvailableModules']").filter(function () {
+                        return $(this).prop("checked") === false;
+                    }).length;
+
+                    if (value == count) {
+                        e.preventDefault();
+                        hideLoading();
+                        alert("Select at least one module to add kiosk");
+            }
+
+            if ($('#kioskTitle').val() == '') {
+                $('#welcomeText').hide();
+                hideLoading();
+            }
+            if ($('#confirmationFrequency').val() < 1 || $('#confirmationFrequency').val() > 180) {
+                hideLoading();
+            }
+            if ($('#earlyArrival, #lateArrival').val() < 0 || $('#earlyArrival, #lateArrival').val() > 150 ) {
+                hideLoading();
+            }
+
+            $('#orgErrorMessage').css({ 'display': 'none' });
+            $('#LangErrorMessage').css({ 'display': 'none' });
+                    if ($('#organisationDropdown').val() == null || $('#organisationDropdown').val().length == 0) {
+                        e.preventDefault();
+                        hideLoading();
+                        $('#orgErrorMessage').css({ 'display': 'block' });
+                    }
+
+                    if ($('#languageDropdown').val() == null || $('#languageDropdown').val().length == 0) {
+                        e.preventDefault();
+                        hideLoading();
+                        $('#LangErrorMessage').css({ 'display': 'block' });
+                    }
+
+                    var selectedSlotList = [];
+                    var selectedMemberList = [];
+                    var selectedBranchList = [];
+
+            $('#branchLocation>tr').each(function (index, el) {
+                        selectedBranchList.push({
+                            OrganisationId: parseInt($(el).children().eq(0).attr("data-id")),
+                            BranchId: parseInt($(el).children().eq(0).find('#locationDrop').val()),
+                            IsMainLocation: $(el).children().eq(1).find('#IsMainLocationDrop').val() == 1 ? true : false
+                })
+            })
+
+            var slotlist = $('#slotDropdown').val();
+                    if (slotlist != null) {
+                    slotlist = unique(slotlist);
+                    }
+                    if (slotlist != null) {
+                $.each(slotlist, function (index, value) {
+                            selectedSlotList.push({
+                                OrganisationId: parseInt($('#slotDropdown option[value=' + value + ']').attr('data-id')),
+                        SlotTypeId: parseInt($('#slotDropdown option[value=' + value + ']').attr('data-value'))
+                            });
+                        })
+            }
+            var memberList = $('#memberDropdown').val();
+            if (memberList != null) {
+                memberList = unique(memberList);
+                    }
+                    if (memberList != null) {
+                $.each(memberList, function (index, value) {
+                            selectedMemberList.push({
+                                OrganisationId: parseInt($('#memberDropdown option[value=' + value + ']').attr('data-id')),
+                        SessionHolderId: parseInt($('#memberDropdown option[value=' + value + ']').attr('data-value'))
+                            });
+                        })
+            }
+            $('#SelectedBranchJson').val(JSON.stringify(selectedBranchList));
+            $('#SelectedSlotJson').val(JSON.stringify(selectedSlotList));
+            $('#SelectedMemberJson').val(JSON.stringify(selectedMemberList));
+
+            $('#SiteMapTable > tbody  > tr').each(function (index, value) {
+                var $tds = $(this).find('td');
+                var siteMapName = $tds.eq(1).find('#kioskSiteMapName').attr('value');
+                var id = $tds.eq(0).attr('id');
+                $.each(siteMapList, function (index, value) {
+                            if (value.SiteMapid == id) {
+                                siteMapList[index].siteMapName = siteMapName;
+                            }
+                        })
+            });
+            $('#SiteMapList').val(JSON.stringify(siteMapList));
+        })
+    });
+
+    function SiteMapTextChanged(text) {
+        $(text).closest("td").find('.mdl-textfield__input').attr('value', text.value);
+    }
+
+    //Select Image for logo
+    function LogoImageChanged(input) {
+        var row = $(input)[0];
+        if (row.files && row.files[0] && input.files[0].type != "") {
+            $('#logoFileError').css({ 'display': 'none' })
+            var reader = new FileReader();
+            $('#dragAndDropText,#selectTxt').hide();
+            reader.onload = function (e) {
+                var fs = $('#dropArea').attr('name');
+                $('#dropArea').children().eq(0).html(fs);
+                $('#dropArea').css({ 'height': '180px' });
+                $('#LogoDelete').css({ 'visibility': 'visible' });
+                $('.uploader').show().attr('src', event.target.result).css({ 'visibility': 'visible', 'width': '13%' });
+                $('#KioskLogo').val(e.target.result.substring(e.target.result.indexOf(',') + 1))
+            }
+            if (input.files[0].size > 50000) {
+                $('.uploader').removeAttr('src');
+                document.getElementById('logoImagetxt').innerHTML = ' ';
+                $('#dropArea').css({ 'height': '2px' });
+                $('#LogoDelete').css({ 'visibility': 'hidden' });
+                $('#dropArea').children().eq(0).html(' ');
+                $('#logoError').css({ 'display': 'block' })
+                $('#dragAndDropText,#selectTxt').show();
+            }
+            else {
+                $('#logoError').css({ 'display': 'none' })
+                $('#dropArea #logoImagetxt').text(this.name);
+                reader.readAsDataURL(input.files[0]);
+                document.getElementById('logoImagetxt').innerHTML = input.files[0].name;
+            }
+        }
+        else {
+            $('#logoFileError').css({ 'display': 'block' })
+            $('.uploader').removeAttr('src');
+            document.getElementById('logoImagetxt').innerHTML = ' ';
+            $('#dropArea').css({ 'height': '2px' });
+            $('#LogoDelete').css({ 'visibility': 'hidden' });
+            $('#dropArea').children().eq(0).html(' ');
+            $('#dragAndDropText,#selectTxt').show();
+        }
+    }
+
+    function SiteMapImageChanged(input) {
+        var row = $(input)[0];
+        if (row.files && row.files[0] && input.files[0].type != "") {
+            $('#SiteMapTypeError,#SiteMapError').css({ 'display': 'none' })
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#SiteMapTable >tbody').append('<tr><td id=' + counter + '><img src="'
+                    + e.target.result + '"style="width:40%;"></td></tr>');
+                $('#AddSiteMap').css({ 'visibility': 'visible' });
+                siteMapList.push({
+                    SiteMapData: e.target.result.substring(e.target.result.indexOf(',') + 1),
+                    SiteMapid: counter
+                });
+            }
+
+            if (input.files[0].size > 1000141) {
+                $('#dropAreaSiteMap').show();
+                $('#SiteMapError').css({ 'display': 'block' });
+                $('#dragAndDropTextSiteMap,#selectTxtSiteMap').show();
+            }
+            else {
+                $('#SiteMapTable').show();
+                $('#dropAreaSiteMap').hide();
+                counter = $(input).next().val();
+                ++counter;
+                $(input).next().val(counter);
+                $('#dragAndDropTextSiteMap,#selectTxtSiteMap').hide();
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        else {
+            $('#SiteMapTypeError').css({ 'display': 'block' })
+        }
+    }
+
+    function unique(array) {
+        return $.grep(array, function (el, index) {
+            return index == $.inArray(el, array);
+        });
+    }
+
+    function SuccessHandling(result) {
+        var eventCategory = 'Kiosks';
+        if (@Model.KioskInstance.Id > 0) {
+            LogEvent(eventCategory, 'Edited', eventCategory);
+        }
+        else {
+            LogEvent(eventCategory, 'Added', eventCategory);
+        }
+
+        window.location.href = '@Url.Action("Index","Kiosk")';
+    }
+
+</script>
+
+<div style="overflow-y: auto; overflow-x: hidden">
+    @Html.HiddenFor(m => m.KioskInstance.KioskLogoByte, new { @id = "KioskLogo" })
+    @Html.HiddenFor(m => m.BranchJson, new { @id = "SelectedBranchJson" })
+    @Html.HiddenFor(m => m.SlotJson, new { @id = "SelectedSlotJson" })
+    @Html.HiddenFor(m => m.MemberJson, new { @id = "SelectedMemberJson" })
+    @Html.HiddenFor(m => m.SiteMapJson, new { @id = "SiteMapList" })
+    @Html.HiddenFor(m => m.KioskInstance.Id, new { @id = "KioskId" })
+    @Html.HiddenFor(m => m.KioskInstance.Status, new { @id = "Status" })
+
+    <br /><br />
+    <div style="width:50%;margin: auto">
+        <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Kiosk Name" style="width: 100%">
+            <legend></legend>
+            @Html.TextBoxFor(m => m.KioskInstance.KioskName, new { @class = "mdl-textfield__input", @id = "kioskName" })
+            <label class="mdl-textfield__label" for="kioskName">Kiosk Name</label>
+        </fieldset>
+        <div class="validation-summary-errors validationMessage">
+            @Html.ValidationMessageFor(model => model.KioskInstance.KioskName)
+        </div>
+        <br /><br />
+    </div>
+
+    <div style="width:50%;margin: auto">
+        <fieldset style="width:100%; margin: auto" name="Logo image" id="dropArea">
+            <legend style="font-size:16px;color:black"></legend>
+            <label>
+                <span class="dropText" id="dragAndDropText">Drag and drop or </span>
+                <img class="uploader" src="" style="visibility:hidden;" id="LogoPath" />
+                <span class="dropText" id="selectTxt"> browse for logo image (optional)</span>
+                <input style="visibility:hidden" type="file" name="file" onchange="LogoImageChanged(this)" accept="image/*">
+            </label>
+            <div style="visibility:hidden" id="LogoDelete">
+                <span id="logoImagetxt"></span>
+                <a href="#" data-keyboard="false" id="DeletelogoModal" title="Delete">
+                    <i class="material-icons" style="padding-left: 15px;">
+                        delete
+                    </i>
+                </a>
+            </div>
+        </fieldset>
+        <div>
+            <span class="validationMessage" id="logoError" style="display:none">Image size should be less than or equal to 50KB</span>
+            <span class="validationMessage" id="logoFileError" style="display:none">Invalid Image Uploaded (Allowed Format = .jpg, .gif, .png ).</span>
+        </div>
+        <br /> <br />
+    </div>
+
+
+    <div style="width:50%; margin: auto">
+        <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Kiosk Title" style="width: 100%">
+            <legend></legend>
+            @Html.TextBoxFor(m => m.KioskInstance.Title, new { @class = "mdl-textfield__input", @id = "kioskTitle" })
+            <label class="mdl-textfield__label" for="kioskTitle">Kiosk Title</label>
+        </fieldset>
+        <span id="welcomeText" class="HelperText"> </span>
+        <div class="validation-summary-errors validationMessage">
+            @Html.ValidationMessageFor(model => model.KioskInstance.Title)
+        </div>
+        <br />
+    </div>
+
+    <div style="width:50%; margin: auto" id="OrganisationField">
+        <fieldset class="fieldset" name="Organisation" style="width:100%;margin:auto">
+            <legend style="position:static">Organisation</legend>
+            @Html.DropDownListFor(model => model.KioskInstance.SelectedOrganisationValue, Model.OrganisationSelectList, "Organisation",
+                                                                                                                                                                                                                                              new
+                                                                                                                                                                                                                                              {
+                                                                                                                                                                                                                                                  @class = "ui fluid search multiple dropdown ui-dropdown-min-width orgDropdown",
+                                                                                                                                                                                                                                                  @id = "organisationDropdown",
+                                                                                                                                                                                                                                                  @multiple = "multiple"
+                                                                                                                                                                                                                                              })
+        </fieldset>
+        <div class="validation-summary-errors validationMessage">
+            <span id="orgErrorMessage" style="display:none">Select at least one organisation</span>
+        </div>
+    </div>
+
+
+    <div style="width:50%; margin: auto">
+        <table class="table table-bordered table-striped table-hover">
+            <tbody id="branchLocation"></tbody>
+        </table>
+        <br />
+    </div>
+
+    <div style="width:50%; margin: auto" id="LanguageField">
+        <fieldset class="fieldset" name="Languages" style="width:100%;margin:auto">
+            <legend class="legend" style="position:static">Languages</legend>
+            @Html.DropDownListFor(x => x.KioskInstance.SelectedLanguageList, Model.LanguageSelectList, "Languages",
+                                                                                                                                                                                                                                                      new
+                                                                                                                                                                                                                                                      {
+                                                                                                                                                                                                                                                          @class = "ui fluid search multiple dropdown ui-dropdown-min-width languageDropdown",
+                                                                                                                                                                                                                                                          @id = "languageDropdown",
+                                                                                                                                                                                                                                                          @multiple = "multiple",
+                                                                                                                                                                                                                                                      })
+        </fieldset>
+        <div class="validation-summary-errors validationMessage">
+            <span id="LangErrorMessage" style="display:none">Select at least one Language</span>
+        </div>
+        <br />
+    </div>
+
+    <fieldset class="fieldset mdl-textfield mdl-js-textfield" style="width:50%; margin: auto" name="Screen Timeout">
+        <legend class="legend"> Screen Timeout </legend>
+        @Html.TextBoxFor(m => m.KioskInstance.ScreenTimeOut, new { @id = "ScreenTimeOut", type = "number", min = 1, max = 150, @style = "border:0; width:4%" })
+        <label class="mdl-textfield__label" for="ScreenTimeOut" style="display:none">Screen Timeout</label>
+        <span>seconds</span>
+    </fieldset>
+    <br /><br />
+
+    <div style="width:50%; margin: auto">
+        <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="Admin Password" style="width:100%; margin: auto">
+            <legend></legend>
+            @Html.TextBoxFor(m => m.KioskInstance.AdminPassword, new { @class = "mdl-textfield__input", @id = "AdminPassword", type = "number" })
+            <label class="mdl-textfield__label" for="AdminPassword">Admin Password</label>
+        </fieldset>
+        <div class="validation-summary-errors validationMessage">
+            @Html.ValidationMessageFor(model => model.KioskInstance.AdminPassword)
+        </div>
+        <br /><br /><br />
+    </div>
+
+    <div style="width: 50%;text-align: left; margin: auto">
+        <label class="mdl_label">Arrivals</label>
+    </div>
+    <br />
+
+    <div style="width:50%; margin: auto">
+        <label style="width:50%;float:left" class="mdl-switch__label">Enable arrivals</label>
+        <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+            @Html.HiddenFor(model => model.AvailableModules[0].Id)
+            @Html.HiddenFor(model => model.AvailableModules[0].ModuleName)
+            @Html.CheckBoxFor(m => m.AvailableModules[0].IsSelected, new { @class = "mdl-switch__input", @id = "EnableArrival" })
+        </label>
+    </div>
+    <br /><br />
+
+    <div id="ArrivalFields">
+        <div style="width: 50%; margin: auto">
+            <label class="mdl_label" style="font-size:medium">Arrivals Matching</label>
+            <br /><br />
+            @foreach (var item in Model.AvailablePatientMatches)
+            {
+                <label for="option_@item.Id" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                    @Html.RadioButtonFor(model => model.KioskInstance.PatientMatchId,
+                                                                                                                                                                                                                                                                    item.Id,
+                                                                                                                                                                                                                                                                    new
+                                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                                        @class = "mdl-radio__button",
+                                                                                                                                                                                                                                                                        @id = "option_" + item.Id
+                                                                                                                                                                                                                                                                    })
+                    <span class="mdl-switch__label">@item.ScreenTitle</span><br />
+                </label>
+                <br />
+                <br />
+            }
+
+            <div class="validation-summary-errors validationMessage">
+                @Html.ValidationMessageFor(model => model.KioskInstance.PatientMatchId)
+            </div>
+            <br />
+        </div>
+
+
+        <div style="width:50%; margin: auto;display:none;">
+            <label style="width:50%;float:left" class="mdl-switch__label">Auto confirm arrival</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.AutoConfirmArrival, new { @class = "mdl-switch__input" })
+            </label>
+            <br /><br />
+        </div>
+
+        <div style="width:50%; margin: auto;display:none">
+            <label style="width:50%;float:left" class="mdl-switch__label">Auto confirm multiple arrivals</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.AutoConfirmMultipleArrival, new { @class = "mdl-switch__input" })
+            </label>
+            <br /><br />
+        </div>
+
+        <div style="width:50%; margin: auto">
+            <label style="width:50%;float:left" class="mdl-switch__label">Allow untimed arrivals</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.AllowUntimed, new { @class = "mdl-switch__input" })
+            </label>
+        </div>
+        <br /><br />
+
+        <div style="width:50%; margin: auto">
+            <label style="width:50%;float:left" class="mdl-switch__label">Show doctor delay</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.ShowDoctorDelay, new { @class = "mdl-switch__input" })
+            </label>
+        </div>
+        <br /><br />
+
+        <div style="width:50%; margin: auto">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" style="width:100%; margin: auto" name="Early Arrival">
+                <legend class="legend">Early Arrival</legend>
+                @Html.TextBoxFor(m => m.KioskInstance.EarlyArrival, new { @id = "earlyArrival", type = "number", @style = "border:0; width:4%" })
+                <label class="mdl-textfield__label" for="earlyArrival" style="display:none">Early Arrival</label>
+                <span>minutes</span>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.KioskInstance.EarlyArrival, "", new { @class = "text-danger" })
+            </div>
+            <br />
+        </div>
+
+        <div style="width:50%; margin: auto">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" style="width:100%; margin: auto" name="Late Arrival">
+                <legend class="legend">Late Arrival</legend>
+                @Html.TextBoxFor(m => m.KioskInstance.LateArrival, new { @id = "lateArrival", type = "number", @style = "border:0; width:4%" })
+                <label class="mdl-textfield__label" for="lateArrival" style="display:none">Late Arrival</label>
+                <span>minutes</span>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.KioskInstance.LateArrival, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <br /><br /><br />
+    </div>
+    @*<br /><br /><br />*@
+
+    <div style="width: 50%;text-align: left; margin: auto">
+        <label class="mdl_label">Demographic details</label>
+    </div>
+    <br />
+    <div style="width:50%; margin: auto;margin-bottom:24px">
+        <label style="width:50%;float:left" class="mdl-switch__label">Enable Demographic Details</label>
+        <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+            @Html.CheckBoxFor(m => m.KioskInstance.ShowDemographicDetails, new { @class = "mdl-switch__input", @id = "EnableDemographicDetails" })
+        </label>
+    </div>
+    <br />
+    <div id="DemographicDetails">
+        <div style="width:50%; margin:auto" id="DemographicField">
+            <fieldset class="fieldset" name="Demographic Details" style="margin-bottom:24px;width:100%;margin:auto">
+                <legend style="position:static">Demographic Details</legend>
+                @Html.DropDownListFor(model => model.KioskInstance.SelectedDemographicDetails, Model.DemographicList, "Demographic Details", new
+                {
+                    @class = "ui fluid search multiple dropdown ui-dropdown-min-width demographicDropdown",
+                    @id = "demographicDropdown",
+                    @multiple = "multiple",
+                })
+            </fieldset>
+        </div>
+        <br />
+        <div style="width:50%; margin: auto;margin-bottom:48px">
+            <label style="width:50%;float:left" class="mdl-switch__label">Mask demographic Details</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.ScrambleDemographicDetails, new { @class = "mdl-switch__input" })
+            </label>
+        </div>
+        <br />
+
+        <div style="width:50%; margin: auto;margin-bottom:24px">
+            <fieldset class="fieldset mdl-textfield mdl-js-textfield" style="width:100%" name="Confirmation frequency">
+                <legend class="legend">Confirmation frequency</legend>
+                @Html.TextBoxFor(m => m.KioskInstance.DemographicDetailsDuration, new { @id = "confirmationFrequency", type = "number", min = 1, max = 180, @style = "border:0; width:4%" })
+                <label class="mdl-textfield__label" for="confirmationFrequency" style="display:none">Confirmation frequency</label>
+                <span>days</span>
+            </fieldset>
+            <div class="validation-summary-errors validationMessage" style="width:100%">
+                @Html.ValidationMessageFor(model => model.KioskInstance.DemographicDetailsDuration, "", new { @class = "text-danger" })
+            </div>
+            <span id="DemographicText" class="HelperText">How often the patient is asked to confirm their demographic details</span>
+        </div>
+        <br />
+    </div>
+
+    <div id="QuestionnaireLabel" style="width: 50%;text-align: left; margin: auto">
+        <label class="mdl_label">Questionnaires</label>
+    </div>
+    <br />
+
+    @if (!User.IsInRole("Practice Admin"))
+    {
+        <div style="width:50%; margin: auto">
+            <label style="width:50%;float:left" class="mdl-switch__label">Enable Questionnaires</label>
+
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.HiddenFor(model => model.AvailableModules[1].Id)
+                @Html.HiddenFor(model => model.AvailableModules[1].ModuleName)
+                @Html.CheckBoxFor(m => m.AvailableModules[1].IsSelected, new { @class = "mdl-switch__input", @Id = "EnableQuestionnaire" })
+            </label>
+        </div>
+        <br /><br />
+    }
+
+    <div id="questionnairefields">
+        <div style="width:50%; margin: auto">
+            <label style="width:50%;float:left" class="mdl-switch__label">Force survey</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.ForceSurvey, new { @class = "mdl-switch__input" })
+            </label>
+        </div>
+        <br /><br />
+
+        <div style="width:50%; margin: auto">
+            <label style="width:50%;float:left" class="mdl-switch__label">Remove skip button</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.SkipSurveyQuestion, new { @class = "mdl-switch__input" })
+            </label>
+        </div>
+        <br /><br />
+
+        <div style="width:50%; margin: auto;display:none;">
+            <label style="width:50%;float:left" class="mdl-switch__label">File QOF as kiosk user</label>
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.CheckBoxFor(m => m.KioskInstance.FileasKioskUser, new { @class = "mdl-switch__input" })
+            </label>
+        </div>
+    </div>
+
+    <br /><br />
+
+    <div style="width: 50%;text-align: left; margin: auto">
+        <label class="mdl_label">Booking Appointment</label>
+    </div>
+    <br />
+
+    <div style="width:50%; margin: auto">
+        <label style="width:50%;float:left" class="mdl-switch__label">Enable appointment booking</label>
+        @if (User.IsInRole("Practice Admin"))
+        {
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.HiddenFor(model => model.AvailableModules[2].Id)
+                @Html.HiddenFor(model => model.AvailableModules[2].ModuleName)
+                @Html.CheckBoxFor(m => m.AvailableModules[2].IsSelected, new { @class = "mdl-switch__input", @Id = "EnableBookAppointment" })
+            </label>
+        }
+        else
+        {
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.HiddenFor(model => model.AvailableModules[3].Id)
+                @Html.HiddenFor(model => model.AvailableModules[3].ModuleName)
+                @Html.CheckBoxFor(m => m.AvailableModules[3].IsSelected, new { @class = "mdl-switch__input", @Id = "EnableBookAppointment" })
+            </label>
+        }
+    </div>
+    <br /><br />
+
+    <div id="bookAppointmentFields">
+        <div style="width:50%; margin: auto" id="SlotField">
+            <fieldset class="fieldset" name="Slot Type" style="width:100%;margin:auto">
+                <legend style="position:static">Slot Type</legend>
+                @Html.DropDownListFor(model => model.KioskInstance.SelectedSlotTypes, Enumerable.Empty<SelectListItem>(), "Slot types (optional)",
+                                                                                                                                                                                                                                                                                         new
+                                                                                                                                                                                                                                                                                         {
+                                                                                                                                                                                                                                                                                             @class = "ui fluid search multiple dropdown ui-dropdown-min-width SlotDropdown",
+                                                                                                                                                                                                                                                                                             @id = "slotDropdown",
+                                                                                                                                                                                                                                                                                             @multiple = "multiple",
+                                                                                                                                                                                                                                                                                         })
+            </fieldset>
+        </div>
+        <br />
+        <div style="width: 50%;text-align: left; margin: auto">
+            <label class="mdl-switch__label">Appointments Matching</label>
+            <br />
+            <br />
+            @foreach (var item in Model.AvailableAppointmentMatches)
+            {
+                <label for="appoption_@item.Id" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                    @Html.RadioButtonFor(model => model.KioskInstance.AppointmentMatchId,
+                                                                                                                                                                                                                            item.Id,
+                                                                                                                                                                                                                            new
+                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                @class = "mdl-radio__button",
+                                                                                                                                                                                                                                @id = "appoption_" + item.Id
+                                                                                                                                                                                                                            })
+                    <span class="mdl-switch__label">@item.ScreenTitle</span><br />
+                </label>
+                <br />
+                <br />
+            }
+
+            <div class="validation-summary-errors validationMessage">
+                @Html.ValidationMessageFor(model => model.KioskInstance.AppointmentMatchId)
+            </div>
+            <br />
+        </div>
+
+        <div style="width:50%; margin: auto" id="StaffMemberField">
+            <fieldset class="fieldset" name="Staff Members" style="width:100%;margin:auto">
+                <legend style="position:static">Staff Members</legend>
+                @Html.DropDownListFor(model => model.KioskInstance.SelectedSessionHolderIdList, Enumerable.Empty<SelectListItem>(), "Staff members (optional)",
+                                                                                                                                                                                                                                                                                                   new
+                                                                                                                                                                                                                                                                                                   {
+                                                                                                                                                                                                                                                                                                       @class = "ui fluid search multiple dropdown ui-dropdown-min-width staffDropdown",
+                                                                                                                                                                                                                                                                                                       @id = "memberDropdown",
+                                                                                                                                                                                                                                                                                                       @multiple = "multiple",
+                                                                                                                                                                                                                                                                                                   })
+            </fieldset>
+        </div>
+        <br />
+
+        <div style="width: 50%;text-align: left; margin: auto">
+            <label class="mdl-switch__label">Appointment reason</label>
+            <br />
+            <br />
+            <label for="reasonnull" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                @Html.RadioButtonFor(model => model.KioskInstance.AppointmentReason, "", new { @class = "mdl-radio__button", @id = "reasonnull", @checked = (Model.KioskInstance.AppointmentReason == null) })
+                <span class="mdl-switch__label">Not required</span><br />
+            </label>
+            <br />
+            <br />
+            <label for="reasonfalse" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                @Html.RadioButtonFor(model => model.KioskInstance.AppointmentReason, "false", new { @class = "mdl-radio__button", @id = "reasonfalse" })
+                <span class="mdl-switch__label">Optional</span><br />
+            </label>
+            <br />
+            <br />
+            <label for="reasontrue" class="mdl-radio mdl-js-radio mdl-js-ripple-effect">
+                @Html.RadioButtonFor(model => model.KioskInstance.AppointmentReason, "true", new { @class = "mdl-radio__button", @id = "reasontrue" })
+                <span class="mdl-switch__label">Mandatory</span><br />
+            </label>
+        </div>
+    </div>
+    <br /><br /><br />
+
+
+
+    <div style="width: 50%;text-align: left; margin: auto">
+        <label class="mdl_label">Site Map Image</label>
+    </div>
+    <br />
+
+    <div style="width:50%; margin: auto">
+        <label style="width:50%;float:left" class="mdl-switch__label">Enable site maps</label>
+        @if (User.IsInRole("Practice Admin"))
+        {
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.HiddenFor(model => model.AvailableModules[1].Id)
+                @Html.HiddenFor(model => model.AvailableModules[1].ModuleName)
+                @Html.CheckBoxFor(m => m.AvailableModules[1].IsSelected, new { @class = "mdl-switch__input", @Id = "EnableSiteMap" })
+            </label>
+        }
+        else
+        {
+            <label style="width:50%;float:right" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
+                @Html.HiddenFor(model => model.AvailableModules[2].Id)
+                @Html.HiddenFor(model => model.AvailableModules[2].ModuleName)
+                @Html.CheckBoxFor(m => m.AvailableModules[2].IsSelected, new { @class = "mdl-switch__input", @Id = "EnableSiteMap" })
+            </label>
+        }
+    </div>
+    <br /><br />
+
+    <div id="siteMapFields">
+        <div id="SiteMapImages" style="width:50%; margin: auto">
+            <table id="SiteMapTable" style="width:50%">
+                <thead>
+                    <tr>
+                        <th>SiteMapImage</th>
+                        <th id="SiteMapNameHeader" style="visibility:hidden">SiteMapName</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <br />
+        </div>
+
+        <div id="dropAreaSiteMap" class="dragAndDropText" style="width:50%; margin: auto">
+            <label>
+                <span class="dropText" id="dragAndDropTextSiteMap">Drag and drop or</span>
+                <span class="dropText color-text" id="selectTxtSiteMap">browse for site Map image (optional)</span>
+                <span id="FileName"></span>
+                <input id="siteMap" style="visibility:hidden" type="file" name="file" onchange="SiteMapImageChanged(this)" accept="image/*">
+                <input id="siteMapImageId" value="0" style="visibility:hidden" />
+            </label>
+        </div>
+
+        <div style="width:50%;margin:auto">
+            <span class="validationMessage" id="SiteMapError" style="display:none">Image size should be less than or equal to  1 MB</span>
+            <span class="validationMessage" id="SiteMapTypeError" style="display:none">Invalid Image Uploaded (Allowed Format = .jpg, .gif, .png ).</span>
+        </div>
+        <br /> <br />
+
+        <fieldset class="fieldset mdl-textfield mdl-js-textfield" name="SiteMap Name" style="width:50%; margin: auto" id="siteMaNamediv">
+            <legend></legend>
+            <input class="mdl-textfield__input" type="text" id="siteMapName" />
+            <label class="mdl-textfield__label" for="siteMapName">Site Map Name</label>
+        </fieldset>
+        <br />
+
+        <div style="width:50%; margin: auto; text-align: right">
+            <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" id="AddSiteMap" style="border-radius: 5px;visibility:hidden">
+                Add SiteMap
+            </button>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Module FriendlyName="tSQLt DB Unit Testing Framework">
+	<SqlBatch Path=".\" Type="Scripts" FriendlyName="Remove Unit Test Framework">
+		<SqlFile Filename="RemoveUnitTestFramework.sql"/>
+	</SqlBatch>
+ 	<SqlBatch Path="DatabasePatcher_UnitTestExceptions\" Type="Tests" FriendlyName="DatabasePatcher - UnitTest Exceptions">
+		<SqlFile Filename="DatabasePatcher_UnitTestExceptions.sql" />
+	</SqlBatch>
+	<SqlBatch Path=".\" Type="Tests" FriendlyName="Add Unit Test Framework">
+		<SqlFile Filename="SetClrEnabled.sql"/>
+		<SqlFile Filename="SetDatabaseOwner.sql"/>
+		<SqlFile Filename="tSQLt.class.sql"/>
+		<SqlAssembly Filename="CLR\Emis.TsqltExtensions\bin\Release\Emis.TsqltExtensions.dll" Unsafe="true"/>
+		<SqlFile Filename="tSQLt.CodeBaseAmendments.sql"/>
+		<SqlFile Filename="tSQLt.XmlTestFileSetup.sql"/>
+		<SqlFile Filename="tSQLt.XmlTestFileLoader.sql"/>
+	</SqlBatch>
+</Module>

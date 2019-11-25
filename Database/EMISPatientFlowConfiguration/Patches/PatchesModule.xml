@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module FriendlyName="Patches">
+	<SqlBatch Path="..\Patches\" Type="Patches" FriendlyName="Version 1">
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0001.sql" PatchNumber="1.0001" DependantPatchNumber="0.0000" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0002.sql" PatchNumber="1.0002" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0003.sql" PatchNumber="1.0003" DependantPatchNumber="1.0002" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0004.sql" PatchNumber="1.0004" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0005.sql" PatchNumber="1.0005" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0006.sql" PatchNumber="1.0006" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0007.sql" PatchNumber="1.0007" DependantPatchNumber="1.0006" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0008.sql" PatchNumber="1.0008" DependantPatchNumber="1.0005" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0009.sql" PatchNumber="1.0009" DependantPatchNumber="1.0007" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0010.sql" PatchNumber="1.0010" DependantPatchNumber="1.0002" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0011.sql" PatchNumber="1.0011" DependantPatchNumber="1.0002" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0012.sql" PatchNumber="1.0012" DependantPatchNumber="1.0002" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0013.sql" PatchNumber="1.0013" DependantPatchNumber="1.0006" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0014.sql" PatchNumber="1.0014" DependantPatchNumber="1.0012" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0015.sql" PatchNumber="1.0015" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0016.sql" PatchNumber="1.0016" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0017.sql" PatchNumber="1.0017" DependantPatchNumber="1.0016" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0018.sql" PatchNumber="1.0018" DependantPatchNumber="1.0016" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0019.sql" PatchNumber="1.0019" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0020.sql" PatchNumber="1.0020" DependantPatchNumber="1.0008" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0021.sql" PatchNumber="1.0021" DependantPatchNumber="1.0019" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0022.sql" PatchNumber="1.0022" DependantPatchNumber="1.0019" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0023.sql" PatchNumber="1.0023" DependantPatchNumber="1.0019" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0024.sql" PatchNumber="1.0024" DependantPatchNumber="1.0022" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0025.sql" PatchNumber="1.0025" DependantPatchNumber="1.0022" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0026.sql" PatchNumber="1.0026" DependantPatchNumber="1.0022" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0027.sql" PatchNumber="1.0027" DependantPatchNumber="1.0026" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0028.sql" PatchNumber="1.0028" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0029.sql" PatchNumber="1.0029" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0030.sql" PatchNumber="1.0030" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0031.sql" PatchNumber="1.0031" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0032.sql" PatchNumber="1.0032" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0033.sql" PatchNumber="1.0033" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0034.sql" PatchNumber="1.0034" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0035.sql" PatchNumber="1.0035" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0036.sql" PatchNumber="1.0036" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0037.sql" PatchNumber="1.0037" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0038.sql" PatchNumber="1.0038" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0039.sql" PatchNumber="1.0039" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0040.sql" PatchNumber="1.0040" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0041.sql" PatchNumber="1.0041" DependantPatchNumber="1.0025" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0042.sql" PatchNumber="1.0042" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0043.sql" PatchNumber="1.0043" DependantPatchNumber="1.0001" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0044.sql" PatchNumber="1.0044" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0045.sql" PatchNumber="1.0045" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+		<SqlPatch Filename="EMISPatientFlowKiosk_SchemaPatch1_0046.sql" PatchNumber="1.0046" DependantPatchNumber="1.0034" ProhibitedPatchNumber="2.0000"/>
+	</SqlBatch>
+</Module>

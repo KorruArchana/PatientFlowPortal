@@ -1,0 +1,78 @@
+﻿@model List<EMIS.PatientFlow.Web.ViewModel.PatientViewModel>
+    @using EMIS.PatientFlow.Common.Enums
+    
+@Html.Partial("_GoogleAnalytics","SearchPatient")
+
+<div class="rightBlockContent">
+    <div id="gridContainer">
+        <table class="TFtable" id="Patient">
+            <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>ID</th>
+                <th>DOB</th>
+            </tr>
+            </thead>
+            <tbody>
+                @if(Model!=null && Model.Count>0)
+                { 
+                    foreach (var member in Model)
+                    {
+                        <tr id="row_@member.Firstname" class="patients">
+                            <td>@member.Firstname</td>
+                            <td>@member.Surname</td>
+                            <td>@member.PatientId</td>
+                            <td>@member.Dob</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="norecords">
+                        <td colspan="4" style="text-align:center">No records found.</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+            <tr style="background-color: white;" >
+                <td colspan="5">
+                    <div id="paginationHolder"></div></td>
+            </tr>
+            </tfoot>
+        </table>
+
+    </div>
+</div>
+    
+    
+<script>
+    $(document).ready(function () {
+        
+        $("#Patient tr.patients").on("click", function () {
+            var firstname = $(this).closest("tr").find('td:first-child').html();
+            var surname = $(this).closest("tr").find('td:nth-child(2)').html();
+            var id = $(this).closest("tr").find('td:nth-child(3)').html();
+            var dob = $(this).closest("tr").find('td:nth-child(4)').html();
+            var patient = new PatientObject(firstname, surname, id, dob);
+
+            $("#Firstname").val(patient.Firstname);
+            $("#Surname").val(patient.Surname);
+            $("#PatientId").val(patient.Id);
+            $("#Dob").val(patient.Dob);
+            $("#searchpatientviewdialog").dialog('close');
+        });
+
+        $("#Patient tr.norecords").on("click", function () {
+            $("#searchpatientviewdialog").dialog('close');
+        });
+
+        function PatientObject( firstName, surname, id, dob) {
+            this.Firstname = firstName;
+            this.Surname = surname;
+            this.Id = id;
+            this.Dob = dob;
+        }
+    })
+</script>
+   
